@@ -83,13 +83,13 @@ const Index = () => {
             
             <div className="flex items-center space-x-3 md:space-x-4">
               <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition">
-                <Bell size={18} md:size={20} />
+                <Bell size={20} />
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-red-500 rounded-full"></span>
               </button>
               
               <div className="flex items-center space-x-2 md:space-x-3">
                 <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                  <User className="text-white" size={16} md:size={20} />
+                  <User className="text-white" size={20} />
                 </div>
                 <div className="hidden sm:block">
                   <p className="text-sm font-medium text-card-foreground dark:text-gray-100">Marie Dupont</p>
