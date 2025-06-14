@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Plus, Clock, Calculator, Info } from 'lucide-react';
+import { Plus, Clock, Calculator, Info, Coffee, Utensils, CakeSlice, Egg } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -71,6 +70,22 @@ const MealPlanner = () => {
     }
   ]);
 
+  // Associe une icône à chaque repas par son nom
+  const getMealIcon = (mealName: string) => {
+    switch (mealName) {
+      case 'Petit-déjeuner':
+        return <Coffee size={18} className="text-blue-500" />;
+      case 'Déjeuner':
+        return <Utensils size={18} className="text-green-600" />;
+      case 'Collation':
+        return <CakeSlice size={18} className="text-pink-500" />;
+      case 'Dîner':
+        return <Egg size={18} className="text-yellow-600" />;
+      default:
+        return <Clock size={18} />;
+    }
+  };
+
   const calculateMealTotals = (foods: Food[]) => {
     return foods.reduce((totals, food) => ({
       calories: totals.calories + food.calories,
@@ -123,7 +138,7 @@ const MealPlanner = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl flex items-center justify-center">
-              <Clock className="text-white" size={18} />
+              {getMealIcon(meal.name)}
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{meal.name}</h3>
