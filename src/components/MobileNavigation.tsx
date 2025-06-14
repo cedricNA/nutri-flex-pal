@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Home, Book, Target, TrendingUp, User, Settings } from 'lucide-react';
+import { Home, Book, Target, TrendingUp, User, Settings, MessageCircle } from 'lucide-react';
 
 interface MobileNavigationProps {
   activeSection: string;
@@ -12,9 +11,9 @@ const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavigationPr
     { id: 'dashboard', label: 'Accueil', icon: Home },
     { id: 'foods', label: 'Aliments', icon: Book },
     { id: 'plans', label: 'Plans', icon: Target },
+    { id: 'chat', label: 'Assistant', icon: MessageCircle },
     { id: 'progress', label: 'Progrès', icon: TrendingUp },
     { id: 'profile', label: 'Profil', icon: User },
-    { id: 'settings', label: 'Paramètres', icon: Settings },
   ];
 
   return (

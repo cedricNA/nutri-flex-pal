@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import NutritionStats from '../components/NutritionStats';
@@ -8,6 +7,7 @@ import ProfilePage from '../components/ProfilePage';
 import SettingsPage from '../components/SettingsPage';
 import ProgressPage from '../components/ProgressPage';
 import PlanManager from '../components/PlanManager';
+import ChatBot from '../components/ChatBot';
 import MobileNavigation from '../components/MobileNavigation';
 import { Bell, User } from 'lucide-react';
 
@@ -33,6 +33,8 @@ const Index = () => {
         return <FoodLibrary />;
       case 'plans':
         return <PlanManager />;
+      case 'chat':
+        return <ChatBot />;
       case 'progress':
         return <ProgressPage />;
       case 'profile':
@@ -49,6 +51,7 @@ const Index = () => {
       'dashboard': 'Tableau de bord',
       'foods': 'Bibliothèque d\'aliments',
       'plans': 'Plans alimentaires',
+      'chat': 'Assistant IA',
       'progress': 'Progression',
       'profile': 'Profil',
       'settings': 'Paramètres'
