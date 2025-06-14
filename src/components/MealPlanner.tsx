@@ -1,6 +1,9 @@
 
 import React, { useState } from 'react';
-import { Plus, Clock, Calculator } from 'lucide-react';
+import { Plus, Clock, Calculator, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Food {
   id: string;
@@ -22,6 +25,9 @@ interface Meal {
 }
 
 const MealPlanner = () => {
+  const { toast } = useToast();
+  const [showMacros, setShowMacros] = useState<string | null>(null);
+  
   const [meals, setMeals] = useState<Meal[]>([
     {
       id: '1',
@@ -74,15 +80,35 @@ const MealPlanner = () => {
     }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
   };
 
+  const handleCopyFromYesterday = () => {
+    toast({
+      title: "Repas copiés !",
+      description: "Les repas d'hier ont été ajoutés à votre plan d'aujourd'hui.",
+    });
+  };
+
+  const handleNewMeal = () => {
+    toast({
+      title: "Nouveau repas",
+      description: "Créez votre nouveau repas personnalisé.",
+    });
+  };
+
+  const handleAddFood = (mealName: string) => {
+    toast({
+      title: "Ajouter un aliment",
+      description: `Sélectionnez un aliment pour ${mealName}.`,
+    });
+  };
+
   const FoodItem = ({ food }: { food: Food }) => (
-    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
       <div className="flex-1">
-        <h4 className="font-medium text-gray-900">{food.name}</h4>
-        <p className="text-sm text-gray-600">{food.quantity} {food.unit}</p>
+        <h4 className="font-medium text-gray-900 dark:text-gray-100">{food.name}</h4>
+        <p className="text-sm text-gray-600 dark:text-gray-400">{food.quantity} {food.unit}</p>
       </div>
       <div className="text-right">
-        <p className="font-semibold text-gray-900">{food.calories} kcal</p>
-        <p className="text-xs text-gray-500">P: {food.protein}g | G: {food.carbs}g | L: {food.fat}g</p>
+        <p className="font-semibold text-gray-900 dark:text-gray-100">{food.calories} kcal</p>
       </div>
     </div>
   );
@@ -90,22 +116,36 @@ const MealPlanner = () => {
   const MealCard = ({ meal }: { meal: Meal }) => {
     const totals = calculateMealTotals(meal.foods);
     const progress = (totals.calories / meal.targetCalories) * 100;
+    const isShowingMacros = showMacros === meal.id;
 
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6 transition-all hover:shadow-md">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl flex items-center justify-center">
               <Clock className="text-white" size={18} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">{meal.name}</h3>
-              <p className="text-sm text-gray-500">{meal.time}</p>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{meal.name}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{meal.time}</p>
             </div>
           </div>
-          <button className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition">
-            <Plus size={18} />
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center gap-2"
+                  onClick={() => handleAddFood(meal.name)}
+                >
+                  <Plus size={18} />
+                  <span className="hidden sm:inline">Ajouter</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ajouter un aliment à {meal.name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className="space-y-2 mb-4">
@@ -113,34 +153,61 @@ const MealPlanner = () => {
             <FoodItem key={food.id} food={food} />
           ))}
           {meal.foods.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <Calculator size={32} className="mx-auto mb-2 opacity-50" />
-              <p>Aucun aliment ajouté</p>
-              <button className="mt-2 text-green-600 font-medium hover:text-green-700">
-                Ajouter un aliment
-              </button>
+            <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+              <Calculator size={24} className="mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Aucun aliment ajouté</p>
+              <Button 
+                variant="ghost" 
+                className="mt-2 text-green-600 hover:text-green-700 text-sm"
+                onClick={() => handleAddFood(meal.name)}
+              >
+                + Ajouter un aliment
+              </Button>
             </div>
           )}
         </div>
 
-        <div className="border-t pt-4">
+        <div className="border-t dark:border-gray-700 pt-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">Progression</span>
-            <span className="text-sm text-gray-600">
-              {totals.calories} / {meal.targetCalories} kcal
-            </span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progression</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {totals.calories} / {meal.targetCalories} kcal
+              </span>
+              {meal.foods.length > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => setShowMacros(isShowingMacros ? null : meal.id)}
+                      >
+                        <Info size={14} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Voir les macronutriments</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div 
               className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500"
               style={{ width: `${Math.min(progress, 100)}%` }}
             ></div>
           </div>
-          <div className="flex justify-between text-xs text-gray-500 mt-2">
-            <span>P: {totals.protein}g</span>
-            <span>G: {totals.carbs}g</span>
-            <span>L: {totals.fat}g</span>
-          </div>
+          {isShowingMacros && (
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t dark:border-gray-700 animate-fade-in">
+              <span>Protéines: {totals.protein}g</span>
+              <span>Glucides: {totals.carbs}g</span>
+              <span>Lipides: {totals.fat}g</span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -148,19 +215,27 @@ const MealPlanner = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Plan alimentaire du jour</h2>
-        <div className="flex space-x-3">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">Plan alimentaire du jour</h2>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Button 
+            variant="outline"
+            className="text-sm px-4 py-2 rounded-lg font-medium transition"
+            onClick={handleCopyFromYesterday}
+          >
             Copier d'hier
-          </button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-600 transition">
+          </Button>
+          <Button 
+            className="bg-green-500 text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-green-600 transition"
+            onClick={handleNewMeal}
+          >
+            <Plus size={16} className="mr-2" />
             Nouveau repas
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {meals.map((meal) => (
           <MealCard key={meal.id} meal={meal} />
         ))}
