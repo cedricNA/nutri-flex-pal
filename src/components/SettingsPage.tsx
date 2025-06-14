@@ -1,4 +1,5 @@
 
+```typescript
 import React, { useState, useEffect } from 'react';
 import { Bell, Shield, Palette, Globe, Smartphone, Mail, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,31 +7,56 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from "@/components/ui/use-toast";
+
+const defaultSettings = {
+  // Notifications
+  mealReminders: true,
+  hydrationReminders: true,
+  weeklyReports: true,
+  emailNotifications: false,
+  pushNotifications: true,
+  
+  // Apparence
+  darkMode: false,
+  compactView: false,
+  animations: true,
+  
+  // Confidentialité
+  profilePublic: false,
+  shareProgress: true,
+  analyticsOptIn: true,
+  
+  // Langue et région
+  language: 'fr',
+  timezone: 'Europe/Paris',
+  units: 'metric',
+};
+
 
 const SettingsPage = () => {
-  const [settings, setSettings] = useState({
-    // Notifications
-    mealReminders: true,
-    hydrationReminders: true,
-    weeklyReports: true,
-    emailNotifications: false,
-    pushNotifications: true,
-    
-    // Apparence
-    darkMode: false,
-    compactView: false,
-    animations: true,
-    
-    // Confidentialité
-    profilePublic: false,
-    shareProgress: true,
-    analyticsOptIn: true,
-    
-    // Langue et région
-    language: 'fr',
-    timezone: 'Europe/Paris',
-    units: 'metric',
+  const { toast } = useToast();
+
+  const [settings, setSettings] = useState(() => {
+    try {
+      const savedSettings = localStorage.getItem('app-settings');
+      if (savedSettings) {
+        return { ...defaultSettings, ...JSON.parse(savedSettings) };
+      }
+    } catch (error) {
+      console.error("Impossible de charger les paramètres depuis le localStorage", error);
+    }
+    return defaultSettings;
   });
+
+  // Save settings to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('app-settings', JSON.stringify(settings));
+    } catch (error) {
+      console.error("Impossible de sauvegarder les paramètres dans le localStorage", error);
+    }
+  }, [settings]);
 
   // Apply dark mode to document
   useEffect(() => {
@@ -61,6 +87,10 @@ const SettingsPage = () => {
 
   const handleSettingChange = (key: string, value: boolean | string) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    toast({
+      title: "Paramètres mis à jour",
+      description: "Vos préférences ont été enregistrées.",
+    });
     console.log(`Paramètre ${key} modifié:`, value);
   };
 
@@ -377,3 +407,4 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
+```
