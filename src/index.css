@@ -38,19 +38,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -100,6 +93,79 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Dark mode overrides for all elements */
+  .dark {
+    color-scheme: dark;
+  }
+
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  .dark .bg-white {
+    @apply bg-gray-800;
+  }
+
+  .dark .bg-gray-50 {
+    @apply bg-gray-900;
+  }
+
+  .dark .bg-gray-100 {
+    @apply bg-gray-800;
+  }
+
+  .dark .text-gray-900 {
+    @apply text-gray-100;
+  }
+
+  .dark .text-gray-800 {
+    @apply text-gray-200;
+  }
+
+  .dark .text-gray-700 {
+    @apply text-gray-300;
+  }
+
+  .dark .text-gray-600 {
+    @apply text-gray-400;
+  }
+
+  .dark .text-gray-500 {
+    @apply text-gray-500;
+  }
+
+  .dark .border-gray-100 {
+    @apply border-gray-700;
+  }
+
+  .dark .border-gray-200 {
+    @apply border-gray-600;
+  }
+
+  .dark .shadow-sm {
+    @apply shadow-gray-900/20;
+  }
+
+  .dark .shadow-lg {
+    @apply shadow-gray-900/30;
+  }
+
+  .dark .hover\:bg-gray-50:hover {
+    @apply bg-gray-700;
+  }
+
+  .dark .hover\:bg-gray-100:hover {
+    @apply bg-gray-700;
+  }
+
+  .dark .hover\:bg-gray-200:hover {
+    @apply bg-gray-600;
+  }
+
+  .dark .hover\:text-gray-900:hover {
+    @apply text-gray-100;
   }
 
   /* Compact view styles */

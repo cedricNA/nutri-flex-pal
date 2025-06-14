@@ -18,15 +18,15 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-white shadow-lg border-r border-gray-100 z-40">
+    <div className="fixed left-0 top-0 h-screen w-64 bg-card shadow-lg border-r border-border z-40">
       <div className="p-6">
         <div className="flex items-center space-x-3 mb-8">
           <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
             <span className="text-white font-bold text-lg">N</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">NutriFlex</h1>
-            <p className="text-sm text-gray-500">Votre coach nutrition</p>
+            <h1 className="text-xl font-bold text-card-foreground">NutriFlex</h1>
+            <p className="text-sm text-muted-foreground">Votre coach nutrition</p>
           </div>
         </div>
         
@@ -39,8 +39,8 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
                 onClick={() => onSectionChange(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   activeSection === item.id
-                    ? 'bg-gradient-to-r from-green-50 to-blue-50 text-green-600 border-l-4 border-green-500'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 text-green-600 dark:text-green-400 border-l-4 border-green-500'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`}
               >
                 <Icon size={20} />
