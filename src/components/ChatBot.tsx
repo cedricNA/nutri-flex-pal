@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Key, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { chatService, ChatMessage } from '../services/chatService';
+import ReactMarkdown from 'react-markdown';
 
 const ChatBot = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -186,7 +187,45 @@ const ChatBot = () => {
                   : 'bg-card border border-border'
               }`}
             >
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              {message.role === 'assistant' ? (
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <ReactMarkdown
+                    components={{
+                      h1: ({ children }) => <h1 className="text-xl font-bold mb-3 text-foreground">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-lg font-semibold mb-2 text-foreground">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-base font-semibold mb-2 text-foreground">{children}</h3>,
+                      p: ({ children }) => <p className="mb-2 text-foreground">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+                      li: ({ children }) => <li className="text-foreground">{children}</li>,
+                      strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+                      em: ({ children }) => <em className="italic text-foreground">{children}</em>,
+                      table: ({ children }) => (
+                        <div className="overflow-x-auto mb-4">
+                          <table className="min-w-full border border-border rounded-lg">{children}</table>
+                        </div>
+                      ),
+                      thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
+                      tbody: ({ children }) => <tbody>{children}</tbody>,
+                      tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,
+                      th: ({ children }) => <th className="px-3 py-2 text-left font-semibold text-foreground">{children}</th>,
+                      td: ({ children }) => <td className="px-3 py-2 text-foreground">{children}</td>,
+                      code: ({ children }) => (
+                        <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono text-foreground">{children}</code>
+                      ),
+                      blockquote: ({ children }) => (
+                        <blockquote className="border-l-4 border-green-500 pl-4 italic text-muted-foreground mb-2">
+                          {children}
+                        </blockquote>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="whitespace-pre-wrap">{message.content}</p>
+              )}
               <span className="text-xs opacity-70 mt-2 block">
                 {message.timestamp.toLocaleTimeString()}
               </span>
