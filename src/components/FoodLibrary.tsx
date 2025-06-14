@@ -1,124 +1,42 @@
 
-import React, { useState } from 'react';
-import { Search, Filter, Plus, Star } from 'lucide-react';
-
-interface Food {
-  id: string;
-  name: string;
-  category: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  image: string;
-  isFavorite: boolean;
-  unit: string;
-}
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, Plus, Star, Loader2 } from 'lucide-react';
+import { foodDataService, type Food } from '../services/foodDataService';
 
 const FoodLibrary = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string; count: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = [
-    { id: 'all', name: 'Tous', count: 245 },
-    { id: 'proteins', name: 'Protéines', count: 45 },
-    { id: 'grains', name: 'Céréales', count: 32 },
-    { id: 'vegetables', name: 'Légumes', count: 67 },
-    { id: 'fruits', name: 'Fruits', count: 38 },
-    { id: 'dairy', name: 'Laitiers', count: 28 },
-    { id: 'fats', name: 'Matières grasses', count: 21 },
-    { id: 'snacks', name: 'Collations', count: 14 }
-  ];
+  useEffect(() => {
+    loadFoods();
+  }, []);
 
-  const foods: Food[] = [
-    {
-      id: '1',
-      name: 'Poulet grillé',
-      category: 'proteins',
-      calories: 231,
-      protein: 43,
-      carbs: 0,
-      fat: 5,
-      fiber: 0,
-      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop',
-      isFavorite: true,
-      unit: '100g'
-    },
-    {
-      id: '2',
-      name: 'Avoine',
-      category: 'grains',
-      calories: 389,
-      protein: 17,
-      carbs: 66,
-      fat: 7,
-      fiber: 11,
-      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop',
-      isFavorite: false,
-      unit: '100g'
-    },
-    {
-      id: '3',
-      name: 'Saumon',
-      category: 'proteins',
-      calories: 206,
-      protein: 28,
-      carbs: 0,
-      fat: 9,
-      fiber: 0,
-      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop',
-      isFavorite: true,
-      unit: '100g'
-    },
-    {
-      id: '4',
-      name: 'Banane',
-      category: 'fruits',
-      calories: 89,
-      protein: 1,
-      carbs: 23,
-      fat: 0,
-      fiber: 3,
-      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop',
-      isFavorite: false,
-      unit: '1 unité'
-    },
-    {
-      id: '5',
-      name: 'Brocolis',
-      category: 'vegetables',
-      calories: 25,
-      protein: 3,
-      carbs: 5,
-      fat: 0,
-      fiber: 3,
-      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop',
-      isFavorite: false,
-      unit: '100g'
-    },
-    {
-      id: '6',
-      name: 'Riz complet',
-      category: 'grains',
-      calories: 123,
-      protein: 3,
-      carbs: 25,
-      fat: 1,
-      fiber: 2,
-      image: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=150&h=150&fit=crop',
-      isFavorite: true,
-      unit: '100g'
+  const loadFoods = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const loadedFoods = await foodDataService.loadFoods();
+      setFoods(loadedFoods);
+      setCategories(foodDataService.getCategories());
+    } catch (err) {
+      setError('Erreur lors du chargement des aliments');
+      console.error('Erreur:', err);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
-  const filteredFoods = foods.filter(food => {
-    const matchesSearch = food.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || food.category === selectedCategory;
-    const matchesFavorites = !showFavoritesOnly || food.isFavorite;
-    return matchesSearch && matchesCategory && matchesFavorites;
-  });
+  const filteredFoods = foodDataService.searchFoods(searchTerm, selectedCategory, showFavoritesOnly);
+
+  const handleToggleFavorite = (foodId: string) => {
+    foodDataService.toggleFavorite(foodId);
+    setFoods([...foods]); // Force re-render
+  };
 
   const FoodCard = ({ food }: { food: Food }) => (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-200 cursor-pointer group">
@@ -127,11 +45,18 @@ const FoodLibrary = () => {
           src={food.image}
           alt={food.name}
           className="w-full h-32 object-cover rounded-lg mb-3"
+          onError={(e) => {
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150&h=150&fit=crop';
+          }}
         />
         <button 
           className={`absolute top-2 right-2 p-2 rounded-full ${
             food.isFavorite ? 'bg-yellow-500 text-white' : 'bg-white text-gray-400'
           } shadow-sm hover:scale-110 transition-transform`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggleFavorite(food.id);
+          }}
         >
           <Star size={16} fill={food.isFavorite ? 'currentColor' : 'none'} />
         </button>
@@ -175,6 +100,33 @@ const FoodLibrary = () => {
       </div>
     </div>
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="animate-spin text-green-500" size={48} />
+        <span className="ml-3 text-lg text-gray-600">Chargement des aliments...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-500 mb-4">
+          <Search size={48} className="mx-auto" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <button 
+          onClick={loadFoods}
+          className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -246,7 +198,7 @@ const FoodLibrary = () => {
         ))}
       </div>
 
-      {filteredFoods.length === 0 && (
+      {filteredFoods.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <Search size={48} className="mx-auto" />
