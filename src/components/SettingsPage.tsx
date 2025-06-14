@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Shield, Palette, Globe, Smartphone, Mail, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -31,6 +31,33 @@ const SettingsPage = () => {
     timezone: 'Europe/Paris',
     units: 'metric',
   });
+
+  // Apply dark mode to document
+  useEffect(() => {
+    if (settings.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [settings.darkMode]);
+
+  // Apply compact view to body
+  useEffect(() => {
+    if (settings.compactView) {
+      document.body.classList.add('compact-view');
+    } else {
+      document.body.classList.remove('compact-view');
+    }
+  }, [settings.compactView]);
+
+  // Apply animations setting
+  useEffect(() => {
+    if (!settings.animations) {
+      document.documentElement.classList.add('reduce-motion');
+    } else {
+      document.documentElement.classList.remove('reduce-motion');
+    }
+  }, [settings.animations]);
 
   const handleSettingChange = (key: string, value: boolean | string) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -146,7 +173,7 @@ const SettingsPage = () => {
                     {settings.darkMode ? <Moon size={16} /> : <Sun size={16} />}
                     Mode sombre
                   </Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Interface avec un thème sombre pour réduire la fatigue oculaire
                   </p>
                 </div>
@@ -160,7 +187,7 @@ const SettingsPage = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="compactView">Vue compacte</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Affichage plus dense pour voir plus d'informations
                   </p>
                 </div>
@@ -174,7 +201,7 @@ const SettingsPage = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="animations">Animations</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Activer les transitions et animations de l'interface
                   </p>
                 </div>
@@ -183,6 +210,25 @@ const SettingsPage = () => {
                   checked={settings.animations}
                   onCheckedChange={(checked) => handleSettingChange('animations', checked)}
                 />
+              </div>
+
+              {/* Preview section */}
+              <div className="mt-6 p-4 border rounded-lg bg-card">
+                <h4 className="font-semibold mb-3">Aperçu des modifications</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${settings.darkMode ? 'bg-slate-800' : 'bg-white border'}`}></div>
+                    <span>Thème: {settings.darkMode ? 'Sombre' : 'Clair'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${settings.compactView ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                    <span>Espacement: {settings.compactView ? 'Compact' : 'Normal'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full transition-all duration-300 ${settings.animations ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+                    <span>Animations: {settings.animations ? 'Activées' : 'Désactivées'}</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -201,7 +247,7 @@ const SettingsPage = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="profilePublic">Profil public</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Permettre aux autres utilisateurs de voir votre profil
                   </p>
                 </div>
@@ -215,7 +261,7 @@ const SettingsPage = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="shareProgress">Partager les progrès</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Autoriser le partage de vos statistiques avec votre coach
                   </p>
                 </div>
@@ -229,7 +275,7 @@ const SettingsPage = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label htmlFor="analyticsOptIn">Données d'usage</Label>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Participer à l'amélioration de l'application
                   </p>
                 </div>
@@ -240,13 +286,13 @@ const SettingsPage = () => {
                 />
               </div>
 
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="font-semibold text-yellow-800 mb-2">Gestion des données</h4>
+              <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">Gestion des données</h4>
                 <div className="space-y-2">
                   <Button variant="outline" size="sm" className="w-full">
                     Exporter mes données
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                  <Button variant="outline" size="sm" className="w-full text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20">
                     Supprimer mon compte
                   </Button>
                 </div>
@@ -308,8 +354,8 @@ const SettingsPage = () => {
                 </select>
               </div>
 
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">Support</h4>
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Support</h4>
                 <div className="space-y-2">
                   <Button variant="outline" size="sm" className="w-full">
                     Centre d'aide
