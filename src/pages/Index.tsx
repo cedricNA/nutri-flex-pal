@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import NutritionStats from '../components/NutritionStats';
@@ -6,6 +7,7 @@ import FoodLibrary from '../components/FoodLibrary';
 import ProfilePage from '../components/ProfilePage';
 import SettingsPage from '../components/SettingsPage';
 import ProgressPage from '../components/ProgressPage';
+import PlanManager from '../components/PlanManager';
 import { Bell, User } from 'lucide-react';
 
 const Index = () => {
@@ -29,30 +31,7 @@ const Index = () => {
       case 'foods':
         return <FoodLibrary />;
       case 'plans':
-        return (
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Plans alimentaires</h2>
-            <p className="text-muted-foreground mb-8">Gérez vos plans personnalisés selon vos objectifs</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { title: 'Perte de poids', desc: 'Déficit calorique contrôlé', color: 'from-red-400 to-pink-500' },
-                { title: 'Maintien', desc: 'Équilibre nutritionnel', color: 'from-green-400 to-blue-500' },
-                { title: 'Prise de masse', desc: 'Surplus calorique', color: 'from-blue-400 to-purple-500' }
-              ].map((plan, idx) => (
-                <div key={idx} className="bg-card border border-border rounded-2xl shadow-sm p-6 hover:shadow-md transition">
-                  <div className={`w-16 h-16 bg-gradient-to-r ${plan.color} rounded-2xl flex items-center justify-center mb-4 mx-auto`}>
-                    <span className="text-white text-2xl font-bold">{plan.title[0]}</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-card-foreground mb-2">{plan.title}</h3>
-                  <p className="text-muted-foreground mb-4">{plan.desc}</p>
-                  <button className="w-full bg-secondary text-secondary-foreground py-2 rounded-lg font-medium hover:bg-secondary/80 transition">
-                    Personnaliser
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <PlanManager />;
       case 'progress':
         return <ProgressPage />;
       case 'profile':
