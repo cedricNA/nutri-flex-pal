@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import NutritionStats from '../components/NutritionStats';
@@ -6,6 +5,7 @@ import MealPlanner from '../components/MealPlanner';
 import FoodLibrary from '../components/FoodLibrary';
 import ProfilePage from '../components/ProfilePage';
 import SettingsPage from '../components/SettingsPage';
+import ProgressPage from '../components/ProgressPage';
 import { Bell, User } from 'lucide-react';
 
 const Index = () => {
@@ -54,12 +54,7 @@ const Index = () => {
           </div>
         );
       case 'progress':
-        return (
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Suivi de progression</h2>
-            <p className="text-muted-foreground">Analysez vos progrès nutritionnels</p>
-          </div>
-        );
+        return <ProgressPage />;
       case 'profile':
         return <ProfilePage />;
       case 'settings':
