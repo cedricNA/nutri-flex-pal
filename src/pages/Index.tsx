@@ -4,6 +4,8 @@ import Sidebar from '../components/Sidebar';
 import NutritionStats from '../components/NutritionStats';
 import MealPlanner from '../components/MealPlanner';
 import FoodLibrary from '../components/FoodLibrary';
+import ProfilePage from '../components/ProfilePage';
+import SettingsPage from '../components/SettingsPage';
 import { Bell, User } from 'lucide-react';
 
 const Index = () => {
@@ -59,19 +61,9 @@ const Index = () => {
           </div>
         );
       case 'profile':
-        return (
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Profil utilisateur</h2>
-            <p className="text-gray-600">Gérez vos informations personnelles</p>
-          </div>
-        );
+        return <ProfilePage />;
       case 'settings':
-        return (
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Paramètres</h2>
-            <p className="text-gray-600">Configurez votre application</p>
-          </div>
-        );
+        return <SettingsPage />;
       default:
         return null;
     }
