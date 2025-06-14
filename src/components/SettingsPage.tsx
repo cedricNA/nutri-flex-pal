@@ -1,5 +1,4 @@
 
-```typescript
 import React, { useState, useEffect } from 'react';
 import { Bell, Shield, Palette, Globe, Smartphone, Mail, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,7 +31,6 @@ const defaultSettings = {
   timezone: 'Europe/Paris',
   units: 'metric',
 };
-
 
 const SettingsPage = () => {
   const { toast } = useToast();
@@ -407,4 +405,3 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
-```
