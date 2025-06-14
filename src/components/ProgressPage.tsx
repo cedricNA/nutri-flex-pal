@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +6,8 @@ import CaloriesChart from './CaloriesChart';
 import ProgressStats from './ProgressStats';
 import GoalsProgress from './GoalsProgress';
 import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
+import PeriodSelector from "./PeriodSelector";
+import { useState } from "react";
 
 const ProgressPage = () => {
   const progressData = {
@@ -15,6 +16,9 @@ const ProgressPage = () => {
     workoutStreak: 7,
     goalsAchieved: 3
   };
+
+  // Ajout du filtre de période
+  const [period, setPeriod] = useState<"7d" | "30d" | "custom">("7d");
 
   return (
     <div className="space-y-8">
@@ -65,6 +69,9 @@ const ProgressPage = () => {
         </Card>
       </div>
 
+      {/* Sélecteur de période */}
+      <PeriodSelector period={period} setPeriod={setPeriod} />
+
       {/* Progress Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
@@ -76,14 +83,14 @@ const ProgressPage = () => {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <WeightChart />
-            <CaloriesChart />
+            <WeightChart period={period} />
+            <CaloriesChart period={period} />
           </div>
           <ProgressStats />
         </TabsContent>
 
         <TabsContent value="weight" className="space-y-6">
-          <WeightChart />
+          <WeightChart period={period} />
           <Card>
             <CardHeader>
               <CardTitle>Analyse du poids</CardTitle>
@@ -109,7 +116,7 @@ const ProgressPage = () => {
         </TabsContent>
 
         <TabsContent value="nutrition" className="space-y-6">
-          <CaloriesChart />
+          <CaloriesChart period={period} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
