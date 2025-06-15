@@ -62,3 +62,39 @@ export const MealEntrySchema = z.object({
   date: z.coerce.date(),
 });
 export type MealEntry = z.infer<typeof MealEntrySchema>;
+
+export const NotificationDataSchema = z.object({
+  id: z.string(),
+  type: z.enum(['meal', 'hydration', 'achievement', 'reminder', 'info']),
+  title: z.string(),
+  message: z.string(),
+  timestamp: z.coerce.date(),
+  read: z.boolean(),
+  actionUrl: z.string().optional(),
+});
+export type NotificationData = z.infer<typeof NotificationDataSchema>;
+
+export const AppSettingsSchema = z.object({
+  // Notifications
+  mealReminders: z.boolean().default(true),
+  hydrationReminders: z.boolean().default(true),
+  weeklyReports: z.boolean().default(true),
+  emailNotifications: z.boolean().default(false),
+  pushNotifications: z.boolean().default(true),
+  
+  // Apparence
+  darkMode: z.boolean().default(false),
+  compactView: z.boolean().default(false),
+  animations: z.boolean().default(true),
+  
+  // Confidentialité
+  profilePublic: z.boolean().default(false),
+  shareProgress: z.boolean().default(true),
+  analyticsOptIn: z.boolean().default(true),
+  
+  // Langue et région
+  language: z.string().default('fr'),
+  timezone: z.string().default('Europe/Paris'),
+  units: z.string().default('metric'),
+});
+export type AppSettings = z.infer<typeof AppSettingsSchema>;

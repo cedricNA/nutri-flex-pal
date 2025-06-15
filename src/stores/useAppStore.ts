@@ -1,7 +1,6 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { dataService } from '../services/dataService';
+import { storageService } from '../services/storageService';
 import { UserProfileSchema, WeightEntrySchema, CalorieEntrySchema, type UserProfile, type WeightEntry, type CalorieEntry } from '../schemas';
 
 interface AppState {
@@ -23,14 +22,12 @@ interface AppState {
   getFilteredCalorieData: () => CalorieEntry[];
 }
 
-// Helper to initialize state from validated localStorage
 function loadInitialState(): Pick<AppState, "user" | "weightEntries" | "calorieEntries" | "currentPeriod"> {
-  // Use dataService for schema-mapped keys, direct localStorage for currentPeriod
   return {
-    user: dataService.get<UserProfile | null>("user", null),
-    weightEntries: dataService.get<WeightEntry[]>("weightEntries", []),
-    calorieEntries: dataService.get<CalorieEntry[]>("calorieEntries", []),
-    currentPeriod: (localStorage.getItem('currentPeriod') as AppState["currentPeriod"]) || "7d",
+    user: storageService.get("user"),
+    weightEntries: storageService.get("weightEntries"),
+    calorieEntries: storageService.get("calorieEntries"),
+    currentPeriod: storageService.get("currentPeriod"),
   };
 }
 
@@ -43,7 +40,7 @@ export const useAppStore = create<AppState>()(
       // Actions
       setUser: (user) => {
         const validated = UserProfileSchema.parse(user);
-        dataService.set('user', validated);
+        storageService.set('user', validated);
         set({ user: validated });
       },
 
@@ -52,7 +49,7 @@ export const useAppStore = create<AppState>()(
         const newGoals = { ...state.user.goals, ...goals };
         const newUser = { ...state.user, goals: newGoals };
         const validated = UserProfileSchema.parse(newUser);
-        dataService.set('user', validated);
+        storageService.set('user', validated);
         return { user: validated };
       }),
 
@@ -63,7 +60,7 @@ export const useAppStore = create<AppState>()(
           weight
         });
         const newEntries = [...state.weightEntries, entry];
-        dataService.set('weightEntries', newEntries);
+        storageService.set('weightEntries', newEntries);
         return { weightEntries: newEntries };
       }),
 
@@ -75,12 +72,12 @@ export const useAppStore = create<AppState>()(
           target
         });
         const newEntries = [...state.calorieEntries, entry];
-        dataService.set('calorieEntries', newEntries);
+        storageService.set('calorieEntries', newEntries);
         return { calorieEntries: newEntries };
       }),
 
       setPeriod: (period) => {
-        localStorage.setItem('currentPeriod', period);
+        storageService.set('currentPeriod', period);
         set({ currentPeriod: period });
       },
 

@@ -1,9 +1,8 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { foodDataService, type Food } from '../services/foodDataService';
-import { dataService } from '../services/dataService';
-import { MealEntrySchema, FoodSchema, type MealEntry } from '../schemas';
+import { storageService } from '../services/storageService';
+import { MealEntrySchema, type MealEntry } from '../schemas';
 
 interface FoodState {
   // Food library
@@ -29,14 +28,13 @@ interface FoodState {
 }
 
 function loadInitialFoodState(): Pick<FoodState, "foods" | "isLoaded" | "searchTerm" | "selectedCategory" | "showFavoritesOnly" | "todayMeals"> {
-  // use dataService only for foods and todayMeals (SchemaMap keys)
   return {
-    foods: dataService.get<Food[]>("foods", []),
+    foods: storageService.get("foods"),
     isLoaded: false,
-    searchTerm: localStorage.getItem("searchTerm") || "",
-    selectedCategory: localStorage.getItem("selectedCategory") || "all",
-    showFavoritesOnly: localStorage.getItem("showFavoritesOnly") === "true",
-    todayMeals: dataService.get<MealEntry[]>("todayMeals", []),
+    searchTerm: storageService.get("searchTerm"),
+    selectedCategory: storageService.get("selectedCategory"),
+    showFavoritesOnly: storageService.get("showFavoritesOnly"),
+    todayMeals: storageService.get("todayMeals"),
   };
 }
 
@@ -53,15 +51,15 @@ export const useFoodStore = create<FoodState>()(
       },
 
       setSearchTerm: (searchTerm) => {
-        localStorage.setItem("searchTerm", searchTerm);
+        storageService.set("searchTerm", searchTerm);
         set({ searchTerm });
       },
       setSelectedCategory: (selectedCategory) => {
-        localStorage.setItem("selectedCategory", selectedCategory);
+        storageService.set("selectedCategory", selectedCategory);
         set({ selectedCategory });
       },
       setShowFavoritesOnly: (showFavoritesOnly) => {
-        localStorage.setItem("showFavoritesOnly", showFavoritesOnly ? "true" : "false");
+        storageService.set("showFavoritesOnly", showFavoritesOnly);
         set({ showFavoritesOnly });
       },
 
@@ -83,13 +81,13 @@ export const useFoodStore = create<FoodState>()(
           date: new Date()
         });
         const todayMeals = [...get().todayMeals, entry];
-        dataService.set("todayMeals", todayMeals);
+        storageService.set("todayMeals", todayMeals);
         set({ todayMeals });
       },
 
       removeMealEntry: (entryId) => {
         const todayMeals = get().todayMeals.filter(entry => entry.id !== entryId);
-        dataService.set("todayMeals", todayMeals);
+        storageService.set("todayMeals", todayMeals);
         set({ todayMeals });
       },
 

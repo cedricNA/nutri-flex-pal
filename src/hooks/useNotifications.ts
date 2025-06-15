@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { notificationService, type NotificationData } from '@/services/notificationService';
+import { notificationService, type NotificationType } from '@/services/notificationService';
+import { type NotificationData } from '@/schemas';
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
@@ -23,7 +24,7 @@ export const useNotifications = () => {
     notificationService.markAllAsRead();
   };
 
-  const addNotification = (type: any, title: string, message: string, actionUrl?: string) => {
+  const addNotification = (type: NotificationType, title: string, message: string, actionUrl?: string) => {
     return notificationService.addNotification(type, title, message, actionUrl);
   };
 

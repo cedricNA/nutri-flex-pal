@@ -1,5 +1,7 @@
-
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { storageService } from './storageService';
+import { settingsService } from './settingsService';
+import { NotificationDataSchema, type NotificationData } from '@/schemas';
 
 export type NotificationType = 'meal' | 'hydration' | 'achievement' | 'reminder' | 'info';
 
@@ -14,7 +16,6 @@ export interface NotificationData {
 }
 
 class NotificationService {
-  private notifications: NotificationData[] = [];
   private listeners: ((notifications: NotificationData[]) => void)[] = [];
   private timers: Map<string, NodeJS.Timeout> = new Map();
 
@@ -23,35 +24,22 @@ class NotificationService {
     this.setupPeriodicReminders();
   }
 
-  private loadNotifications() {
-    try {
-      const saved = localStorage.getItem('notifications');
-      if (saved) {
-        this.notifications = JSON.parse(saved).map((n: any) => ({
-          ...n,
-          timestamp: new Date(n.timestamp)
-        }));
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des notifications:', error);
-    }
+  private loadNotifications(): NotificationData[] {
+    return storageService.get('notifications');
   }
 
-  private saveNotifications() {
-    try {
-      localStorage.setItem('notifications', JSON.stringify(this.notifications));
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde des notifications:', error);
-    }
+  private saveNotifications(notifications: NotificationData[]): void {
+    storageService.set('notifications', notifications);
   }
 
-  private notifyListeners() {
-    this.listeners.forEach(listener => listener([...this.notifications]));
+  private notifyListeners(): void {
+    const notifications = this.loadNotifications();
+    this.listeners.forEach(listener => listener([...notifications]));
   }
 
   subscribe(listener: (notifications: NotificationData[]) => void) {
     this.listeners.push(listener);
-    listener([...this.notifications]);
+    listener(this.loadNotifications());
     
     return () => {
       const index = this.listeners.indexOf(listener);
@@ -61,17 +49,8 @@ class NotificationService {
     };
   }
 
-  private getSettings() {
-    try {
-      const saved = localStorage.getItem('app-settings');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  }
-
   addNotification(type: NotificationType, title: string, message: string, actionUrl?: string) {
-    const notification: NotificationData = {
+    const notification = NotificationDataSchema.parse({
       id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,
       title,
@@ -79,57 +58,61 @@ class NotificationService {
       timestamp: new Date(),
       read: false,
       actionUrl
-    };
+    });
 
-    this.notifications.unshift(notification);
+    const notifications = this.loadNotifications();
+    notifications.unshift(notification);
     
-    // Garder seulement les 50 dernières notifications
-    if (this.notifications.length > 50) {
-      this.notifications = this.notifications.slice(0, 50);
+    // Keep only the last 50 notifications
+    if (notifications.length > 50) {
+      notifications.splice(50);
     }
 
-    this.saveNotifications();
+    this.saveNotifications(notifications);
     this.notifyListeners();
 
-    // Afficher le toast
+    // Show toast
     toast({
       title,
       description: message,
     });
 
-    console.log('Nouvelle notification:', notification);
+    console.log('New notification:', notification);
     return notification.id;
   }
 
   markAsRead(id: string) {
-    const notification = this.notifications.find(n => n.id === id);
+    const notifications = this.loadNotifications();
+    const notification = notifications.find(n => n.id === id);
     if (notification) {
       notification.read = true;
-      this.saveNotifications();
+      this.saveNotifications(notifications);
       this.notifyListeners();
     }
   }
 
   markAllAsRead() {
-    this.notifications.forEach(n => n.read = true);
-    this.saveNotifications();
+    const notifications = this.loadNotifications();
+    notifications.forEach(n => n.read = true);
+    this.saveNotifications(notifications);
     this.notifyListeners();
   }
 
   getUnreadCount() {
-    return this.notifications.filter(n => !n.read).length;
+    const notifications = this.loadNotifications();
+    return notifications.filter(n => !n.read).length;
   }
 
   private setupPeriodicReminders() {
-    const settings = this.getSettings();
+    const settings = settingsService.getSettings();
     
-    // Rappels de repas
-    if (settings.mealReminders !== false) {
+    // Meal reminders
+    if (settings.mealReminders) {
       this.setupMealReminders();
     }
 
-    // Rappels d'hydratation
-    if (settings.hydrationReminders !== false) {
+    // Hydration reminders
+    if (settings.hydrationReminders) {
       this.setupHydrationReminders();
     }
   }
@@ -184,7 +167,7 @@ class NotificationService {
       const scheduled = new Date();
       scheduled.setHours(hours, minutes, 0, 0);
 
-      // Si l'heure est déjà passée aujourd'hui, programmer pour demain
+      // If the hour is already passed today, schedule for tomorrow
       if (scheduled <= now) {
         scheduled.setDate(scheduled.getDate() + 1);
       }
@@ -193,7 +176,7 @@ class NotificationService {
       
       const timerId = setTimeout(() => {
         callback();
-        scheduleNext(); // Reprogrammer pour le lendemain
+        scheduleNext(); // Reschedule for the next day
       }, timeUntil);
 
       this.timers.set(time, timerId);
@@ -202,17 +185,14 @@ class NotificationService {
     scheduleNext();
   }
 
-  // Notifications d'accomplissement
   notifyAchievement(title: string, message: string) {
     this.addNotification('achievement', title, message);
   }
 
-  // Notifications de rappel général
   notifyReminder(title: string, message: string) {
     this.addNotification('reminder', title, message);
   }
 
-  // Nettoyer les timers
   cleanup() {
     this.timers.forEach(timer => clearTimeout(timer));
     this.timers.clear();
