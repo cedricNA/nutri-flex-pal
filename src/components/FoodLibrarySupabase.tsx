@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Search, Filter, Plus, Star, Loader2 } from 'lucide-react';
+import { Search, Filter, Plus, Star, Loader2, RefreshCw } from 'lucide-react';
 import { useSupabaseFoodStore } from '../stores/useSupabaseFoodStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -23,16 +23,27 @@ const FoodLibrarySupabase = () => {
     setShowFavoritesOnly,
     toggleFavorite,
     getFilteredFoods,
-    addMealEntry
+    addMealEntry,
+    refreshData
   } = useSupabaseFoodStore();
 
   const filteredFoods = getFilteredFoods();
 
   useEffect(() => {
+    console.log('FoodLibrarySupabase mounted, isLoaded:', isLoaded, 'isLoading:', isLoading);
     if (!isLoaded && !isLoading) {
       loadFoods();
     }
   }, [isLoaded, isLoading, loadFoods]);
+
+  const handleRefresh = async () => {
+    console.log('Manual refresh triggered');
+    await refreshData();
+    toast({
+      title: "Données actualisées",
+      description: "La bibliothèque d'aliments a été mise à jour.",
+    });
+  };
 
   const handleAddToMeal = async (foodId: string) => {
     if (!user) {
@@ -151,10 +162,19 @@ const FoodLibrarySupabase = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Bibliothèque d'aliments</h2>
-        <button className="bg-green-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-600 transition flex items-center space-x-2">
-          <Plus size={18} />
-          <span>Nouvel aliment</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={handleRefresh}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition flex items-center space-x-2"
+          >
+            <RefreshCw size={18} />
+            <span>Actualiser</span>
+          </button>
+          <button className="bg-green-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-600 transition flex items-center space-x-2">
+            <Plus size={18} />
+            <span>Nouvel aliment</span>
+          </button>
+        </div>
       </div>
 
       {/* Barre de recherche et filtres */}
@@ -223,7 +243,18 @@ const FoodLibrarySupabase = () => {
             <Search size={48} className="mx-auto" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun aliment trouvé</h3>
-          <p className="text-gray-600 mb-4">Essayez de modifier vos critères de recherche</p>
+          <p className="text-gray-600 mb-4">
+            {categories.length > 1 && categories.find(c => c.id === 'all')?.count === 0 
+              ? "Il semble que la base de données soit vide. Essayez d'importer des aliments."
+              : "Essayez de modifier vos critères de recherche"
+            }
+          </p>
+          <button 
+            onClick={handleRefresh}
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition mr-3"
+          >
+            Actualiser
+          </button>
           <button className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition">
             Créer cet aliment
           </button>

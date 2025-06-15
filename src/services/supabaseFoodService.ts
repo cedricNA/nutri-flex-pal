@@ -13,6 +13,8 @@ class SupabaseFoodService {
   
   async loadFoods(userId?: string): Promise<ExtendedFood[]> {
     try {
+      console.log('Fetching foods from Supabase...');
+      
       // Load foods from Supabase with new nutritional columns
       const { data: foods, error } = await supabase
         .from('foods')
@@ -25,17 +27,23 @@ class SupabaseFoodService {
       }
 
       if (!foods) {
+        console.log('No foods returned from database');
         return [];
       }
 
+      console.log(`Raw foods count: ${foods.length}`);
+
       // Filter out corrupted entries with invalid names
-      const validFoods = foods.filter(food => 
-        food.name && 
-        food.name.length > 0 && 
-        !food.name.includes(':::') && // Remove entries with corrupted separators
-        !food.name.match(/^\d+:\d+/) && // Remove entries starting with numbers and colons
-        food.name.length < 200 // Remove extremely long names
-      );
+      const validFoods = foods.filter(food => {
+        if (!food.name || food.name.length === 0) return false;
+        if (food.name.includes(':::')) return false; // Remove entries with corrupted separators
+        if (food.name.match(/^\d+:\d+/)) return false; // Remove entries starting with numbers and colons
+        if (food.name.length > 200) return false; // Remove extremely long names
+        if (food.name.match(/^\d+$/)) return false; // Remove pure numeric names
+        return true;
+      });
+
+      console.log(`Valid foods count: ${validFoods.length}`);
 
       if (!userId) {
         return validFoods.map(food => ({ ...food, isFavorite: false }));
@@ -66,14 +74,15 @@ class SupabaseFoodService {
 
   async cleanCorruptedData(): Promise<boolean> {
     try {
+      console.log('Cleaning corrupted data...');
+      
       // Delete entries with corrupted names
       const { error } = await supabase
         .from('foods')
         .delete()
         .or(
           'name.like.*:::*,' +
-          'name.like.0*:*,' +
-          'name.like.1*:*,' +
+          'name.like.%:%,' +
           'name.eq.,' +
           'name.is.null'
         );
@@ -83,6 +92,7 @@ class SupabaseFoodService {
         return false;
       }
 
+      console.log('Corrupted data cleaned successfully');
       return true;
     } catch (error) {
       console.error('Error in cleanCorruptedData:', error);

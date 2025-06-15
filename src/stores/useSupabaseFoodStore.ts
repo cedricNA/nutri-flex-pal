@@ -36,16 +36,18 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
 
   // Actions
   loadFoods: async () => {
-    const { isLoading, isLoaded } = get();
-    if (isLoading || isLoaded) return;
+    const { isLoading } = get();
+    if (isLoading) return;
 
     set({ isLoading: true });
     
     try {
-      // Get current user from auth context - this is a workaround
-      // In real usage, we should pass userId as parameter
+      console.log('Loading foods from database...');
       const foods = await supabaseFoodService.loadFoods();
+      console.log('Loaded foods:', foods.length);
+      
       const categories = await supabaseFoodService.getCategories();
+      console.log('Loaded categories:', categories);
       
       set({ 
         foods, 
@@ -72,7 +74,6 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
   },
 
   toggleFavorite: async (foodId) => {
-    // This needs user context - will be improved when auth is fully integrated
     try {
       const { foods } = get();
       // Optimistically update UI
@@ -89,7 +90,6 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
 
   addMealEntry: async (foodId, quantity, mealType) => {
     try {
-      // This needs user context - placeholder for now
       console.log('Adding meal entry:', { foodId, quantity, mealType });
       return true;
     } catch (error) {
@@ -121,7 +121,8 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
   },
 
   refreshData: async () => {
-    set({ isLoaded: false });
+    console.log('Refreshing food data...');
+    set({ isLoaded: false, isLoading: false });
     await get().loadFoods();
   }
 }));

@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
+import { useSupabaseFoodStore } from '../stores/useSupabaseFoodStore';
 
 interface ImportStats {
   total: number;
@@ -44,6 +45,7 @@ const FoodImporter = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useRole();
+  const { refreshData } = useSupabaseFoodStore();
 
   const detectSeparator = (line: string): string => {
     const separators = ['\t', ';', ','];
@@ -313,9 +315,15 @@ const FoodImporter = () => {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
+    // Add refresh after successful import
+    if (successful > 0) {
+      console.log('Import successful, refreshing food library...');
+      await refreshData();
+    }
+
     setErrors(newErrors);
     return { successful, errors: newErrors.length };
-  }, []);
+  }, [refreshData]);
 
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -354,6 +362,13 @@ const FoodImporter = () => {
         variant: result.errors > 0 ? "destructive" : "default"
       });
 
+      // Force refresh of the food library
+      if (result.successful > 0) {
+        setTimeout(() => {
+          refreshData();
+        }, 1000);
+      }
+
     } catch (error) {
       console.error('Erreur lors de l\'import:', error);
       toast({
@@ -366,7 +381,7 @@ const FoodImporter = () => {
       // Reset file input
       event.target.value = '';
     }
-  }, [user, isAdmin, processCSVData, toast]);
+  }, [user, isAdmin, processCSVData, toast, refreshData]);
 
   if (!isAdmin) {
     return (
