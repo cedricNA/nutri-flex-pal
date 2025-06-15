@@ -1,8 +1,9 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { foodDataService, type Food } from '../services/foodDataService';
 import { storageService } from '../services/storageService';
-import { MealEntrySchema, type MealEntry } from '../schemas';
+import { MealEntrySchema, type MealEntry, FoodSchema } from '../schemas';
 
 interface FoodState {
   // Food library
@@ -27,9 +28,23 @@ interface FoodState {
   getTodayNutrition: () => { calories: number; protein: number; carbs: number; fat: number };
 }
 
+function validateAndCastFoods(rawFoods: unknown): Food[] {
+  if (!Array.isArray(rawFoods)) return [];
+  
+  return rawFoods
+    .map(item => {
+      try {
+        return FoodSchema.parse(item);
+      } catch {
+        return null;
+      }
+    })
+    .filter((item): item is Food => item !== null);
+}
+
 function loadInitialFoodState(): Pick<FoodState, "foods" | "isLoaded" | "searchTerm" | "selectedCategory" | "showFavoritesOnly" | "todayMeals"> {
   return {
-    foods: storageService.get("foods"),
+    foods: validateAndCastFoods(storageService.get("foods")),
     isLoaded: false,
     searchTerm: storageService.get("searchTerm"),
     selectedCategory: storageService.get("selectedCategory"),

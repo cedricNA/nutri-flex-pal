@@ -1,7 +1,8 @@
+
 import { toast } from "@/hooks/use-toast";
 import { storageService } from './storageService';
 import { settingsService } from './settingsService';
-import { NotificationDataSchema, type NotificationData } from '@/schemas';
+import { NotificationDataSchema, type NotificationData as SchemaNotificationData } from '@/schemas';
 
 export type NotificationType = 'meal' | 'hydration' | 'achievement' | 'reminder' | 'info';
 
@@ -16,7 +17,7 @@ export interface NotificationData {
 }
 
 class NotificationService {
-  private listeners: ((notifications: NotificationData[]) => void)[] = [];
+  private listeners: ((notifications: SchemaNotificationData[]) => void)[] = [];
   private timers: Map<string, NodeJS.Timeout> = new Map();
 
   constructor() {
@@ -24,11 +25,11 @@ class NotificationService {
     this.setupPeriodicReminders();
   }
 
-  private loadNotifications(): NotificationData[] {
+  private loadNotifications(): SchemaNotificationData[] {
     return storageService.get('notifications');
   }
 
-  private saveNotifications(notifications: NotificationData[]): void {
+  private saveNotifications(notifications: SchemaNotificationData[]): void {
     storageService.set('notifications', notifications);
   }
 
@@ -37,7 +38,7 @@ class NotificationService {
     this.listeners.forEach(listener => listener([...notifications]));
   }
 
-  subscribe(listener: (notifications: NotificationData[]) => void) {
+  subscribe(listener: (notifications: SchemaNotificationData[]) => void) {
     this.listeners.push(listener);
     listener(this.loadNotifications());
     

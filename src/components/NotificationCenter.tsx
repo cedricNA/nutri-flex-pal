@@ -8,7 +8,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import type { NotificationData, NotificationType } from '@/services/notificationService';
+import type { NotificationData as SchemaNotificationData } from '@/schemas';
+import type { NotificationType } from '@/services/notificationService';
 
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
@@ -50,7 +51,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, onClose
 
   if (!isOpen) return null;
 
-  const handleNotificationClick = (notification: NotificationData) => {
+  const handleNotificationClick = (notification: SchemaNotificationData) => {
     if (!notification.read) {
       markAsRead(notification.id);
     }
@@ -109,13 +110,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, onClose
                       onClick={() => handleNotificationClick(notification)}
                       className={`
                         p-3 rounded-lg border cursor-pointer transition-all duration-200 hover:shadow-md
-                        ${getNotificationColor(notification.type)}
+                        ${getNotificationColor(notification.type as NotificationType)}
                         ${!notification.read ? 'ring-2 ring-blue-200 dark:ring-blue-700' : 'opacity-75'}
                       `}
                     >
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 mt-0.5">
-                          {getNotificationIcon(notification.type)}
+                          {getNotificationIcon(notification.type as NotificationType)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
@@ -130,7 +131,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, onClose
                             {notification.message}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(notification.timestamp, {
+                            {formatDistanceToNow(new Date(notification.timestamp), {
                               addSuffix: true,
                               locale: fr
                             })}
