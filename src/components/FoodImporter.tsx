@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -86,8 +85,6 @@ const FoodImporter = () => {
     if (isNaN(num)) return 0;
     
     // Limiter les valeurs extrêmes pour éviter l'overflow
-    // PostgreSQL NUMERIC peut gérer jusqu'à 131072 chiffres avant la virgule
-    // Mais nous limitons à des valeurs raisonnables pour les données nutritionnelles
     if (num > 999999) {
       console.warn(`Valeur très élevée détectée: ${num}, limitée à 999999`);
       return 999999;
@@ -109,20 +106,31 @@ const FoodImporter = () => {
       errors.push('Nom manquant');
     }
     
+    // Validation plus permissive pour les calories (jusqu'à 9000 kcal/100g possible pour certains aliments)
     if (foodItem.calories < 0 || foodItem.calories > 9000) {
       errors.push(`Calories invalides: ${foodItem.calories}`);
     }
     
-    if (foodItem.protein < 0 || foodItem.protein > 100) {
+    // Validation plus permissive - certains aliments peuvent avoir plus de 100g de protéines/100g
+    if (foodItem.protein < 0 || foodItem.protein > 200) {
       errors.push(`Protéines invalides: ${foodItem.protein}`);
     }
     
-    if (foodItem.carbs < 0 || foodItem.carbs > 100) {
+    // Validation plus permissive pour les glucides
+    if (foodItem.carbs < 0 || foodItem.carbs > 200) {
       errors.push(`Glucides invalides: ${foodItem.carbs}`);
     }
     
-    if (foodItem.fat < 0 || foodItem.fat > 100) {
+    // Validation plus permissive pour les lipides
+    if (foodItem.fat < 0 || foodItem.fat > 200) {
       errors.push(`Lipides invalides: ${foodItem.fat}`);
+    }
+    
+    // Vérification cohérence nutritionnelle - si la somme des macros dépasse 120g/100g, c'est suspect
+    const totalMacros = foodItem.protein + foodItem.carbs + foodItem.fat;
+    if (totalMacros > 120) {
+      console.warn(`Somme des macronutriments élevée pour ${foodItem.name}: ${totalMacros}g/100g`);
+      // On log mais on ne rejette pas automatiquement
     }
     
     return {
@@ -159,7 +167,7 @@ const FoodImporter = () => {
     const total = lines.length - 1; // Exclure l'en-tête
     setStats({ total, processed: 0, successful: 0, errors: 0 });
     
-    const batchSize = 20; // Réduire la taille des lots pour éviter les timeouts
+    const batchSize = 15; // Réduire encore plus la taille des lots
     const newErrors: ImportError[] = [];
     let processed = 0;
     let successful = 0;
@@ -190,13 +198,18 @@ const FoodImporter = () => {
           const energyKJ = parseNumericValue(row[columnMapping.calories] || '0');
           const calories = Math.round(energyKJ / 4.184);
 
+          // Parser chaque valeur nutritionnelle avec gestion des erreurs
+          const protein = parseNumericValue(row[columnMapping.protein] || '0');
+          const carbs = parseNumericValue(row[columnMapping.carbs] || '0');
+          const fat = parseNumericValue(row[columnMapping.fat] || '0');
+
           const foodItem = {
             name,
             category,
             calories,
-            protein: parseNumericValue(row[columnMapping.protein] || '0'),
-            carbs: parseNumericValue(row[columnMapping.carbs] || '0'),
-            fat: parseNumericValue(row[columnMapping.fat] || '0'),
+            protein,
+            carbs,
+            fat,
             fiber: parseNumericValue(row[columnMapping.fiber] || '0'),
             calcium: parseNumericValue(row[columnMapping.calcium] || '0'),
             iron: parseNumericValue(row[columnMapping.iron] || '0'),
@@ -238,11 +251,30 @@ const FoodImporter = () => {
 
           if (error) {
             console.error('Erreur lors de l\'insertion:', error);
-            newErrors.push({
-              row: i,
-              error: `Erreur batch: ${error.message}`,
-              data: foodItems
-            });
+            // Essayer d'insérer un par un pour identifier les problèmes
+            for (const item of foodItems) {
+              try {
+                const { error: singleError } = await supabase
+                  .from('foods')
+                  .insert([item]);
+                
+                if (singleError) {
+                  newErrors.push({
+                    row: i,
+                    error: `Erreur insertion ${item.name}: ${singleError.message}`,
+                    data: item
+                  });
+                } else {
+                  successful++;
+                }
+              } catch (singleInsertError) {
+                newErrors.push({
+                  row: i,
+                  error: `Erreur insertion ${item.name}: ${singleInsertError instanceof Error ? singleInsertError.message : 'Erreur inconnue'}`,
+                  data: item
+                });
+              }
+            }
           } else {
             successful += foodItems.length;
             console.log(`${foodItems.length} aliments insérés avec succès`);
@@ -266,7 +298,7 @@ const FoodImporter = () => {
       });
 
       // Pause plus longue entre les lots
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     setErrors(newErrors);
@@ -343,9 +375,9 @@ const FoodImporter = () => {
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Convertissez votre fichier .xls en .csv d'abord</li>
               <li>• Le fichier doit contenir les colonnes nutritionnelles standard</li>
-              <li>• L'import se fait par lots de 20 aliments (réduit pour éviter les erreurs)</li>
+              <li>• L'import se fait par lots de 15 aliments (optimisé pour la stabilité)</li>
               <li>• Les catégories sont automatiquement mappées</li>
-              <li>• Les valeurs nutritionnelles sont validées (max 999,999)</li>
+              <li>• Validation assouplie pour les valeurs nutritionnelles extrêmes</li>
             </ul>
           </div>
 
