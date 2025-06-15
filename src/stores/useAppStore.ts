@@ -54,11 +54,12 @@ interface AppState {
 
 // Helper to initialize state from validated localStorage
 function loadInitialState(): Pick<AppState, "user" | "weightEntries" | "calorieEntries" | "currentPeriod"> {
+  // Use dataService for schema-mapped keys, direct localStorage for currentPeriod
   return {
     user: dataService.get<UserProfile | null>("user", null),
     weightEntries: dataService.get<WeightEntry[]>("weightEntries", []),
     calorieEntries: dataService.get<CalorieEntry[]>("calorieEntries", []),
-    currentPeriod: dataService.get<AppState["currentPeriod"]>("currentPeriod", "7d"),
+    currentPeriod: (localStorage.getItem('currentPeriod') as AppState["currentPeriod"]) || "7d",
   };
 }
 
@@ -108,7 +109,7 @@ export const useAppStore = create<AppState>()(
       }),
 
       setPeriod: (period) => {
-        dataService.set('currentPeriod', period);
+        localStorage.setItem('currentPeriod', period);
         set({ currentPeriod: period });
       },
 

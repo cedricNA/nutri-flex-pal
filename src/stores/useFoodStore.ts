@@ -1,16 +1,9 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { foodDataService, type Food } from '../services/foodDataService';
 import { dataService } from '../services/dataService';
-import { MealEntrySchema, FoodSchema, type Food, type MealEntry } from '../schemas';
-
-interface MealEntry {
-  id: string;
-  foodId: string;
-  quantity: number;
-  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-  date: Date;
-}
+import { MealEntrySchema, FoodSchema, type MealEntry } from '../schemas';
 
 interface FoodState {
   // Food library
@@ -36,12 +29,13 @@ interface FoodState {
 }
 
 function loadInitialFoodState(): Pick<FoodState, "foods" | "isLoaded" | "searchTerm" | "selectedCategory" | "showFavoritesOnly" | "todayMeals"> {
+  // use dataService only for foods and todayMeals (SchemaMap keys)
   return {
     foods: dataService.get<Food[]>("foods", []),
     isLoaded: false,
-    searchTerm: dataService.get<string>("searchTerm", ""),
-    selectedCategory: dataService.get<string>("selectedCategory", "all"),
-    showFavoritesOnly: dataService.get<boolean>("showFavoritesOnly", false),
+    searchTerm: localStorage.getItem("searchTerm") || "",
+    selectedCategory: localStorage.getItem("selectedCategory") || "all",
+    showFavoritesOnly: localStorage.getItem("showFavoritesOnly") === "true",
     todayMeals: dataService.get<MealEntry[]>("todayMeals", []),
   };
 }
@@ -59,15 +53,15 @@ export const useFoodStore = create<FoodState>()(
       },
 
       setSearchTerm: (searchTerm) => {
-        dataService.set("searchTerm", searchTerm);
+        localStorage.setItem("searchTerm", searchTerm);
         set({ searchTerm });
       },
       setSelectedCategory: (selectedCategory) => {
-        dataService.set("selectedCategory", selectedCategory);
+        localStorage.setItem("selectedCategory", selectedCategory);
         set({ selectedCategory });
       },
       setShowFavoritesOnly: (showFavoritesOnly) => {
-        dataService.set("showFavoritesOnly", showFavoritesOnly);
+        localStorage.setItem("showFavoritesOnly", showFavoritesOnly ? "true" : "false");
         set({ showFavoritesOnly });
       },
 
@@ -109,7 +103,11 @@ export const useFoodStore = create<FoodState>()(
         const today = new Date().toDateString();
         
         const todayEntries = todayMeals.filter(
-          entry => entry.date.toDateString() === today
+          entry => {
+            // entry.date may be a string after hydration, fix:
+            const entryDate = entry.date instanceof Date ? entry.date : new Date(entry.date);
+            return entryDate.toDateString() === today;
+          }
         );
 
         return todayEntries.reduce((total, entry) => {
