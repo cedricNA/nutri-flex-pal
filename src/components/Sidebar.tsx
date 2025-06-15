@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Home, Target, Book, User, Settings, TrendingUp, MessageCircle } from 'lucide-react';
+import { Home, Target, Book, User, Settings, TrendingUp, MessageCircle, Sparkles } from 'lucide-react';
 
 interface SidebarProps {
   activeSection: string;
@@ -18,44 +19,53 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
   ];
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-card shadow-lg border-r border-border z-40">
-      <div className="p-6">
+    <div className="h-screen w-64 bg-white dark:bg-gray-800 shadow-xl border-r border-gray-200 dark:border-gray-700 flex flex-col">
+      <div className="p-6 border-b border-gray-100 dark:border-gray-700">
         <div className="flex items-center space-x-3 mb-8">
-          <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-lg">N</span>
+          <div className="w-12 h-12 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-xl">N</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-card-foreground">NutriFlex</h1>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              NutriFlex
+            </h1>
             <p className="text-sm text-muted-foreground">Votre coach nutrition</p>
           </div>
         </div>
-        
-        <nav className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onSectionChange(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                  activeSection === item.id
-                    ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 text-green-600 dark:text-green-400 border-l-4 border-green-500'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                }`}
-              >
-                <Icon size={20} />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
       </div>
       
-      <div className="absolute bottom-6 left-6 right-6">
-        <div className="bg-gradient-to-r from-green-500 to-blue-500 rounded-lg p-4 text-white">
-          <h3 className="font-semibold text-sm mb-1">Version Pro</h3>
-          <p className="text-xs opacity-90 mb-3">Débloquez toutes les fonctionnalités</p>
-          <button className="w-full bg-white text-green-600 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-50 transition">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeSection === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onSectionChange(item.id)}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                isActive
+                  ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/30 dark:to-blue-900/30 text-green-600 dark:text-green-400 shadow-md scale-105'
+                  : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 hover:scale-102'
+              }`}
+            >
+              <Icon size={20} className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
+              <span className="font-medium">{item.label}</span>
+              {isActive && (
+                <div className="ml-auto w-2 h-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-full animate-pulse"></div>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+      
+      <div className="p-6 border-t border-gray-100 dark:border-gray-700">
+        <div className="bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div className="absolute top-2 right-2">
+            <Sparkles size={20} className="animate-pulse" />
+          </div>
+          <h3 className="font-bold text-lg mb-2">Version Pro</h3>
+          <p className="text-sm opacity-90 mb-4">Débloquez toutes les fonctionnalités premium</p>
+          <button className="w-full bg-white text-gray-800 py-3 px-4 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 hover:scale-105 shadow-lg">
             Découvrir
           </button>
         </div>

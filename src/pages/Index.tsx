@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import NutritionStats from '../components/NutritionStats';
@@ -9,10 +10,11 @@ import ProgressPage from '../components/ProgressPage';
 import PlanManager from '../components/PlanManager';
 import ChatBot from '../components/ChatBot';
 import MobileNavigation from '../components/MobileNavigation';
-import { Bell, User } from 'lucide-react';
+import { Bell, User, Menu, X } from 'lucide-react';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const renderMainContent = () => {
     switch (activeSection) {
@@ -59,39 +61,73 @@ const Index = () => {
     return titles[activeSection as keyof typeof titles] || 'NutriFlex';
   };
 
+  const getSectionDescription = () => {
+    const descriptions = {
+      'dashboard': 'Gérez vos repas et suivez vos objectifs nutritionnels',
+      'foods': 'Explorez notre base de données d\'aliments',
+      'plans': 'Créez et gérez vos plans alimentaires personnalisés',
+      'chat': 'Obtenez des conseils nutritionnels personnalisés',
+      'progress': 'Suivez vos progrès et statistiques',
+      'profile': 'Gérez vos informations personnelles',
+      'settings': 'Configurez vos préférences'
+    };
+    return descriptions[activeSection as keyof typeof descriptions] || '';
+  };
+
   return (
-    <div className="min-h-screen bg-background dark:bg-gray-900 flex">
-      {/* Sidebar pour desktop */}
-      <div className="hidden md:block">
-        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex transition-colors duration-300">
+      {/* Overlay pour mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar pour desktop et mobile */}
+      <div className={`fixed md:static transition-transform duration-300 ease-in-out z-50 ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        <Sidebar 
+          activeSection={activeSection} 
+          onSectionChange={(section) => {
+            setActiveSection(section);
+            setIsSidebarOpen(false);
+          }}
+        />
       </div>
       
-      <div className="flex-1 md:ml-64 pb-16 md:pb-0">
-        {/* Header */}
-        <header className="bg-card dark:bg-gray-800 shadow-sm border-b border-border dark:border-gray-700 px-4 md:px-8 py-4">
+      <div className="flex-1 md:ml-64 pb-16 md:pb-0 min-h-screen">
+        {/* Header modernisé */}
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 md:px-8 py-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-card-foreground dark:text-gray-100">
-                {getSectionTitle()}
-              </h1>
-              <p className="text-muted-foreground dark:text-gray-400 text-sm md:text-base">
-                {new Date().toLocaleDateString('fr-FR', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </p>
+            <div className="flex items-center space-x-4">
+              {/* Bouton menu mobile */}
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+              
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  {getSectionTitle()}
+                </h1>
+                <p className="text-muted-foreground dark:text-gray-400 text-sm md:text-base">
+                  {getSectionDescription()}
+                </p>
+              </div>
             </div>
             
             <div className="flex items-center space-x-3 md:space-x-4">
-              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition">
+              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 hover:scale-110">
                 <Bell size={20} />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-red-500 rounded-full"></span>
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse"></span>
               </button>
               
-              <div className="flex items-center space-x-2 md:space-x-3">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+              <div className="flex items-center space-x-2 md:space-x-3 bg-gray-50 dark:bg-gray-700 rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center shadow-md">
                   <User className="text-white" size={20} />
                 </div>
                 <div className="hidden sm:block">
@@ -103,8 +139,8 @@ const Index = () => {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="p-4 md:p-8 max-w-7xl mx-auto">
+        {/* Main Content avec animations */}
+        <main className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in">
           {renderMainContent()}
         </main>
       </div>
