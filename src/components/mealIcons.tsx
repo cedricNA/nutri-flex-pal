@@ -18,7 +18,7 @@ const iconMapping: { [key: string]: React.ComponentType<any> } = {
 };
 
 // Fonction de fallback avec les icônes hardcodées
-const getMealIconFallback = (mealName: string, size: number = 18, className?: string) => {
+const getMealIconFallback = (mealName: string, size: number = 18, className?: string): React.ReactElement => {
   switch (mealName) {
     case 'breakfast':
     case 'Petit-déjeuner':
@@ -38,7 +38,7 @@ const getMealIconFallback = (mealName: string, size: number = 18, className?: st
 };
 
 // Fonction pour obtenir l'icône depuis la base de données (asynchrone)
-export const getMealIcon = async (mealTypeKey: string, size: number = 18, className?: string) => {
+export const getMealIcon = async (mealTypeKey: string, size: number = 18, className?: string): Promise<React.ReactElement> => {
   // Vérifier le cache
   const now = Date.now();
   if (!mealTypesCache || (now - cacheTimestamp) > CACHE_DURATION) {
@@ -65,7 +65,7 @@ export const getMealIcon = async (mealTypeKey: string, size: number = 18, classN
 
 // Hook pour utiliser les icônes de repas dans les composants React
 export const useMealIcon = (mealTypeKey: string) => {
-  const [icon, setIcon] = useState(() => getMealIconFallback(mealTypeKey));
+  const [icon, setIcon] = useState<React.ReactElement>(() => getMealIconFallback(mealTypeKey));
 
   useEffect(() => {
     const loadIcon = async () => {
@@ -80,6 +80,6 @@ export const useMealIcon = (mealTypeKey: string) => {
 };
 
 // Version synchrone pour la compatibilité (utilise le fallback)
-export const getMealIconSync = (mealName: string, size: number = 18, className?: string) => {
+export const getMealIconSync = (mealName: string, size: number = 18, className?: string): React.ReactElement => {
   return getMealIconFallback(mealName, size, className);
 };
