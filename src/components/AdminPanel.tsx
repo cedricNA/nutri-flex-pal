@@ -78,6 +78,7 @@ const AdminPanel = () => {
     return role === 'admin' ? Shield : UserCog;
   };
 
+  // Fixed: Return content based on activeTab without type error
   if (activeTab === 'foods') {
     return <FoodLibraryAdmin />;
   }
@@ -106,6 +107,7 @@ const AdminPanel = () => {
         </div>
       </div>
 
+      {/* Users management content - only shown when activeTab is 'users' */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

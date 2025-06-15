@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d" | "custom">("7d");
   const { signOut, user } = useAuth();
 
   const handleSignOut = async () => {
@@ -59,11 +60,10 @@ const Index = () => {
               </div>
             </div>
             
-            {showNotifications && (
-              <div className="relative">
-                <NotificationCenter />
-              </div>
-            )}
+            <NotificationCenter 
+              isOpen={showNotifications}
+              onClose={() => setShowNotifications(false)}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <NutritionStats />
@@ -71,8 +71,8 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <CaloriesChart />
-              <WeightChart />
+              <CaloriesChart period={chartPeriod} />
+              <WeightChart period={chartPeriod} />
             </div>
           </div>
         );
