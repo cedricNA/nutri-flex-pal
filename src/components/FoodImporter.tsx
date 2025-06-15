@@ -73,9 +73,62 @@ const FoodImporter = () => {
 
   const parseNumericValue = (value: string): number => {
     if (!value || value === '' || value === '-' || value === 'traces') return 0;
-    const numStr = value.replace(',', '.').replace(/[^\d.-]/g, '');
-    const num = parseFloat(numStr);
-    return isNaN(num) ? 0 : num;
+    
+    // Nettoyer la valeur
+    let cleanValue = value.replace(',', '.').replace(/[^\d.-]/g, '');
+    
+    // Si la valeur est vide après nettoyage
+    if (!cleanValue) return 0;
+    
+    const num = parseFloat(cleanValue);
+    
+    // Vérifier si c'est un nombre valide
+    if (isNaN(num)) return 0;
+    
+    // Limiter les valeurs extrêmes pour éviter l'overflow
+    // PostgreSQL NUMERIC peut gérer jusqu'à 131072 chiffres avant la virgule
+    // Mais nous limitons à des valeurs raisonnables pour les données nutritionnelles
+    if (num > 999999) {
+      console.warn(`Valeur très élevée détectée: ${num}, limitée à 999999`);
+      return 999999;
+    }
+    
+    if (num < -999999) {
+      console.warn(`Valeur très faible détectée: ${num}, limitée à -999999`);
+      return -999999;
+    }
+    
+    // Arrondir à 2 décimales pour éviter les problèmes de précision
+    return Math.round(num * 100) / 100;
+  };
+
+  const validateFoodItem = (foodItem: any): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    if (!foodItem.name || foodItem.name.trim() === '') {
+      errors.push('Nom manquant');
+    }
+    
+    if (foodItem.calories < 0 || foodItem.calories > 9000) {
+      errors.push(`Calories invalides: ${foodItem.calories}`);
+    }
+    
+    if (foodItem.protein < 0 || foodItem.protein > 100) {
+      errors.push(`Protéines invalides: ${foodItem.protein}`);
+    }
+    
+    if (foodItem.carbs < 0 || foodItem.carbs > 100) {
+      errors.push(`Glucides invalides: ${foodItem.carbs}`);
+    }
+    
+    if (foodItem.fat < 0 || foodItem.fat > 100) {
+      errors.push(`Lipides invalides: ${foodItem.fat}`);
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
   };
 
   const processCSVData = useCallback(async (csvContent: string) => {
@@ -106,7 +159,7 @@ const FoodImporter = () => {
     const total = lines.length - 1; // Exclure l'en-tête
     setStats({ total, processed: 0, successful: 0, errors: 0 });
     
-    const batchSize = 50;
+    const batchSize = 20; // Réduire la taille des lots pour éviter les timeouts
     const newErrors: ImportError[] = [];
     let processed = 0;
     let successful = 0;
@@ -121,7 +174,14 @@ const FoodImporter = () => {
 
         try {
           const name = row[columnMapping.name]?.replace(/"/g, '').trim();
-          if (!name || name === '') continue;
+          if (!name || name === '') {
+            newErrors.push({
+              row: rowIndex,
+              error: 'Nom manquant',
+              data: row
+            });
+            continue;
+          }
 
           const categoryRaw = row[columnMapping.category]?.replace(/"/g, '').trim();
           const category = mapCategory(categoryRaw || '');
@@ -149,6 +209,16 @@ const FoodImporter = () => {
             unit: '100g'
           };
 
+          const validation = validateFoodItem(foodItem);
+          if (!validation.isValid) {
+            newErrors.push({
+              row: rowIndex,
+              error: `Validation échouée: ${validation.errors.join(', ')}`,
+              data: foodItem
+            });
+            continue;
+          }
+
           foodItems.push(foodItem);
         } catch (error) {
           newErrors.push({
@@ -161,6 +231,7 @@ const FoodImporter = () => {
 
       if (foodItems.length > 0) {
         try {
+          console.log(`Insertion de ${foodItems.length} aliments...`);
           const { error } = await supabase
             .from('foods')
             .insert(foodItems);
@@ -174,6 +245,7 @@ const FoodImporter = () => {
             });
           } else {
             successful += foodItems.length;
+            console.log(`${foodItems.length} aliments insérés avec succès`);
           }
         } catch (error) {
           console.error('Erreur lors de l\'insertion batch:', error);
@@ -193,8 +265,8 @@ const FoodImporter = () => {
         errors: newErrors.length
       });
 
-      // Pause courte entre les lots
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Pause plus longue entre les lots
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
     setErrors(newErrors);
@@ -271,8 +343,9 @@ const FoodImporter = () => {
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Convertissez votre fichier .xls en .csv d'abord</li>
               <li>• Le fichier doit contenir les colonnes nutritionnelles standard</li>
-              <li>• L'import se fait par lots de 50 aliments</li>
+              <li>• L'import se fait par lots de 20 aliments (réduit pour éviter les erreurs)</li>
               <li>• Les catégories sont automatiquement mappées</li>
+              <li>• Les valeurs nutritionnelles sont validées (max 999,999)</li>
             </ul>
           </div>
 
