@@ -1,9 +1,8 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { foodDataService, type Food } from '../services/foodDataService';
 import { storageService } from '../services/storageService';
-import { MealEntrySchema, type MealEntry, FoodSchema } from '../schemas';
+import { MealEntrySchema, type MealEntry } from '../schemas';
 
 interface FoodState {
   // Food library
@@ -28,36 +27,14 @@ interface FoodState {
   getTodayNutrition: () => { calories: number; protein: number; carbs: number; fat: number };
 }
 
-function validateAndCastFoods(data: unknown): Food[] {
-  if (!Array.isArray(data)) {
-    return [];
-  }
-  
-  const validFoods: Food[] = [];
-  for (const item of data) {
-    try {
-      // Cast item en unknown pour satisfaire TypeScript
-      const validFood = FoodSchema.parse(item as unknown);
-      validFoods.push(validFood);
-    } catch (error) {
-      console.warn('Invalid food item, skipping:', item);
-    }
-  }
-  
-  return validFoods;
-}
-
 function loadInitialFoodState(): Pick<FoodState, "foods" | "isLoaded" | "searchTerm" | "selectedCategory" | "showFavoritesOnly" | "todayMeals"> {
-  const storedFoods = storageService.get("foods");
-  const storedMeals = storageService.get("todayMeals");
-  
   return {
-    foods: validateAndCastFoods(storedFoods),
+    foods: storageService.get("foods"),
     isLoaded: false,
-    searchTerm: storageService.get("searchTerm") || "",
-    selectedCategory: storageService.get("selectedCategory") || "all",
-    showFavoritesOnly: storageService.get("showFavoritesOnly") || false,
-    todayMeals: Array.isArray(storedMeals) ? storedMeals : [],
+    searchTerm: storageService.get("searchTerm"),
+    selectedCategory: storageService.get("selectedCategory"),
+    showFavoritesOnly: storageService.get("showFavoritesOnly"),
+    todayMeals: storageService.get("todayMeals"),
   };
 }
 

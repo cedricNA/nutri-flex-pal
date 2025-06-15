@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Bell, Check, Utensils, Droplets, Trophy, Clock, Info, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import type { NotificationData } from '@/schemas';
-import type { NotificationType } from '@/services/notificationService';
+import type { NotificationData, NotificationType } from '@/services/notificationService';
 
 const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
