@@ -1,34 +1,100 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import PeriodSelector from "./PeriodSelector";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { useAuth } from '@/hooks/useAuth';
+import { weightService } from '@/services/supabaseServices';
 
 interface WeightChartProps {
   period: "7d" | "30d" | "custom";
 }
 
-const allWeightData = [
-  { date: '1 Jan', weight: 72.5 },
-  { date: '8 Jan', weight: 72.2 },
-  { date: '15 Jan', weight: 71.8 },
-  { date: '22 Jan', weight: 71.5 },
-  { date: '29 Jan', weight: 71.0 },
-  { date: '5 Fév', weight: 70.8 },
-  { date: '12 Fév', weight: 70.3 },
-  { date: '19 Fév', weight: 70.0 },
-];
-
 const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
-  // Filtre de période basique (à raffiner si vrai custom)
-  let data;
-  if (period === "7d") data = allWeightData.slice(-2); // 2 derniers points = ~7j (exemple)
-  else if (period === "30d") data = allWeightData.slice(-5);
-  else data = allWeightData;
+  const { user } = useAuth();
+  const [weightData, setWeightData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadWeightData = async () => {
+      if (!user) return;
+
+      setLoading(true);
+      try {
+        const entries = await weightService.getWeightEntries(user.id);
+        
+        // Filtrer selon la période
+        const now = new Date();
+        let cutoffDate = new Date();
+        
+        switch (period) {
+          case '7d':
+            cutoffDate.setDate(now.getDate() - 7);
+            break;
+          case '30d':
+            cutoffDate.setDate(now.getDate() - 30);
+            break;
+          default:
+            cutoffDate = new Date(0); // Toutes les données
+        }
+
+        const filteredEntries = entries
+          .filter(entry => new Date(entry.date) >= cutoffDate)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .map(entry => ({
+            date: new Date(entry.date).toLocaleDateString('fr-FR', { 
+              day: 'numeric', 
+              month: 'short' 
+            }),
+            weight: Number(entry.weight)
+          }));
+
+        setWeightData(filteredEntries);
+      } catch (error) {
+        console.error('Error loading weight data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWeightData();
+  }, [user, period]);
 
   const chartConfig = {
     weight: { label: 'Poids (kg)', color: 'hsl(var(--primary))' }
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Évolution du poids</CardTitle>
+          <CardDescription>Chargement des données...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <p className="text-muted-foreground">Chargement...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (weightData.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Évolution du poids</CardTitle>
+          <CardDescription>Aucune donnée disponible pour cette période</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <p className="text-muted-foreground">Aucune donnée de poids trouvée</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -37,10 +103,10 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
         <CardDescription>Suivi de votre poids au fil du temps</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto"> {/* Scroll horizontal si mobile */}
+        <div className="overflow-x-auto">
           <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" minWidth={320} height={300}>
-              <LineChart data={data}>
+              <LineChart data={weightData}>
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis domain={['dataMin - 0.5', 'dataMax + 0.5']} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />

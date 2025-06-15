@@ -1,25 +1,28 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { hydrationService, settingsService } from '@/services/supabaseServices';
 
 const ProgressStats = () => {
-  const stats = [
+  const { user } = useAuth();
+  const [stats, setStats] = useState([
     {
       label: 'Hydratation quotidienne',
-      current: 2.1,
+      current: 0,
       target: 2.5,
       unit: 'L',
-      progress: 84,
+      progress: 0,
       color: 'bg-blue-500'
     },
     {
       label: 'Activité physique',
-      current: 4,
+      current: 0,
       target: 5,
       unit: 'séances/semaine',
-      progress: 80,
+      progress: 0,
       color: 'bg-green-500'
     },
     {
@@ -32,13 +35,70 @@ const ProgressStats = () => {
     },
     {
       label: 'Respect du plan',
-      current: 6,
+      current: 0,
       target: 7,
       unit: 'jours/semaine',
-      progress: 86,
+      progress: 0,
       color: 'bg-orange-500'
     }
-  ];
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      if (!user) return;
+
+      try {
+        // Récupérer l'hydratation du jour
+        const todayHydration = await hydrationService.getTodayHydration(user.id);
+        const hydrationLiters = (todayHydration * 0.25); // 250ml par verre
+        
+        // Récupérer les paramètres utilisateur pour les objectifs
+        const userSettings = await settingsService.getSettings(user.id);
+        
+        setStats(prevStats => [
+          {
+            ...prevStats[0],
+            current: hydrationLiters,
+            progress: Math.min(100, (hydrationLiters / 2.5) * 100)
+          },
+          {
+            ...prevStats[1],
+            current: 4, // Pour l'instant, on garde une valeur par défaut
+            progress: 80
+          },
+          {
+            ...prevStats[2],
+            // Sommeil - pour l'instant valeur par défaut, pourra être étendu plus tard
+            current: 7.2,
+            progress: 90
+          },
+          {
+            ...prevStats[3],
+            current: 6, // Pour l'instant, on garde une valeur par défaut  
+            progress: 86
+          }
+        ]);
+      } catch (error) {
+        console.error('Error loading progress stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Statistiques détaillées</CardTitle>
+          <CardDescription>Chargement de vos statistiques...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -62,7 +122,7 @@ const ProgressStats = () => {
                     / {stat.target} {stat.unit}
                   </span>
                   <Badge variant={stat.progress >= 85 ? "default" : "secondary"}>
-                    {stat.progress}%
+                    {stat.progress.toFixed(0)}%
                   </Badge>
                 </div>
               </div>
