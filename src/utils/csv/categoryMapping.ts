@@ -1,80 +1,10 @@
 
-const CATEGORY_MAPPING: { [key: string]: string } = {
-  // Fruits et légumes
-  'fruits': 'fruits',
-  'legumes': 'vegetables',
-  'pommes de terre et autres tubercules': 'vegetables',
-  'salades composees et crudites': 'vegetables',
-  
-  // Protéines
-  'viandes crues': 'proteins',
-  'viandes cuites': 'proteins',
-  'poissons cuits': 'proteins',
-  'mollusques et crustaces crus': 'proteins',
-  'mollusques et crustaces cuits': 'proteins',
-  'produits a base de poissons et produits de la mer': 'proteins',
-  'autres produits a base de viande': 'proteins',
-  'charcuteries et assimiles': 'proteins',
-  'substitus de produits carnes': 'proteins',
-  'oeufs': 'proteins',
-  'legumineuses': 'proteins',
-  'fruits a coque et graines oleagineuses': 'proteins',
-  
-  // Produits laitiers
-  'laits': 'dairy',
-  'laits et boissons infantiles': 'dairy',
-  'fromages et assimiles': 'dairy',
-  'desserts lactes': 'dairy',
-  'produits laitiers frais et assimiles': 'dairy',
-  'cremes et specialites a base de creme': 'dairy',
-  'aliments infantiles': 'dairy',
-  'desserts infantiles': 'dairy',
-  
-  // Céréales et dérivés
-  'pains et assimiles': 'grains',
-  'pates, riz et cereales': 'grains',
-  'cereales de petit-dejeuner': 'grains',
-  'cereales et biscuits infantiles': 'grains',
-  'viennoiseries': 'grains',
-  'barres cerealeres': 'grains',
-  'plats composes': 'grains',
-  'sandwichs': 'grains',
-  'pizzas, tartes et crepes salees': 'grains',
-  'feuilletees et autres entrees': 'grains',
-  'soupes': 'grains',
-  'petits pots sales et plats infantiles': 'grains',
-  
-  // Matières grasses
-  'beurres': 'fats',
-  'huiles et graisses vegetales': 'fats',
-  'huiles de poissons': 'fats',
-  'autres matieres grasses': 'fats',
-  'margarines': 'fats',
-  
-  // Snacks et sucreries (tout le reste)
-  'sucres, miels et assimiles': 'snacks',
-  'confiseries non chocolatees': 'snacks',
-  'chocolats et produits a base de chocolat': 'snacks',
-  'biscuits sucres': 'snacks',
-  'biscuits aperitifs': 'snacks',
-  'gateaux et patisseries': 'snacks',
-  'glaces': 'snacks',
-  'desserts glaces': 'snacks',
-  'sorbets': 'snacks',
-  'confitures et assimiles': 'snacks',
-  'boissons sans alcool': 'snacks',
-  'boisson alcoolisees': 'snacks',
-  'eaux': 'snacks',
-  'epices': 'snacks',
-  'condiments': 'snacks',
-  'herbes': 'snacks',
-  'sauces': 'snacks',
-  'sels': 'snacks',
-  'aides culinaires': 'snacks',
-  'ingredients divers': 'snacks',
-  'algues': 'snacks',
-  'denrees destinees a une alimentation particuliere': 'snacks'
-};
+import { dynamicDataService } from '@/services/dynamicDataService';
+
+// Cache pour éviter les appels répétés à la base de données
+let categoryMappingCache: { [key: string]: string } | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Fonction pour normaliser les noms de catégories
 export const normalizeCategory = (category: string): string => {
@@ -118,7 +48,33 @@ const findFlexibleMapping = (normalized: string): string | null => {
   return null;
 };
 
-export const mapCategory = (originalCategory: string): string => {
+// Fonction pour charger le mapping depuis Supabase
+const loadCategoryMapping = async (): Promise<{ [key: string]: string }> => {
+  try {
+    const mappings = await dynamicDataService.getCategoryMappings();
+    const mappingObject: { [key: string]: string } = {};
+    
+    mappings.forEach(mapping => {
+      mappingObject[normalizeCategory(mapping.ciqual_category)] = mapping.simplified_category;
+    });
+    
+    return mappingObject;
+  } catch (error) {
+    console.error('Error loading category mappings:', error);
+    // Fallback vers un mapping minimal en cas d'erreur
+    return {
+      'legumes': 'vegetables',
+      'fruits': 'fruits',
+      'viandes': 'proteins',
+      'poissons': 'proteins',
+      'produits laitiers': 'dairy',
+      'cereales': 'grains',
+      'matieres grasses': 'fats'
+    };
+  }
+};
+
+export const mapCategory = async (originalCategory: string): Promise<string> => {
   if (!originalCategory) {
     console.log('⚠️ Catégorie vide ou null');
     return 'snacks';
@@ -127,7 +83,15 @@ export const mapCategory = (originalCategory: string): string => {
   const normalized = normalizeCategory(originalCategory);
   console.log(`🔍 Mapping catégorie: "${originalCategory}" -> "${normalized}"`);
   
-  const mapped = CATEGORY_MAPPING[normalized];
+  // Vérifier le cache
+  const now = Date.now();
+  if (!categoryMappingCache || (now - cacheTimestamp) > CACHE_DURATION) {
+    console.log('🔄 Rechargement du cache des catégories...');
+    categoryMappingCache = await loadCategoryMapping();
+    cacheTimestamp = now;
+  }
+  
+  const mapped = categoryMappingCache[normalized];
   if (mapped) {
     console.log(`✅ Catégorie mappée: "${normalized}" -> "${mapped}"`);
     return mapped;
@@ -141,4 +105,20 @@ export const mapCategory = (originalCategory: string): string => {
     console.log(`❌ Catégorie non reconnue: "${normalized}" -> par défaut "snacks"`);
     return 'snacks';
   }
+};
+
+// Version synchrone pour la compatibilité avec l'ancien code
+export const mapCategorySync = (originalCategory: string): string => {
+  if (!originalCategory) return 'snacks';
+  
+  const normalized = normalizeCategory(originalCategory);
+  
+  // Utiliser le cache s'il est disponible
+  if (categoryMappingCache && categoryMappingCache[normalized]) {
+    return categoryMappingCache[normalized];
+  }
+  
+  // Sinon utiliser la recherche flexible
+  const flexibleMapping = findFlexibleMapping(normalized);
+  return flexibleMapping || 'snacks';
 };

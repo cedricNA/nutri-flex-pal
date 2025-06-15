@@ -1,5 +1,7 @@
 
-import { ColumnMapping, mapCategory, parseNumericValue } from '@/utils/csvUtils';
+import { ColumnMapping } from '@/types/import';
+import { parseNumericValue } from '@/utils/csv/valueParser';
+import { mapCategorySync } from '@/utils/csv/categoryMapping';
 import { FoodInsert } from '@/types/food';
 
 export interface ValidationResult {
@@ -46,7 +48,7 @@ export const createFoodItem = (row: string[], columnMapping: ColumnMapping): Omi
   
   console.log(`🏷️ Traitement: "${name}" - catégorie brute: "${originalCategory}"`);
   
-  const mappedCategory = mapCategory(originalCategory);
+  const mappedCategory = mapCategorySync(originalCategory);
   
   console.log(`🎯 Catégorie finale pour "${name}": "${mappedCategory}"`);
 

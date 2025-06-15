@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -265,6 +264,62 @@ export const settingsService = {
     
     if (error) {
       console.error('Error updating settings:', error);
+      throw error;
+    }
+  }
+};
+
+// Nouveaux services pour les données dynamiques
+export const goalService = {
+  async getUserGoals(userId: string) {
+    const { data, error } = await supabase
+      .from('user_goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching user goals:', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async createUserGoal(userId: string, goal: any) {
+    const { error } = await supabase
+      .from('user_goals')
+      .insert({
+        user_id: userId,
+        ...goal
+      });
+    
+    if (error) {
+      console.error('Error creating user goal:', error);
+      throw error;
+    }
+  },
+
+  async updateUserGoal(goalId: string, updates: any) {
+    const { error } = await supabase
+      .from('user_goals')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', goalId);
+    
+    if (error) {
+      console.error('Error updating user goal:', error);
+      throw error;
+    }
+  },
+
+  async deleteUserGoal(goalId: string) {
+    const { error } = await supabase
+      .from('user_goals')
+      .delete()
+      .eq('id', goalId);
+    
+    if (error) {
+      console.error('Error deleting user goal:', error);
       throw error;
     }
   }

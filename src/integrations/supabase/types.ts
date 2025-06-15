@@ -44,6 +44,54 @@ export type Database = {
           },
         ]
       }
+      category_mappings: {
+        Row: {
+          ciqual_category: string
+          created_at: string | null
+          id: string
+          simplified_category: string
+          updated_at: string | null
+        }
+        Insert: {
+          ciqual_category: string
+          created_at?: string | null
+          id?: string
+          simplified_category: string
+          updated_at?: string | null
+        }
+        Update: {
+          ciqual_category?: string
+          created_at?: string | null
+          id?: string
+          simplified_category?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      csv_column_mappings: {
+        Row: {
+          created_at: string | null
+          field_type: string
+          id: string
+          possible_names: string[]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_type: string
+          id?: string
+          possible_names: string[]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          field_type?: string
+          id?: string
+          possible_names?: string[]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       foods: {
         Row: {
           calcium: number | null
@@ -187,6 +235,33 @@ export type Database = {
           },
         ]
       }
+      meal_types: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          icon_name: string
+          id: string
+          sort_order: number | null
+          type_key: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_name: string
+          icon_name: string
+          id?: string
+          sort_order?: number | null
+          type_key: string
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          icon_name?: string
+          id?: string
+          sort_order?: number | null
+          type_key?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -308,6 +383,59 @@ export type Database = {
           },
           {
             foreignKeyName: "user_food_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_goals: {
+        Row: {
+          created_at: string | null
+          current_value: number | null
+          deadline: string | null
+          description: string | null
+          goal_type: string
+          id: string
+          is_active: boolean | null
+          target_value: number
+          title: string
+          unit: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_value?: number | null
+          deadline?: string | null
+          description?: string | null
+          goal_type: string
+          id?: string
+          is_active?: boolean | null
+          target_value: number
+          title: string
+          unit: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_value?: number | null
+          deadline?: string | null
+          description?: string | null
+          goal_type?: string
+          id?: string
+          is_active?: boolean | null
+          target_value?: number
+          title?: string
+          unit?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_goals_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
