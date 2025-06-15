@@ -1,37 +1,8 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { dataService } from '../services/dataService';
 import { UserProfileSchema, WeightEntrySchema, CalorieEntrySchema, type UserProfile, type WeightEntry, type CalorieEntry } from '../schemas';
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  age: number;
-  weight: number;
-  height: number;
-  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-  goals: {
-    weightTarget: number;
-    dailyCalories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-}
-
-interface WeightEntry {
-  id: string;
-  date: Date;
-  weight: number;
-}
-
-interface CalorieEntry {
-  id: string;
-  date: Date;
-  consumed: number;
-  target: number;
-}
 
 interface AppState {
   // User data
@@ -77,7 +48,7 @@ export const useAppStore = create<AppState>()(
       },
 
       updateUserGoals: (goals) => set((state) => {
-        if (!state.user) return { user: null };
+        if (!state.user) return state;
         const newGoals = { ...state.user.goals, ...goals };
         const newUser = { ...state.user, goals: newGoals };
         const validated = UserProfileSchema.parse(newUser);
