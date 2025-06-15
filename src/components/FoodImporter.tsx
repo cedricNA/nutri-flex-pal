@@ -56,19 +56,20 @@ const FoodImporter = () => {
       
       if (char === '"') {
         inQuotes = !inQuotes;
-      } else if (char === '\t' && !inQuotes) { // Utiliser tabulation au lieu de virgule
-        result.push(current.trim());
+      } else if (char === '\t' && !inQuotes) {
+        result.push(current.trim().replace(/^"|"$/g, ''));
         current = '';
       } else {
         current += char;
       }
     }
     
-    result.push(current.trim());
+    result.push(current.trim().replace(/^"|"$/g, ''));
     return result;
   };
 
   const mapCategory = (originalCategory: string): string => {
+    if (!originalCategory) return 'snacks';
     const normalized = originalCategory.toLowerCase().trim();
     return CATEGORY_MAPPING[normalized] || 'snacks';
   };
@@ -76,7 +77,6 @@ const FoodImporter = () => {
   const parseNumericValue = (value: string): number => {
     if (!value || value === '' || value === '-' || value === 'traces' || value === '<') return 0;
     
-    // Nettoyer la valeur - remplacer virgule par point
     let cleanValue = value.replace(',', '.').replace(/[^\d.-]/g, '');
     
     if (!cleanValue) return 0;
@@ -85,7 +85,6 @@ const FoodImporter = () => {
     
     if (isNaN(num)) return 0;
     
-    // Limiter les valeurs extrêmes
     if (num > 999999) return 999999;
     if (num < -999999) return -999999;
     
@@ -95,16 +94,14 @@ const FoodImporter = () => {
   const validateFoodItem = (foodItem: any): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
     
-    // Vérifier que le nom existe et n'est pas un code
     if (!foodItem.name || foodItem.name.trim() === '') {
       errors.push('Nom manquant');
     } else if (foodItem.name.match(/^\d+$/)) {
       errors.push('Nom invalide (code numérique uniquement)');
-    } else if (foodItem.name.includes(':::')) {
-      errors.push('Nom corrompu (contient :::)');
+    } else if (foodItem.name.includes(':::') || foodItem.name.includes('alim_nom_fr')) {
+      errors.push('Nom corrompu');
     }
     
-    // Validation nutritionnelle plus permissive
     if (foodItem.calories < 0 || foodItem.calories > 9000) {
       errors.push(`Calories invalides: ${foodItem.calories}`);
     }
@@ -128,39 +125,53 @@ const FoodImporter = () => {
   };
 
   const processCSVData = useCallback(async (csvContent: string) => {
+    console.log('Starting CSV processing...');
     const lines = csvContent.split('\n').filter(line => line.trim());
+    
+    if (lines.length < 2) {
+      throw new Error('Fichier CSV vide ou invalide');
+    }
+
     const headers = parseCSVLine(lines[0]);
+    console.log('Headers found:', headers.slice(0, 10));
     
-    console.log('Headers found:', headers);
-    console.log('First few headers:', headers.slice(0, 10));
-    
-    // Mapping basé sur le fichier CSV CIQUAL que vous avez partagé
+    // Recherche dynamique des colonnes importantes
+    const findColumnIndex = (patterns: string[]) => {
+      for (const pattern of patterns) {
+        const index = headers.findIndex(h => h.toLowerCase().includes(pattern.toLowerCase()));
+        if (index !== -1) return index;
+      }
+      return -1;
+    };
+
     const columnMapping = {
-      code: headers.findIndex(h => h.includes('alim_code')),
-      name: headers.findIndex(h => h.includes('alim_nom_fr')),
-      category: headers.findIndex(h => h.includes('alim_grp_nom_fr')),
-      // Chercher les colonnes d'énergie (en kJ puis conversion en kcal)
-      calories: headers.findIndex(h => h.includes('Energie') && h.includes('kJ')),
-      protein: headers.findIndex(h => h.includes('Protéines') && h.includes('g/100')),
-      carbs: headers.findIndex(h => h.includes('Glucides') && h.includes('g/100')),
-      fat: headers.findIndex(h => h.includes('Lipides') && h.includes('g/100')),
-      fiber: headers.findIndex(h => h.includes('Fibres') && h.includes('g/100')),
-      calcium: headers.findIndex(h => h.includes('Calcium') && h.includes('mg/100')),
-      iron: headers.findIndex(h => h.includes('Fer') && h.includes('mg/100')),
-      magnesium: headers.findIndex(h => h.includes('Magnésium') && h.includes('mg/100')),
-      potassium: headers.findIndex(h => h.includes('Potassium') && h.includes('mg/100')),
-      sodium: headers.findIndex(h => h.includes('Sodium') && h.includes('mg/100')),
-      vitamin_c: headers.findIndex(h => h.includes('Vitamine C') && h.includes('mg/100')),
-      vitamin_d: headers.findIndex(h => h.includes('Vitamine D') && h.includes('μg/100')),
-      salt: headers.findIndex(h => h.includes('Sel') && h.includes('g/100'))
+      name: findColumnIndex(['alim_nom_fr', 'nom_fr', 'nom']),
+      category: findColumnIndex(['alim_grp_nom_fr', 'groupe', 'categorie']),
+      calories: findColumnIndex(['energie', 'energy', 'kj']),
+      protein: findColumnIndex(['protéines', 'protein']),
+      carbs: findColumnIndex(['glucides', 'carbohydrate']),
+      fat: findColumnIndex(['lipides', 'fat']),
+      fiber: findColumnIndex(['fibres', 'fiber']),
+      calcium: findColumnIndex(['calcium']),
+      iron: findColumnIndex(['fer', 'iron']),
+      magnesium: findColumnIndex(['magnésium', 'magnesium']),
+      potassium: findColumnIndex(['potassium']),
+      sodium: findColumnIndex(['sodium']),
+      vitamin_c: findColumnIndex(['vitamine c', 'vitamin c']),
+      vitamin_d: findColumnIndex(['vitamine d', 'vitamin d']),
+      salt: findColumnIndex(['sel', 'salt'])
     };
 
     console.log('Column mapping:', columnMapping);
 
+    if (columnMapping.name === -1) {
+      throw new Error('Colonne nom (alim_nom_fr) non trouvée dans le fichier');
+    }
+
     const total = lines.length - 1;
     setStats({ total, processed: 0, successful: 0, errors: 0 });
     
-    const batchSize = 10; // Réduire la taille des lots
+    const batchSize = 5;
     const newErrors: ImportError[] = [];
     let processed = 0;
     let successful = 0;
@@ -174,44 +185,44 @@ const FoodImporter = () => {
         const rowIndex = i + j;
 
         try {
-          // Récupérer le nom et vérifier qu'il existe
-          const name = row[columnMapping.name]?.replace(/"/g, '').trim();
-          const code = row[columnMapping.code]?.replace(/"/g, '').trim();
+          const name = row[columnMapping.name]?.trim();
           
-          console.log(`Row ${rowIndex}: name="${name}", code="${code}"`);
-          
-          if (!name || name === '' || name === code) {
+          if (!name || name === '' || name.match(/^\d+$/)) {
             newErrors.push({
               row: rowIndex,
-              error: `Nom manquant ou invalide: "${name}"`,
-              data: { name, code }
+              error: `Nom invalide: "${name}"`,
+              data: { name }
             });
             continue;
           }
 
-          const categoryRaw = row[columnMapping.category]?.replace(/"/g, '').trim();
+          const categoryRaw = columnMapping.category !== -1 ? row[columnMapping.category]?.trim() : '';
           const category = mapCategory(categoryRaw || '');
 
-          // Convertir kJ en kcal (diviser par 4.184)
-          const energyKJ = parseNumericValue(row[columnMapping.calories] || '0');
-          const calories = Math.round(energyKJ / 4.184);
+          // Conversion kJ en kcal si nécessaire
+          let calories = 0;
+          if (columnMapping.calories !== -1) {
+            const energyValue = parseNumericValue(row[columnMapping.calories] || '0');
+            // Si la valeur est > 1000, on assume que c'est en kJ et on convertit
+            calories = energyValue > 1000 ? Math.round(energyValue / 4.184) : energyValue;
+          }
 
           const foodItem = {
             name,
             category,
             calories,
-            protein: parseNumericValue(row[columnMapping.protein] || '0'),
-            carbs: parseNumericValue(row[columnMapping.carbs] || '0'),
-            fat: parseNumericValue(row[columnMapping.fat] || '0'),
-            fiber: parseNumericValue(row[columnMapping.fiber] || '0'),
-            calcium: parseNumericValue(row[columnMapping.calcium] || '0'),
-            iron: parseNumericValue(row[columnMapping.iron] || '0'),
-            magnesium: parseNumericValue(row[columnMapping.magnesium] || '0'),
-            potassium: parseNumericValue(row[columnMapping.potassium] || '0'),
-            sodium: parseNumericValue(row[columnMapping.sodium] || '0'),
-            vitamin_c: parseNumericValue(row[columnMapping.vitamin_c] || '0'),
-            vitamin_d: parseNumericValue(row[columnMapping.vitamin_d] || '0'),
-            salt: parseNumericValue(row[columnMapping.salt] || '0'),
+            protein: columnMapping.protein !== -1 ? parseNumericValue(row[columnMapping.protein] || '0') : 0,
+            carbs: columnMapping.carbs !== -1 ? parseNumericValue(row[columnMapping.carbs] || '0') : 0,
+            fat: columnMapping.fat !== -1 ? parseNumericValue(row[columnMapping.fat] || '0') : 0,
+            fiber: columnMapping.fiber !== -1 ? parseNumericValue(row[columnMapping.fiber] || '0') : 0,
+            calcium: columnMapping.calcium !== -1 ? parseNumericValue(row[columnMapping.calcium] || '0') : 0,
+            iron: columnMapping.iron !== -1 ? parseNumericValue(row[columnMapping.iron] || '0') : 0,
+            magnesium: columnMapping.magnesium !== -1 ? parseNumericValue(row[columnMapping.magnesium] || '0') : 0,
+            potassium: columnMapping.potassium !== -1 ? parseNumericValue(row[columnMapping.potassium] || '0') : 0,
+            sodium: columnMapping.sodium !== -1 ? parseNumericValue(row[columnMapping.sodium] || '0') : 0,
+            vitamin_c: columnMapping.vitamin_c !== -1 ? parseNumericValue(row[columnMapping.vitamin_c] || '0') : 0,
+            vitamin_d: columnMapping.vitamin_d !== -1 ? parseNumericValue(row[columnMapping.vitamin_d] || '0') : 0,
+            salt: columnMapping.salt !== -1 ? parseNumericValue(row[columnMapping.salt] || '0') : 0,
             unit: '100g'
           };
 
@@ -244,29 +255,12 @@ const FoodImporter = () => {
 
           if (error) {
             console.error('Erreur lors de l\'insertion:', error);
-            // Insérer un par un pour identifier les problèmes
             for (const item of foodItems) {
-              try {
-                const { error: singleError } = await supabase
-                  .from('foods')
-                  .insert([item]);
-                
-                if (singleError) {
-                  newErrors.push({
-                    row: i,
-                    error: `Erreur insertion ${item.name}: ${singleError.message}`,
-                    data: item
-                  });
-                } else {
-                  successful++;
-                }
-              } catch (singleInsertError) {
-                newErrors.push({
-                  row: i,
-                  error: `Erreur insertion ${item.name}: ${singleInsertError instanceof Error ? singleInsertError.message : 'Erreur inconnue'}`,
-                  data: item
-                });
-              }
+              newErrors.push({
+                row: i,
+                error: `Erreur insertion ${item.name}: ${error.message}`,
+                data: item
+              });
             }
           } else {
             successful += foodItems.length;
@@ -290,8 +284,7 @@ const FoodImporter = () => {
         errors: newErrors.length
       });
 
-      // Pause entre les lots
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
     setErrors(newErrors);
@@ -326,19 +319,8 @@ const FoodImporter = () => {
     try {
       let csvContent = '';
 
-      if (file.name.endsWith('.csv')) {
+      if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
         csvContent = await file.text();
-      } else if (file.name.endsWith('.txt')) {
-        // Accepter aussi les fichiers .txt qui peuvent être du CSV
-        csvContent = await file.text();
-      } else if (file.name.endsWith('.xls') || file.name.endsWith('.xlsx')) {
-        toast({
-          title: "Format non supporté directement",
-          description: "Veuillez convertir votre fichier Excel en CSV ou TXT avec séparateurs tabulation.",
-          variant: "destructive"
-        });
-        setIsImporting(false);
-        return;
       } else {
         toast({
           title: "Format non supporté",
@@ -392,13 +374,12 @@ const FoodImporter = () => {
         
         <div className="space-y-4">
           <div className="bg-blue-50 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-900 mb-2">Instructions pour format CIQUAL</h3>
+            <h3 className="font-semibold text-blue-900 mb-2">Instructions</h3>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Exportez votre fichier en CSV ou TXT avec séparateurs tabulation</li>
-              <li>• Assurez-vous que les colonnes 'alim_nom_fr' et 'alim_grp_nom_fr' sont présentes</li>
-              <li>• Les colonnes nutritionnelles doivent être au format 'Nutriment (unité/100 g)'</li>
-              <li>• L'import filtre automatiquement les codes numériques sans nom</li>
-              <li>• Validation renforcée pour éviter les données corrompues</li>
+              <li>• Fichier CSV ou TXT avec séparateurs tabulation</li>
+              <li>• Colonnes requises : nom des aliments (alim_nom_fr)</li>
+              <li>• Colonnes optionnelles : groupe (alim_grp_nom_fr), valeurs nutritionnelles</li>
+              <li>• Import automatique avec validation renforcée</li>
             </ul>
           </div>
 
