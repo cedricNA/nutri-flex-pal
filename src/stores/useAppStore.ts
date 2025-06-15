@@ -1,6 +1,7 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { dataService } from '../services/dataService';
+import { UserProfileSchema, WeightEntrySchema, CalorieEntrySchema, type UserProfile, type WeightEntry, type CalorieEntry } from '../schemas';
 
 interface UserProfile {
   id: string;
@@ -51,40 +52,65 @@ interface AppState {
   getFilteredCalorieData: () => CalorieEntry[];
 }
 
+// Helper to initialize state from validated localStorage
+function loadInitialState(): Pick<AppState, "user" | "weightEntries" | "calorieEntries" | "currentPeriod"> {
+  return {
+    user: dataService.get<UserProfile | null>("user", null),
+    weightEntries: dataService.get<WeightEntry[]>("weightEntries", []),
+    calorieEntries: dataService.get<CalorieEntry[]>("calorieEntries", []),
+    currentPeriod: dataService.get<AppState["currentPeriod"]>("currentPeriod", "7d"),
+  };
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       // Initial state
-      user: null,
-      weightEntries: [],
-      calorieEntries: [],
-      currentPeriod: '7d',
+      ...loadInitialState(),
 
       // Actions
-      setUser: (user) => set({ user }),
-      
-      updateUserGoals: (goals) => set((state) => ({
-        user: state.user ? { ...state.user, goals: { ...state.user.goals, ...goals } } : null
-      })),
+      setUser: (user) => {
+        const validated = UserProfileSchema.parse(user);
+        dataService.set('user', validated);
+        set({ user: validated });
+      },
 
-      addWeightEntry: (weight, date = new Date()) => set((state) => ({
-        weightEntries: [...state.weightEntries, {
+      updateUserGoals: (goals) => set((state) => {
+        if (!state.user) return { user: null };
+        const newGoals = { ...state.user.goals, ...goals };
+        const newUser = { ...state.user, goals: newGoals };
+        const validated = UserProfileSchema.parse(newUser);
+        dataService.set('user', validated);
+        return { user: validated };
+      }),
+
+      addWeightEntry: (weight, date = new Date()) => set((state) => {
+        const entry: WeightEntry = WeightEntrySchema.parse({
           id: `weight_${Date.now()}`,
           date,
           weight
-        }]
-      })),
+        });
+        const newEntries = [...state.weightEntries, entry];
+        dataService.set('weightEntries', newEntries);
+        return { weightEntries: newEntries };
+      }),
 
-      addCalorieEntry: (consumed, target, date = new Date()) => set((state) => ({
-        calorieEntries: [...state.calorieEntries, {
+      addCalorieEntry: (consumed, target, date = new Date()) => set((state) => {
+        const entry: CalorieEntry = CalorieEntrySchema.parse({
           id: `calorie_${Date.now()}`,
           date,
           consumed,
           target
-        }]
-      })),
+        });
+        const newEntries = [...state.calorieEntries, entry];
+        dataService.set('calorieEntries', newEntries);
+        return { calorieEntries: newEntries };
+      }),
 
-      setPeriod: (period) => set({ currentPeriod: period }),
+      setPeriod: (period) => {
+        dataService.set('currentPeriod', period);
+        set({ currentPeriod: period });
+      },
 
       getFilteredWeightData: () => {
         const { weightEntries, currentPeriod } = get();
