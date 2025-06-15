@@ -114,7 +114,17 @@ export const plannedMealService = {
       console.error('Error fetching planned meals:', error);
       return [];
     }
-    return data || [];
+
+    // Transform the data to match the expected structure
+    const transformedData = (data || []).map(meal => ({
+      ...meal,
+      foods: (meal.planned_meal_foods || []).map((pmf: any) => ({
+        ...pmf,
+        food: pmf.foods
+      }))
+    }));
+
+    return transformedData;
   },
 
   async createPlannedMeal(planId: string, meal: Omit<PlannedMeal, 'id' | 'plan_id' | 'created_at'>) {

@@ -5,24 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { nutritionPlanService } from '@/services/supabaseServices';
+import { nutritionPlanService } from '@/services/nutritionPlanService';
 import { useToast } from "@/hooks/use-toast";
 import CreatePlanModal from './CreatePlanModal';
 import EditPlanModal from './EditPlanModal';
+import type { Database } from '@/integrations/supabase/types';
 
-interface NutritionalPlan {
-  id: string;
-  name: string;
-  description: string;
-  type: 'weight-loss' | 'maintenance' | 'bulk';
-  target_calories: number;
-  target_protein: number;
-  target_carbs: number;
-  target_fat: number;
-  is_active: boolean;
-  created_at: string;
-  duration: number;
-}
+type NutritionalPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 
 const PlanManager = () => {
   const { user } = useAuth();
@@ -222,7 +211,7 @@ const PlanManager = () => {
           <CardContent>
             {(() => {
               const activePlan = plans.find(plan => plan.is_active)!;
-              const config = planTypeConfig[activePlan.type];
+              const config = planTypeConfig[activePlan.type as keyof typeof planTypeConfig];
               return (
                 <div className="flex items-center space-x-4">
                   <div className={`w-16 h-16 bg-gradient-to-r ${config.color} rounded-2xl flex items-center justify-center`}>
@@ -248,7 +237,7 @@ const PlanManager = () => {
       {/* Liste des plans */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.map((plan) => {
-          const config = planTypeConfig[plan.type];
+          const config = planTypeConfig[plan.type as keyof typeof planTypeConfig];
           return (
             <Card key={plan.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
@@ -317,7 +306,7 @@ const PlanManager = () => {
                     <Calendar size={12} className="mr-1" />
                     {plan.duration} semaines
                   </div>
-                  <span>Créé le {new Date(plan.created_at).toLocaleDateString('fr-FR')}</span>
+                  <span>Créé le {new Date(plan.created_at!).toLocaleDateString('fr-FR')}</span>
                 </div>
 
                 {!plan.is_active && (
