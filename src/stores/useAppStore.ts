@@ -12,22 +12,28 @@ interface AppState {
   calorieEntries: CalorieEntry[];
   currentPeriod: '7d' | '30d' | 'custom';
   
+  // Hydration tracking
+  todayWater: number;
+  
   // Actions
   setUser: (user: UserProfile) => void;
   updateUserGoals: (goals: Partial<UserProfile['goals']>) => void;
   addWeightEntry: (weight: number, date?: Date) => void;
   addCalorieEntry: (consumed: number, target: number, date?: Date) => void;
   setPeriod: (period: '7d' | '30d' | 'custom') => void;
+  addWater: () => void;
+  resetDailyWater: () => void;
   getFilteredWeightData: () => WeightEntry[];
   getFilteredCalorieData: () => CalorieEntry[];
 }
 
-function loadInitialState(): Pick<AppState, "user" | "weightEntries" | "calorieEntries" | "currentPeriod"> {
+function loadInitialState(): Pick<AppState, "user" | "weightEntries" | "calorieEntries" | "currentPeriod" | "todayWater"> {
   return {
     user: storageService.get("user"),
     weightEntries: storageService.get("weightEntries"),
     calorieEntries: storageService.get("calorieEntries"),
     currentPeriod: storageService.get("currentPeriod"),
+    todayWater: storageService.get("todayWater") || 0,
   };
 }
 
@@ -81,6 +87,17 @@ export const useAppStore = create<AppState>()(
         set({ currentPeriod: period });
       },
 
+      addWater: () => set((state) => {
+        const newWater = state.todayWater + 1;
+        storageService.set('todayWater', newWater);
+        return { todayWater: newWater };
+      }),
+
+      resetDailyWater: () => {
+        storageService.set('todayWater', 0);
+        set({ todayWater: 0 });
+      },
+
       getFilteredWeightData: () => {
         const { weightEntries, currentPeriod } = get();
         const now = new Date();
@@ -125,7 +142,8 @@ export const useAppStore = create<AppState>()(
         user: state.user,
         weightEntries: state.weightEntries,
         calorieEntries: state.calorieEntries,
-        currentPeriod: state.currentPeriod
+        currentPeriod: state.currentPeriod,
+        todayWater: state.todayWater
       })
     }
   )

@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Utensils, Flame, Droplets, TrendingDown, Minus, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
+import { useNutritionStats } from '../hooks/useNutritionStats';
 
 interface MacroCircleProps {
   label: string;
@@ -60,14 +60,7 @@ const MacroCircle = ({ label, current, target, color, unit }: MacroCircleProps) 
 const NutritionStats = () => {
   const { toast } = useToast();
   const [goal] = useState<'weight-loss' | 'maintenance' | 'bulk'>('weight-loss');
-  
-  const dailyStats = {
-    calories: { current: 1850, target: 2200 },
-    proteins: { current: 85, target: 120 },
-    carbs: { current: 220, target: 275 },
-    fats: { current: 65, target: 75 },
-    water: { current: 6, target: 8 }
-  };
+  const { stats, addWater } = useNutritionStats();
 
   const goalConfig = {
     'weight-loss': {
@@ -99,7 +92,8 @@ const NutritionStats = () => {
   const currentGoal = goalConfig[goal];
   const GoalIcon = currentGoal.icon;
 
-  const addWater = () => {
+  const handleAddWater = () => {
+    addWater();
     toast({
       title: "Hydratation ajoutée !",
       description: "Un verre d'eau a été ajouté à votre compteur.",
@@ -126,22 +120,22 @@ const NutritionStats = () => {
             <div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Calories</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Restantes: {Math.max(0, dailyStats.calories.target - dailyStats.calories.current)} kcal
+                Restantes: {Math.max(0, stats.calories.target - stats.calories.current)} kcal
               </p>
             </div>
           </div>
           <div className="text-right">
             <p className={`text-xl md:text-2xl font-bold ${currentGoal.textColor}`}>
-              {dailyStats.calories.current}
+              {stats.calories.current}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">/ {dailyStats.calories.target} kcal</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">/ {stats.calories.target} kcal</p>
           </div>
         </div>
         <div className="mt-4">
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
             <div 
               className={`bg-gradient-to-r ${currentGoal.color} h-2.5 rounded-full transition-all duration-1000`}
-              style={{ width: `${Math.min((dailyStats.calories.current / dailyStats.calories.target) * 100, 100)}%` }}
+              style={{ width: `${Math.min((stats.calories.current / stats.calories.target) * 100, 100)}%` }}
             ></div>
           </div>
         </div>
@@ -151,22 +145,22 @@ const NutritionStats = () => {
       <div className="grid grid-cols-3 gap-3 md:gap-4">
         <MacroCircle
           label="Protéines"
-          current={dailyStats.proteins.current}
-          target={dailyStats.proteins.target}
+          current={stats.proteins.current}
+          target={stats.proteins.target}
           color="#10B981"
           unit="g"
         />
         <MacroCircle
           label="Glucides"
-          current={dailyStats.carbs.current}
-          target={dailyStats.carbs.target}
+          current={stats.carbs.current}
+          target={stats.carbs.target}
           color="#3B82F6"
           unit="g"
         />
         <MacroCircle
           label="Lipides"
-          current={dailyStats.fats.current}
-          target={dailyStats.fats.target}
+          current={stats.fats.current}
+          target={stats.fats.target}
           color="#F59E0B"
           unit="g"
         />
@@ -181,12 +175,12 @@ const NutritionStats = () => {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Hydratation</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{dailyStats.water.current} / {dailyStats.water.target} verres</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{stats.water.current} / {stats.water.target} verres</p>
             </div>
           </div>
           <Button 
             className="bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition"
-            onClick={addWater}
+            onClick={handleAddWater}
           >
             + Ajouter
           </Button>
