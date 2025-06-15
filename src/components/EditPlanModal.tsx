@@ -5,20 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Database } from '@/integrations/supabase/types';
 
-interface NutritionalPlan {
-  id: string;
-  name: string;
-  description: string;
-  type: 'weight-loss' | 'maintenance' | 'bulk';
-  targetCalories: number;
-  targetProtein: number;
-  targetCarbs: number;
-  targetFat: number;
-  isActive: boolean;
-  createdAt: string;
-  duration: number;
-}
+type NutritionalPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 
 interface EditPlanModalProps {
   open: boolean;
@@ -32,10 +21,10 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
     name: '',
     description: '',
     type: 'maintenance' as 'weight-loss' | 'maintenance' | 'bulk',
-    targetCalories: 2000,
-    targetProtein: 100,
-    targetCarbs: 250,
-    targetFat: 70,
+    target_calories: 2000,
+    target_protein: 100,
+    target_carbs: 250,
+    target_fat: 70,
     duration: 8
   });
 
@@ -43,12 +32,12 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
     if (plan) {
       setFormData({
         name: plan.name,
-        description: plan.description,
-        type: plan.type,
-        targetCalories: plan.targetCalories,
-        targetProtein: plan.targetProtein,
-        targetCarbs: plan.targetCarbs,
-        targetFat: plan.targetFat,
+        description: plan.description || '',
+        type: plan.type as 'weight-loss' | 'maintenance' | 'bulk',
+        target_calories: plan.target_calories,
+        target_protein: plan.target_protein,
+        target_carbs: plan.target_carbs,
+        target_fat: plan.target_fat,
         duration: plan.duration
       });
     }
@@ -58,7 +47,14 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
     e.preventDefault();
     onUpdatePlan({
       ...plan,
-      ...formData
+      name: formData.name,
+      description: formData.description,
+      type: formData.type,
+      target_calories: formData.target_calories,
+      target_protein: formData.target_protein,
+      target_carbs: formData.target_carbs,
+      target_fat: formData.target_fat,
+      duration: formData.duration
     });
     onClose();
   };
@@ -151,8 +147,8 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="1000"
                     max="5000"
-                    value={formData.targetCalories}
-                    onChange={(e) => setFormData({ ...formData, targetCalories: parseInt(e.target.value) })}
+                    value={formData.target_calories}
+                    onChange={(e) => setFormData({ ...formData, target_calories: parseInt(e.target.value) })}
                     required
                   />
                 </div>
@@ -164,8 +160,8 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="50"
                     max="300"
-                    value={formData.targetProtein}
-                    onChange={(e) => setFormData({ ...formData, targetProtein: parseInt(e.target.value) })}
+                    value={formData.target_protein}
+                    onChange={(e) => setFormData({ ...formData, target_protein: parseInt(e.target.value) })}
                     required
                   />
                 </div>
@@ -177,8 +173,8 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="50"
                     max="500"
-                    value={formData.targetCarbs}
-                    onChange={(e) => setFormData({ ...formData, targetCarbs: parseInt(e.target.value) })}
+                    value={formData.target_carbs}
+                    onChange={(e) => setFormData({ ...formData, target_carbs: parseInt(e.target.value) })}
                     required
                   />
                 </div>
@@ -190,8 +186,8 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="20"
                     max="200"
-                    value={formData.targetFat}
-                    onChange={(e) => setFormData({ ...formData, targetFat: parseInt(e.target.value) })}
+                    value={formData.target_fat}
+                    onChange={(e) => setFormData({ ...formData, target_fat: parseInt(e.target.value) })}
                     required
                   />
                 </div>
