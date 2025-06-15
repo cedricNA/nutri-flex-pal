@@ -1,18 +1,17 @@
-
 import { ColumnMapping } from '@/types/import';
 
 const CATEGORY_MAPPING: { [key: string]: string } = {
   // Fruits et légumes
   'fruits': 'fruits',
-  'fruits et légumes': 'fruits',
-  'légumes': 'vegetables',
-  'légumes frais': 'vegetables',
-  'légumes secs': 'vegetables',
-  'légumineuses': 'proteins',
+  'fruits et legumes': 'fruits',
+  'legumes': 'vegetables',
+  'legumes frais': 'vegetables',
+  'legumes secs': 'vegetables',
+  'legumineuses': 'proteins',
   'pommes de terre et autres tubercules': 'vegetables',
   'tubercules': 'vegetables',
-  'pommes de terre et dérivés': 'vegetables',
-  'salades composées et crudités': 'vegetables',
+  'pommes de terre et derives': 'vegetables',
+  'salades composees et crudites': 'vegetables',
   
   // Protéines
   'viandes crues': 'proteins',
@@ -24,102 +23,105 @@ const CATEGORY_MAPPING: { [key: string]: string } = {
   'poissons': 'proteins',
   'poissons et fruits de mer': 'proteins',
   'fruits de mer': 'proteins',
-  'mollusques et crustacés crus': 'proteins',
-  'mollusques et crustacés cuits': 'proteins',
-  'produits à base de poissons et produits de la mer': 'proteins',
-  'autres produits à base de viande': 'proteins',
-  'charcuteries et assimilés': 'proteins',
-  'substitus de produits carnés': 'proteins',
-  'œufs': 'proteins',
+  'mollusques et crustaces crus': 'proteins',
+  'mollusques et crustaces cuits': 'proteins',
+  'produits a base de poissons et produits de la mer': 'proteins',
+  'autres produits a base de viande': 'proteins',
+  'charcuteries et assimiles': 'proteins',
+  'substitus de produits carnes': 'proteins',
   'oeufs': 'proteins',
-  'légumes secs et légumineuses': 'proteins',
-  'fruits à coque et graines oléagineuses': 'proteins',
+  'legumes secs et legumineuses': 'proteins',
+  'fruits a coque et graines oleagineuses': 'proteins',
   
   // Produits laitiers
   'produits laitiers': 'dairy',
   'laits': 'dairy',
   'laits et boissons infantiles': 'dairy',
-  'fromages et assimilés': 'dairy',
+  'fromages et assimiles': 'dairy',
   'fromages': 'dairy',
-  'desserts lactés': 'dairy',
-  'produits laitiers frais et assimilés': 'dairy',
-  'crèmes et spécialités à base de crème': 'dairy',
+  'desserts lactes': 'dairy',
+  'produits laitiers frais et assimiles': 'dairy',
+  'cremes et specialites a base de creme': 'dairy',
   'yaourts': 'dairy',
   'beurres': 'fats',
   
   // Céréales et dérivés
-  'céréales et dérivés': 'grains',
-  'céréales': 'grains',
-  'pains et assimilés': 'grains',
+  'cereales et derives': 'grains',
+  'cereales': 'grains',
+  'pains et assimiles': 'grains',
   'pains': 'grains',
   'biscottes et crackers': 'grains',
-  'pâtes, riz et céréales': 'grains',
-  'pâtes': 'grains',
+  'pates, riz et cereales': 'grains',
+  'pates': 'grains',
   'riz': 'grains',
   'farines': 'grains',
-  'céréales de petit-déjeuner': 'grains',
-  'céréales et biscuits infantiles': 'grains',
+  'cereales de petit-dejeuner': 'grains',
+  'cereales et biscuits infantiles': 'grains',
   'viennoiseries': 'grains',
-  'barres céréalières': 'grains',
+  'barres cerealières': 'grains',
   
   // Matières grasses
-  'matières grasses': 'fats',
-  'huiles et graisses végétales': 'fats',
+  'matieres grasses': 'fats',
+  'huiles et graisses vegetales': 'fats',
   'huiles': 'fats',
   'huiles de poissons': 'fats',
-  'autres matières grasses': 'fats',
+  'autres matieres grasses': 'fats',
   'margarine': 'fats',
   'margarines': 'fats',
   'graisses animales': 'fats',
   
   // Snacks et sucreries
-  'sucres et produits sucrés': 'snacks',
-  'sucres, miels et assimilés': 'snacks',
+  'sucres et produits sucres': 'snacks',
+  'sucres, miels et assimiles': 'snacks',
   'confiseries': 'snacks',
-  'confiseries non chocolatées': 'snacks',
+  'confiseries non chocolatees': 'snacks',
   'chocolats': 'snacks',
-  'chocolats et produits à base de chocolat': 'snacks',
-  'biscuits et gâteaux': 'snacks',
-  'biscuits sucrés': 'snacks',
-  'biscuits apéritifs': 'snacks',
-  'gâteaux et pâtisseries': 'snacks',
-  'pâtisseries': 'snacks',
+  'chocolats et produits a base de chocolat': 'snacks',
+  'biscuits et gateaux': 'snacks',
+  'biscuits sucres': 'snacks',
+  'biscuits aperitifs': 'snacks',
+  'gateaux et patisseries': 'snacks',
+  'patisseries': 'snacks',
   'glaces': 'snacks',
-  'desserts glacés': 'snacks',
+  'desserts glaces': 'snacks',
   'sorbets': 'snacks',
-  'confitures et assimilés': 'snacks',
+  'confitures et assimiles': 'snacks',
   'boissons': 'snacks',
   'boissons sans alcool': 'snacks',
-  'boisson alcoolisées': 'snacks',
-  'boissons alcoolisées': 'snacks',
-  'boissons non alcoolisées': 'snacks',
+  'boisson alcoolisees': 'snacks',
+  'boissons alcoolisees': 'snacks',
+  'boissons non alcoolisees': 'snacks',
   'eaux': 'snacks',
-  'épices et condiments': 'snacks',
-  'épices': 'snacks',
+  'epices et condiments': 'snacks',
+  'epices': 'snacks',
   'condiments': 'snacks',
   'herbes': 'snacks',
   'sauces': 'snacks',
   'sels': 'snacks',
   'aides culinaires': 'snacks',
-  'ingrédients divers': 'snacks',
+  'ingredients divers': 'snacks',
   'algues': 'snacks',
   
   // Plats composés
-  'plats composés': 'grains',
+  'plats composes': 'grains',
   'sandwichs': 'grains',
-  'pizzas, tartes et crêpes salées': 'grains',
+  'pizzas, tartes et crepes salees': 'grains',
   'pizzas et quiches': 'grains',
-  'feuilletées et autres entrées': 'grains',
+  'feuilletees et autres entrees': 'grains',
   'soupes': 'grains',
   
   // Autres
-  'aides culinaires et ingrédients divers': 'snacks',
-  'compléments alimentaires': 'snacks',
-  'denrées destinées à une alimentation particulière': 'snacks',
+  'aides culinaires et ingredients divers': 'snacks',
+  'complements alimentaires': 'snacks',
+  'denrees destinees a une alimentation particuliere': 'snacks',
   'aliments infantiles': 'dairy',
   'desserts infantiles': 'dairy',
-  'petits pots salés et plats infantiles': 'grains',
-  'entremets': 'dairy'
+  'petits pots sales et plats infantiles': 'grains',
+  'entremets': 'dairy',
+  
+  // Variations communes avec virgules et espaces
+  'viandes, oeufs, poissons et assimiles': 'proteins',
+  'viandes, oeufs, poissons et assimilés': 'proteins'
 };
 
 // Fonction pour normaliser les noms de catégories
@@ -138,6 +140,30 @@ const normalizeCategory = (category: string): string => {
     .replace(/[ñ]/g, 'n')
     .replace(/\s+/g, ' ')
     .trim();
+};
+
+// Fonction pour recherche flexible
+const findFlexibleMapping = (normalized: string): string | null => {
+  // Recherche par mots-clés
+  if (normalized.includes('viande') || normalized.includes('oeuf') || normalized.includes('poisson')) {
+    return 'proteins';
+  }
+  if (normalized.includes('legume') || normalized.includes('tubercule') || normalized.includes('salade')) {
+    return 'vegetables';
+  }
+  if (normalized.includes('fruit')) {
+    return 'fruits';
+  }
+  if (normalized.includes('lait') || normalized.includes('fromage') || normalized.includes('yaourt')) {
+    return 'dairy';
+  }
+  if (normalized.includes('pain') || normalized.includes('cereale') || normalized.includes('pate') || normalized.includes('riz')) {
+    return 'grains';
+  }
+  if (normalized.includes('huile') || normalized.includes('beurre') || normalized.includes('margarine')) {
+    return 'fats';
+  }
+  return null;
 };
 
 export const detectSeparator = (line: string): string => {
@@ -192,6 +218,12 @@ export const mapCategory = (originalCategory: string): string => {
     console.log(`✅ Catégorie mappée: "${normalized}" -> "${mapped}"`);
     return mapped;
   } else {
+    // Si pas de correspondance exacte, essayer une recherche plus flexible
+    const flexibleMapping = findFlexibleMapping(normalized);
+    if (flexibleMapping) {
+      console.log(`🔍 Correspondance flexible: "${normalized}" -> "${flexibleMapping}"`);
+      return flexibleMapping;
+    }
     console.log(`❌ Catégorie non reconnue: "${normalized}" -> par défaut "snacks"`);
     return 'snacks';
   }
@@ -257,7 +289,7 @@ export const createColumnMapping = (headers: string[]): ColumnMapping => {
       'sodium (mg/100 g)', 'sodium', 'na'
     ]),
     vitamin_c: findColumnIndex(headers, [
-      'vitamine c (mg/100 g)', 'vitamin c', 'vitamine c', 'vit c'
+      'vitamine c (mg/100 g)', 'vitamin c', 'vitamin c', 'vit c'
     ]),
     vitamin_d: findColumnIndex(headers, [
       'vitamine d (µg/100 g)', 'vitamin d', 'vitamine d', 'vit d'
