@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { foodDataService, type Food } from '../services/foodDataService';
 import { storageService } from '../services/storageService';
-import { MealEntrySchema, type MealEntry } from '../schemas';
+import { MealEntrySchema, type MealEntry, FoodSchema } from '../schemas';
 
 interface FoodState {
   // Food library
@@ -28,12 +28,30 @@ interface FoodState {
   getTodayNutrition: () => { calories: number; protein: number; carbs: number; fat: number };
 }
 
+function validateAndCastFoods(data: unknown): Food[] {
+  if (!Array.isArray(data)) {
+    return [];
+  }
+  
+  const validFoods: Food[] = [];
+  for (const item of data) {
+    try {
+      const validFood = FoodSchema.parse(item);
+      validFoods.push(validFood);
+    } catch (error) {
+      console.warn('Invalid food item, skipping:', item);
+    }
+  }
+  
+  return validFoods;
+}
+
 function loadInitialFoodState(): Pick<FoodState, "foods" | "isLoaded" | "searchTerm" | "selectedCategory" | "showFavoritesOnly" | "todayMeals"> {
   const storedFoods = storageService.get("foods");
   const storedMeals = storageService.get("todayMeals");
   
   return {
-    foods: Array.isArray(storedFoods) ? storedFoods : [],
+    foods: validateAndCastFoods(storedFoods),
     isLoaded: false,
     searchTerm: storageService.get("searchTerm") || "",
     selectedCategory: storageService.get("selectedCategory") || "all",
