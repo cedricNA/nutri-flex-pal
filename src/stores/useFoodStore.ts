@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { foodDataService, type Food } from '../services/foodDataService';
@@ -29,12 +30,12 @@ interface FoodState {
 
 function loadInitialFoodState(): Pick<FoodState, "foods" | "isLoaded" | "searchTerm" | "selectedCategory" | "showFavoritesOnly" | "todayMeals"> {
   return {
-    foods: storageService.get("foods"),
+    foods: storageService.get("foods") || [],
     isLoaded: false,
-    searchTerm: storageService.get("searchTerm"),
-    selectedCategory: storageService.get("selectedCategory"),
-    showFavoritesOnly: storageService.get("showFavoritesOnly"),
-    todayMeals: storageService.get("todayMeals"),
+    searchTerm: storageService.get("searchTerm") || "",
+    selectedCategory: storageService.get("selectedCategory") || "all",
+    showFavoritesOnly: storageService.get("showFavoritesOnly") || false,
+    todayMeals: storageService.get("todayMeals") || [],
   };
 }
 
