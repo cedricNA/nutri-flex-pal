@@ -9,7 +9,7 @@ export class CSVProcessor {
     csvContent: string,
     setStats: (stats: ImportStats) => void
   ): Promise<{ successful: number; errors: ImportError[] }> {
-    console.log('Starting CSV processing...');
+    console.log('🚀 Démarrage du traitement CSV...');
     
     const lines = csvContent
       .split('\n')
@@ -21,16 +21,20 @@ export class CSVProcessor {
     }
 
     const separator = detectSeparator(lines[0]);
-    console.log('Detected separator:', separator === '\t' ? 'TAB' : separator);
+    console.log('🔍 Séparateur détecté:', separator === '\t' ? 'TAB' : separator);
 
     const headers = parseCSVLine(lines[0], separator);
-    console.log('Headers found:', headers.slice(0, 10));
+    console.log('📋 Headers trouvés (premiers 15):', headers.slice(0, 15));
     
     const columnMapping = createColumnMapping(headers);
-    console.log('Column mapping:', columnMapping);
+    console.log('🗂️ Mapping des colonnes:', columnMapping);
 
     if (columnMapping.name === -1) {
       throw new Error('Colonne nom non trouvée. Colonnes disponibles: ' + headers.join(', '));
+    }
+
+    if (columnMapping.category === -1) {
+      console.warn('⚠️ Colonne catégorie non trouvée - toutes les catégories seront "snacks"');
     }
 
     const total = lines.length - 1;
@@ -40,6 +44,9 @@ export class CSVProcessor {
     const newErrors: ImportError[] = [];
     let processed = 0;
     let successful = 0;
+    
+    // Suivi des catégories pour debug
+    const categoryStats = new Map<string, number>();
 
     for (let i = 1; i < lines.length; i += batchSize) {
       const batch = lines.slice(i, i + batchSize);
@@ -71,7 +78,14 @@ export class CSVProcessor {
             continue;
           }
 
+          const originalCategory = columnMapping.category !== -1 ? row[columnMapping.category]?.trim() : '';
+          console.log(`📝 Ligne ${rowIndex}: "${name}" - catégorie originale: "${originalCategory}"`);
+
           const foodItem = createFoodItem(row, columnMapping);
+          
+          // Suivi des statistiques de catégories
+          const finalCategory = foodItem.category;
+          categoryStats.set(finalCategory, (categoryStats.get(finalCategory) || 0) + 1);
 
           const validation = validateFoodItem(foodItem);
           if (!validation.isValid) {
@@ -96,13 +110,13 @@ export class CSVProcessor {
 
       if (foodItems.length > 0) {
         try {
-          console.log(`Insertion de ${foodItems.length} aliments...`);
+          console.log(`💾 Insertion de ${foodItems.length} aliments...`);
           const { error } = await supabase
             .from('foods')
             .insert(foodItems);
 
           if (error) {
-            console.error('Erreur insertion:', error);
+            console.error('❌ Erreur insertion:', error);
             for (const item of foodItems) {
               newErrors.push({
                 row: i,
@@ -112,10 +126,10 @@ export class CSVProcessor {
             }
           } else {
             successful += foodItems.length;
-            console.log(`${foodItems.length} aliments insérés avec succès`);
+            console.log(`✅ ${foodItems.length} aliments insérés avec succès`);
           }
         } catch (error) {
-          console.error('Erreur batch:', error);
+          console.error('❌ Erreur batch:', error);
           newErrors.push({
             row: i,
             error: `Erreur batch: ${error instanceof Error ? error.message : 'Erreur inconnue'}`,
@@ -134,6 +148,12 @@ export class CSVProcessor {
 
       await new Promise(resolve => setTimeout(resolve, 100));
     }
+
+    // Affichage des statistiques de catégories
+    console.log('📊 Statistiques des catégories:');
+    categoryStats.forEach((count, category) => {
+      console.log(`  - ${category}: ${count} aliments`);
+    });
 
     return { successful, errors: newErrors };
   }
