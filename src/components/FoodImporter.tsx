@@ -3,6 +3,7 @@ import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'luci
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 
 interface ImportStats {
   total: number;
@@ -42,6 +43,7 @@ const FoodImporter = () => {
   const [showErrors, setShowErrors] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isAdmin } = useRole();
 
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = [];
@@ -318,6 +320,15 @@ const FoodImporter = () => {
       return;
     }
 
+    if (!isAdmin) {
+      toast({
+        title: "Accès refusé",
+        description: "Seuls les administrateurs peuvent importer des aliments.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsImporting(true);
     setErrors([]);
 
@@ -362,7 +373,23 @@ const FoodImporter = () => {
     } finally {
       setIsImporting(false);
     }
-  }, [user, processCSVData, toast]);
+  }, [user, isAdmin, processCSVData, toast]);
+
+  if (!isAdmin) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="text-center py-12">
+            <AlertCircle className="mx-auto text-red-500 mb-4" size={64} />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Accès refusé</h2>
+            <p className="text-gray-600">
+              Seuls les administrateurs peuvent importer des aliments dans la base de données.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

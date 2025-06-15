@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Home, Target, Book, User, Settings, TrendingUp, MessageCircle, Sparkles } from 'lucide-react';
+import { Home, Target, Book, User, Settings, TrendingUp, MessageCircle, Sparkles, Shield } from 'lucide-react';
+import { useRole } from '@/hooks/useRole';
 
 interface SidebarProps {
   activeSection: string;
@@ -8,7 +9,9 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
-  const menuItems = [
+  const { isAdmin, role } = useRole();
+
+  const baseMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'plans', label: 'Plans Alimentaires', icon: Target },
     { id: 'foods', label: 'Bibliothèque', icon: Book },
@@ -17,6 +20,12 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
     { id: 'profile', label: 'Profil', icon: User },
     { id: 'settings', label: 'Paramètres', icon: Settings },
   ];
+
+  const adminMenuItems = [
+    { id: 'admin', label: 'Administration', icon: Shield },
+  ];
+
+  const menuItems = isAdmin ? [...baseMenuItems, ...adminMenuItems] : baseMenuItems;
 
   return (
     <div className="h-screen w-64 bg-white dark:bg-gray-800 shadow-xl border-r border-gray-200 dark:border-gray-700 flex flex-col">
@@ -29,7 +38,9 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
             <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
               NutriFlex
             </h1>
-            <p className="text-sm text-muted-foreground">Votre coach nutrition</p>
+            <p className="text-sm text-muted-foreground">
+              {role === 'admin' ? 'Admin' : 'Utilisateur'}
+            </p>
           </div>
         </div>
       </div>
@@ -38,20 +49,22 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
+          const isAdminItem = item.id === 'admin';
+          
           return (
             <button
               key={item.id}
               onClick={() => onSectionChange(item.id)}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/30 dark:to-blue-900/30 text-green-600 dark:text-green-400 shadow-md scale-105'
+                  ? `bg-gradient-to-r ${isAdminItem ? 'from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 text-red-600 dark:text-red-400' : 'from-green-50 to-blue-50 dark:from-green-900/30 dark:to-blue-900/30 text-green-600 dark:text-green-400'} shadow-md scale-105`
                   : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 hover:scale-102'
               }`}
             >
               <Icon size={20} className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
               <span className="font-medium">{item.label}</span>
               {isActive && (
-                <div className="ml-auto w-2 h-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-full animate-pulse"></div>
+                <div className={`ml-auto w-2 h-2 ${isAdminItem ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-green-500 to-blue-500'} rounded-full animate-pulse`}></div>
               )}
             </button>
           );
