@@ -29,13 +29,16 @@ interface FoodState {
 }
 
 function loadInitialFoodState(): Pick<FoodState, "foods" | "isLoaded" | "searchTerm" | "selectedCategory" | "showFavoritesOnly" | "todayMeals"> {
+  const storedFoods = storageService.get("foods");
+  const storedMeals = storageService.get("todayMeals");
+  
   return {
-    foods: storageService.get("foods") || [],
+    foods: Array.isArray(storedFoods) ? storedFoods : [],
     isLoaded: false,
     searchTerm: storageService.get("searchTerm") || "",
     selectedCategory: storageService.get("selectedCategory") || "all",
     showFavoritesOnly: storageService.get("showFavoritesOnly") || false,
-    todayMeals: storageService.get("todayMeals") || [],
+    todayMeals: Array.isArray(storedMeals) ? storedMeals : [],
   };
 }
 

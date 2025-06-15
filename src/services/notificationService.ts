@@ -5,16 +5,6 @@ import { NotificationDataSchema, type NotificationData } from '@/schemas';
 
 export type NotificationType = 'meal' | 'hydration' | 'achievement' | 'reminder' | 'info';
 
-export interface NotificationData {
-  id: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-  actionUrl?: string;
-}
-
 class NotificationService {
   private listeners: ((notifications: NotificationData[]) => void)[] = [];
   private timers: Map<string, NodeJS.Timeout> = new Map();
