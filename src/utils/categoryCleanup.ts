@@ -132,9 +132,9 @@ const guessCategory = (name: string): string => {
 };
 
 // Version améliorée qui utilise le mapping existant
-const guessedCategoryFromName = (name: string): string => {
+const guessCategoryFromName = (name: string): string => {
   // D'abord essayer la logique simple
-  let category = guessedCategory(name);
+  let category = guessCategory(name);
   
   // Si c'est encore "snacks", essayer avec des mots-clés plus spécifiques
   if (category === 'snacks') {
