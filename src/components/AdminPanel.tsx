@@ -11,11 +11,12 @@ import { Database as DatabaseType } from '@/integrations/supabase/types';
 import FoodLibraryAdmin from './FoodLibraryAdmin';
 
 type UserRole = DatabaseType['public']['Enums']['app_role'];
+type AdminTab = 'users' | 'foods';
 
 const AdminPanel = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'foods'>('users');
+  const [activeTab, setActiveTab] = useState<AdminTab>('users');
   const { toast } = useToast();
 
   const loadUsers = async () => {
@@ -78,10 +79,121 @@ const AdminPanel = () => {
     return role === 'admin' ? Shield : UserCog;
   };
 
-  // Fixed: Return content based on activeTab without type error
-  if (activeTab === 'foods') {
-    return <FoodLibraryAdmin />;
-  }
+  // Render content based on active tab
+  const renderTabContent = () => {
+    if (activeTab === 'foods') {
+      return <FoodLibraryAdmin />;
+    }
+
+    // Users management tab content
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Users className="text-blue-500" size={24} />
+              <span>Gestion des utilisateurs</span>
+            </CardTitle>
+            <CardDescription>
+              Gérez les rôles et permissions des utilisateurs de l'application
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {users.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">Aucun utilisateur trouvé</p>
+                ) : (
+                  users.map((user) => {
+                    const RoleIcon = getRoleIcon(user.role);
+                    return (
+                      <div
+                        key={user.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-medium text-sm">
+                              {user.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900">{user.name}</h3>
+                            <p className="text-sm text-gray-500">{user.email}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-4">
+                          <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center space-x-1">
+                            <RoleIcon size={14} />
+                            <span>{user.role === 'admin' ? 'Administrateur' : 'Utilisateur'}</span>
+                          </Badge>
+                          
+                          <Select
+                            value={user.role}
+                            onValueChange={(newRole: UserRole) => handleRoleChange(user.id, newRole)}
+                          >
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">Utilisateur</SelectItem>
+                              <SelectItem value="admin">Administrateur</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Statistiques</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <Users className="text-blue-500" size={20} />
+                  <span className="font-medium">Total utilisateurs</span>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 mt-2">{users.length}</p>
+              </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <UserCog className="text-green-500" size={20} />
+                  <span className="font-medium">Utilisateurs</span>
+                </div>
+                <p className="text-2xl font-bold text-green-600 mt-2">
+                  {users.filter(u => u.role === 'user').length}
+                </p>
+              </div>
+              
+              <div className="bg-red-50 p-4 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <Shield className="text-red-500" size={20} />
+                  <span className="font-medium">Administrateurs</span>
+                </div>
+                <p className="text-2xl font-bold text-red-600 mt-2">
+                  {users.filter(u => u.role === 'admin').length}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -107,110 +219,7 @@ const AdminPanel = () => {
         </div>
       </div>
 
-      {/* Users management content - only shown when activeTab is 'users' */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="text-blue-500" size={24} />
-            <span>Gestion des utilisateurs</span>
-          </CardTitle>
-          <CardDescription>
-            Gérez les rôles et permissions des utilisateurs de l'application
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {users.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">Aucun utilisateur trouvé</p>
-              ) : (
-                users.map((user) => {
-                  const RoleIcon = getRoleIcon(user.role);
-                  return (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                          <span className="text-white font-medium text-sm">
-                            {user.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900">{user.name}</h3>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center space-x-1">
-                          <RoleIcon size={14} />
-                          <span>{user.role === 'admin' ? 'Administrateur' : 'Utilisateur'}</span>
-                        </Badge>
-                        
-                        <Select
-                          value={user.role}
-                          onValueChange={(newRole: UserRole) => handleRoleChange(user.id, newRole)}
-                        >
-                          <SelectTrigger className="w-40">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="user">Utilisateur</SelectItem>
-                            <SelectItem value="admin">Administrateur</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Statistiques</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <Users className="text-blue-500" size={20} />
-                <span className="font-medium">Total utilisateurs</span>
-              </div>
-              <p className="text-2xl font-bold text-blue-600 mt-2">{users.length}</p>
-            </div>
-            
-            <div className="bg-green-50 p-4 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <UserCog className="text-green-500" size={20} />
-                <span className="font-medium">Utilisateurs</span>
-              </div>
-              <p className="text-2xl font-bold text-green-600 mt-2">
-                {users.filter(u => u.role === 'user').length}
-              </p>
-            </div>
-            
-            <div className="bg-red-50 p-4 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <Shield className="text-red-500" size={20} />
-                <span className="font-medium">Administrateurs</span>
-              </div>
-              <p className="text-2xl font-bold text-red-600 mt-2">
-                {users.filter(u => u.role === 'admin').length}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {renderTabContent()}
     </div>
   );
 };
