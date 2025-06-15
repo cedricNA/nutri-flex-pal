@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -128,8 +127,12 @@ const FoodImporter = () => {
     };
   };
 
-  const findColumnIndex = (headers: string[], columnName: string): number => {
-    return headers.findIndex(h => h && h.trim() === columnName);
+  const findColumnIndex = (headers: string[], possibleNames: string[]): number => {
+    for (const name of possibleNames) {
+      const index = headers.findIndex(h => h && h.trim().toLowerCase() === name.toLowerCase());
+      if (index !== -1) return index;
+    }
+    return -1;
   };
 
   const processCSVData = useCallback(async (csvContent: string) => {
@@ -150,30 +153,29 @@ const FoodImporter = () => {
     const headers = parseCSVLine(lines[0], separator);
     console.log('Headers found:', headers.slice(0, 10));
     
-    // Mapping exact avec les noms de colonnes CIQUAL incluant alim_ssgrp_nom_fr
+    // Mapping plus flexible avec plusieurs variantes de noms de colonnes
     const columnMapping = {
-      name: findColumnIndex(headers, 'alim_nom_fr'),
-      category: findColumnIndex(headers, 'alim_grp_nom_fr'),
-      subgroup: findColumnIndex(headers, 'alim_ssgrp_nom_fr'), // Nouvelle colonne pour les sous-groupes
-      calories: findColumnIndex(headers, 'kcal'),
-      protein: findColumnIndex(headers, 'Protéines'),
-      carbs: findColumnIndex(headers, 'Glucides'),
-      fat: findColumnIndex(headers, 'Lipides'),
-      fiber: findColumnIndex(headers, 'Fibres alimentaires (g/100 g)'),
-      calcium: findColumnIndex(headers, 'Calcium (mg/100 g)'),
-      iron: findColumnIndex(headers, 'Fer (mg/100 g)'),
-      magnesium: findColumnIndex(headers, 'Magnésium (mg/100 g)'),
-      potassium: findColumnIndex(headers, 'Potassium (mg/100 g)'),
-      sodium: findColumnIndex(headers, 'Sodium (mg/100 g)'),
-      vitamin_c: findColumnIndex(headers, 'Vitamine C (mg/100 g)'),
-      vitamin_d: findColumnIndex(headers, 'Vitamine D (µg/100 g)'),
-      salt: findColumnIndex(headers, 'Sel chlorure de sodium (g/100 g)')
+      name: findColumnIndex(headers, ['alim_nom_fr', 'nom', 'name', 'aliment']),
+      category: findColumnIndex(headers, ['alim_grp_nom_fr', 'groupe', 'category', 'categorie']),
+      calories: findColumnIndex(headers, ['kcal', 'calories', 'energie']),
+      protein: findColumnIndex(headers, ['protéines', 'proteines', 'protein']),
+      carbs: findColumnIndex(headers, ['glucides', 'carbs', 'carbohydrates']),
+      fat: findColumnIndex(headers, ['lipides', 'fat', 'graisses']),
+      fiber: findColumnIndex(headers, ['fibres alimentaires (g/100 g)', 'fibres', 'fiber']),
+      calcium: findColumnIndex(headers, ['calcium (mg/100 g)', 'calcium']),
+      iron: findColumnIndex(headers, ['fer (mg/100 g)', 'fer', 'iron']),
+      magnesium: findColumnIndex(headers, ['magnésium (mg/100 g)', 'magnesium']),
+      potassium: findColumnIndex(headers, ['potassium (mg/100 g)', 'potassium']),
+      sodium: findColumnIndex(headers, ['sodium (mg/100 g)', 'sodium']),
+      vitamin_c: findColumnIndex(headers, ['vitamine c (mg/100 g)', 'vitamin c', 'vitamine c']),
+      vitamin_d: findColumnIndex(headers, ['vitamine d (µg/100 g)', 'vitamin d', 'vitamine d']),
+      salt: findColumnIndex(headers, ['sel chlorure de sodium (g/100 g)', 'sel', 'salt'])
     };
 
     console.log('Column mapping:', columnMapping);
 
     if (columnMapping.name === -1) {
-      throw new Error('Colonne "alim_nom_fr" non trouvée. Colonnes disponibles: ' + headers.join(', '));
+      throw new Error('Colonne nom non trouvée. Colonnes disponibles: ' + headers.join(', '));
     }
 
     const total = lines.length - 1;
@@ -216,12 +218,11 @@ const FoodImporter = () => {
 
           const categoryRaw = columnMapping.category !== -1 ? row[columnMapping.category]?.trim() : '';
           const category = mapCategory(categoryRaw || '');
-          const subgroup = columnMapping.subgroup !== -1 ? row[columnMapping.subgroup]?.trim() : '';
 
+          // Ne pas inclure subgroup dans l'objet foodItem car la colonne n'existe pas en DB
           const foodItem = {
             name,
             category,
-            subgroup, // Ajouter le sous-groupe
             calories: columnMapping.calories !== -1 ? parseNumericValue(row[columnMapping.calories] || '0') : 0,
             protein: columnMapping.protein !== -1 ? parseNumericValue(row[columnMapping.protein] || '0') : 0,
             carbs: columnMapping.carbs !== -1 ? parseNumericValue(row[columnMapping.carbs] || '0') : 0,
@@ -390,9 +391,9 @@ const FoodImporter = () => {
           <div className="bg-blue-50 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">Instructions</h3>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Fichier CSV avec colonnes CIQUAL exactes</li>
-              <li>• Colonne requise : "alim_nom_fr"</li>
-              <li>• Colonnes supportées : "alim_ssgrp_nom_fr" (sous-groupes), calories, macronutriments, vitamines, minéraux</li>
+              <li>• Fichier CSV avec des noms de colonnes français ou anglais</li>
+              <li>• Colonnes détectées automatiquement (nom, calories, protéines, etc.)</li>
+              <li>• Format flexible avec séparateurs : virgule, point-virgule ou tabulation</li>
               <li>• Validation automatique des données</li>
             </ul>
           </div>
@@ -412,10 +413,10 @@ const FoodImporter = () => {
             >
               <FileSpreadsheet size={48} className="mx-auto text-gray-400 mb-4" />
               <p className="text-lg font-medium text-gray-900 mb-2">
-                {isImporting ? 'Import en cours...' : 'Sélectionner un fichier CSV CIQUAL'}
+                {isImporting ? 'Import en cours...' : 'Sélectionner un fichier CSV'}
               </p>
               <p className="text-sm text-gray-500">
-                Format CIQUAL avec colonnes françaises
+                Format CSV avec colonnes françaises ou anglaises
               </p>
             </label>
           </div>

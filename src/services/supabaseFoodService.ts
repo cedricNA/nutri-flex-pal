@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -7,7 +8,7 @@ type UserFoodFavorite = Database['public']['Tables']['user_food_favorites']['Row
 
 export interface ExtendedFood extends Food {
   isFavorite?: boolean;
-  subgroup?: string; // Pour alim_ssgrp_nom_fr
+  subgroup?: string; // Pour affichage seulement, pas stocké en DB
 }
 
 class SupabaseFoodService {
@@ -16,7 +17,7 @@ class SupabaseFoodService {
     try {
       console.log('Fetching foods from Supabase...');
       
-      // Load foods from Supabase with new nutritional columns
+      // Load foods from Supabase
       const { data: foods, error } = await supabase
         .from('foods')
         .select('*')
@@ -37,10 +38,10 @@ class SupabaseFoodService {
       // Filter out corrupted entries with invalid names
       const validFoods = foods.filter(food => {
         if (!food.name || food.name.length === 0) return false;
-        if (food.name.includes(':::')) return false; // Remove entries with corrupted separators
-        if (food.name.match(/^\d+:\d+/)) return false; // Remove entries starting with numbers and colons
-        if (food.name.length > 200) return false; // Remove extremely long names
-        if (food.name.match(/^\d+$/)) return false; // Remove pure numeric names
+        if (food.name.includes(':::')) return false;
+        if (food.name.match(/^\d+:\d+/)) return false;
+        if (food.name.length > 200) return false;
+        if (food.name.match(/^\d+$/)) return false;
         return true;
       });
 
@@ -118,7 +119,8 @@ class SupabaseFoodService {
     }
 
     if (subgroup !== 'all') {
-      filtered = filtered.filter(food => food.subgroup === subgroup);
+      // Utiliser la catégorie à la place du sous-groupe pour le filtrage
+      filtered = filtered.filter(food => food.category === subgroup);
     }
 
     if (showFavoritesOnly) {
@@ -182,15 +184,24 @@ class SupabaseFoodService {
         return null;
       }
 
-      // Clean the food name
+      // Clean the food data - Remove subgroup as it doesn't exist in DB
       const cleanedFood = {
-        ...food,
         name: food.name.trim(),
+        category: food.category,
         calories: Math.max(0, food.calories || 0),
         protein: Math.max(0, food.protein || 0),
         carbs: Math.max(0, food.carbs || 0),
         fat: Math.max(0, food.fat || 0),
-        fiber: Math.max(0, food.fiber || 0)
+        fiber: Math.max(0, food.fiber || 0),
+        unit: food.unit || '100g',
+        calcium: food.calcium ? Math.max(0, food.calcium) : 0,
+        iron: food.iron ? Math.max(0, food.iron) : 0,
+        magnesium: food.magnesium ? Math.max(0, food.magnesium) : 0,
+        potassium: food.potassium ? Math.max(0, food.potassium) : 0,
+        sodium: food.sodium ? Math.max(0, food.sodium) : 0,
+        vitamin_c: food.vitamin_c ? Math.max(0, food.vitamin_c) : 0,
+        vitamin_d: food.vitamin_d ? Math.max(0, food.vitamin_d) : 0,
+        salt: food.salt ? Math.max(0, food.salt) : 0
       };
 
       const { data, error } = await supabase
@@ -213,22 +224,22 @@ class SupabaseFoodService {
 
   async getSubgroups(userId?: string): Promise<{ id: string; name: string; count: number }[]> {
     const foods = await this.loadFoods(userId);
-    const subgroupMap = new Map<string, number>();
+    const categoryMap = new Map<string, number>();
     
     foods.forEach(food => {
-      const subgroup = food.subgroup || 'Autres';
-      subgroupMap.set(subgroup, (subgroupMap.get(subgroup) || 0) + 1);
+      const category = food.category || 'Autres';
+      categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
     });
 
     const subgroups = [
       { id: 'all', name: 'Tous', count: foods.length }
     ];
 
-    subgroupMap.forEach((count, subgroupName) => {
-      if (subgroupName && subgroupName.trim() !== '') {
+    categoryMap.forEach((count, categoryName) => {
+      if (categoryName && categoryName.trim() !== '') {
         subgroups.push({
-          id: subgroupName,
-          name: subgroupName,
+          id: categoryName,
+          name: categoryName,
           count
         });
       }

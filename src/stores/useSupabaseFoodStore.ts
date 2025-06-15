@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { supabaseFoodService, type ExtendedFood } from '../services/supabaseFoodService';
 import { useAuth } from '@/hooks/useAuth';
@@ -109,7 +110,8 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
     }
 
     if (selectedSubgroup !== 'all') {
-      filtered = filtered.filter(food => food.subgroup === selectedSubgroup);
+      // Utiliser category au lieu de subgroup pour le filtrage
+      filtered = filtered.filter(food => food.category === selectedSubgroup);
     }
 
     if (showFavoritesOnly) {
