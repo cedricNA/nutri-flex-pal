@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import NutritionStats from '../components/NutritionStats';
@@ -11,11 +10,16 @@ import PlanManager from '../components/PlanManager';
 import ChatBot from '../components/ChatBot';
 import MobileNavigation from '../components/MobileNavigation';
 import ThemeToggle from '../components/ThemeToggle';
+import NotificationCenter from '../components/NotificationCenter';
 import { Bell, User, Menu, X } from 'lucide-react';
+import { useNotifications } from '../hooks/useNotifications';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
+  const { unreadCount } = useNotifications();
+  
   const [isDarkMode, setIsDarkMode] = useState(() => {
     try {
       const savedSettings = localStorage.getItem('app-settings');
@@ -136,7 +140,7 @@ const Index = () => {
       </div>
       
       <div className="flex-1 md:ml-64 pb-16 md:pb-0 min-h-screen">
-        {/* Header modernisé avec toggle de thème */}
+        {/* Header modernisé avec notifications */}
         <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 md:px-8 py-4 shadow-sm transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -162,9 +166,17 @@ const Index = () => {
               {/* Toggle de thème */}
               <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} variant="compact" />
               
-              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 hover:scale-110">
+              {/* Bouton notifications avec badge */}
+              <button 
+                onClick={() => setIsNotificationCenterOpen(!isNotificationCenterOpen)}
+                className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 hover:scale-110"
+              >
                 <Bell size={20} />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full text-[10px] font-semibold text-white flex items-center justify-center animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
               
               <div className="flex items-center space-x-2 md:space-x-3 bg-gray-50 dark:bg-gray-700 rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
@@ -185,6 +197,12 @@ const Index = () => {
           {renderMainContent()}
         </main>
       </div>
+
+      {/* Centre de notifications */}
+      <NotificationCenter 
+        isOpen={isNotificationCenterOpen}
+        onClose={() => setIsNotificationCenterOpen(false)}
+      />
 
       {/* Navigation mobile */}
       <MobileNavigation 
