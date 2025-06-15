@@ -2,6 +2,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { weightService, calorieService, hydrationService } from '@/services/supabaseServices';
+import { activityService, sleepService } from '@/services/nutritionPlanService';
 import { useAppStore } from '../stores/useAppStore';
 
 export const useProgressStats = () => {
@@ -9,6 +10,8 @@ export const useProgressStats = () => {
   const { currentPeriod } = useAppStore();
   const [weightEntries, setWeightEntries] = useState<any[]>([]);
   const [calorieEntries, setCalorieEntries] = useState<any[]>([]);
+  const [activityEntries, setActivityEntries] = useState<any[]>([]);
+  const [sleepEntries, setSleepEntries] = useState<any[]>([]);
   const [todayHydration, setTodayHydration] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -18,14 +21,33 @@ export const useProgressStats = () => {
       
       setLoading(true);
       try {
-        const [weights, calories, hydration] = await Promise.all([
+        // Calculer les dates selon la période
+        const now = new Date();
+        let startDate = new Date();
+        
+        switch (currentPeriod) {
+          case '7d':
+            startDate.setDate(now.getDate() - 7);
+            break;
+          case '30d':
+            startDate.setDate(now.getDate() - 30);
+            break;
+          default:
+            startDate = new Date(0); // Toutes les données
+        }
+
+        const [weights, calories, activities, sleep, hydration] = await Promise.all([
           weightService.getWeightEntries(user.id),
           calorieService.getCalorieEntries(user.id),
+          activityService.getActivityEntries(user.id, startDate),
+          sleepService.getSleepEntries(user.id, startDate),
           hydrationService.getTodayHydration(user.id)
         ]);
         
         setWeightEntries(weights);
         setCalorieEntries(calories);
+        setActivityEntries(activities);
+        setSleepEntries(sleep);
         setTodayHydration(hydration);
       } catch (error) {
         console.error('Error loading progress data:', error);
@@ -35,7 +57,7 @@ export const useProgressStats = () => {
     };
 
     loadData();
-  }, [user]);
+  }, [user, currentPeriod]);
 
   const stats = useMemo(() => {
     if (loading || !user) {
@@ -45,6 +67,9 @@ export const useProgressStats = () => {
         workoutStreak: 0,
         goalsAchieved: 0,
         globalScore: 0,
+        activityCount: 0,
+        averageSleep: 0,
+        planComplianceRate: 0,
         period: currentPeriod,
         loading: true
       };
@@ -83,7 +108,16 @@ export const useProgressStats = () => {
       ? Math.round(filteredCalories.reduce((sum, entry) => sum + entry.consumed, 0) / filteredCalories.length)
       : 0;
 
-    // Calcul de la série d'entraînements (basé sur les entrées de calories régulières)
+    // Calcul des activités physiques
+    const activityCount = activityEntries.length;
+    const weeklyActivityTarget = currentPeriod === '7d' ? 5 : (currentPeriod === '30d' ? 20 : activityCount);
+
+    // Calcul du sommeil moyen
+    const averageSleep = sleepEntries.length > 0
+      ? sleepEntries.reduce((sum, entry) => sum + Number(entry.hours_slept), 0) / sleepEntries.length
+      : 0;
+
+    // Calcul de la série d'entraînements basée sur les activités réelles
     let workoutStreak = 0;
     const today = new Date();
     for (let i = 0; i < 30; i++) {
@@ -91,11 +125,11 @@ export const useProgressStats = () => {
       checkDate.setDate(today.getDate() - i);
       const dateStr = checkDate.toISOString().split('T')[0];
       
-      const hasEntry = calorieEntries.some(entry => 
-        entry.date.split('T')[0] === dateStr
+      const hasActivity = activityEntries.some(entry => 
+        entry.date === dateStr
       );
       
-      if (hasEntry) {
+      if (hasActivity) {
         workoutStreak++;
       } else {
         break;
@@ -107,14 +141,20 @@ export const useProgressStats = () => {
       Math.abs(entry.consumed - entry.target) <= 100
     ).length;
 
-    // Score global
+    // Calcul du taux de respect du plan (basé sur les entrées de calories)
+    const totalDays = currentPeriod === '7d' ? 7 : (currentPeriod === '30d' ? 30 : Math.max(1, filteredCalories.length));
+    const planComplianceRate = (filteredCalories.length / totalDays) * 100;
+
+    // Score global amélioré
     const weightProgress = Math.max(0, Math.min(100, 100 - Math.abs(weightChange) * 10));
     const calorieProgress = filteredCalories.length > 0 
       ? (goalsAchieved / filteredCalories.length) * 100 
       : 0;
     const hydrationProgress = Math.min(100, (todayHydration / 8) * 100); // 8 verres par jour
+    const activityProgress = Math.min(100, (activityCount / weeklyActivityTarget) * 100);
+    const sleepProgress = averageSleep > 0 ? Math.min(100, (averageSleep / 8) * 100) : 0;
     
-    const globalScore = Math.round((weightProgress + calorieProgress + hydrationProgress) / 3);
+    const globalScore = Math.round((weightProgress + calorieProgress + hydrationProgress + activityProgress + sleepProgress) / 5);
 
     return {
       weightChange,
@@ -122,11 +162,14 @@ export const useProgressStats = () => {
       workoutStreak,
       goalsAchieved,
       globalScore: Math.min(100, globalScore),
+      activityCount,
+      averageSleep: Math.round(averageSleep * 10) / 10,
+      planComplianceRate: Math.round(planComplianceRate),
       period: currentPeriod,
       loading: false,
       hydrationGlasses: todayHydration
     };
-  }, [weightEntries, calorieEntries, todayHydration, currentPeriod, loading, user]);
+  }, [weightEntries, calorieEntries, activityEntries, sleepEntries, todayHydration, currentPeriod, loading, user]);
 
   return stats;
 };

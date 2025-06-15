@@ -5,91 +5,21 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { hydrationService, settingsService } from '@/services/supabaseServices';
+import { activityService, sleepService } from '@/services/nutritionPlanService';
+import { useProgressStats } from '@/hooks/useProgressStats';
 
 const ProgressStats = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState([
-    {
-      label: 'Hydratation quotidienne',
-      current: 0,
-      target: 2.5,
-      unit: 'L',
-      progress: 0,
-      color: 'bg-blue-500'
-    },
-    {
-      label: 'Activité physique',
-      current: 0,
-      target: 5,
-      unit: 'séances/semaine',
-      progress: 0,
-      color: 'bg-green-500'
-    },
-    {
-      label: 'Sommeil moyen',
-      current: 7.2,
-      target: 8,
-      unit: 'heures',
-      progress: 90,
-      color: 'bg-purple-500'
-    },
-    {
-      label: 'Respect du plan',
-      current: 0,
-      target: 7,
-      unit: 'jours/semaine',
-      progress: 0,
-      color: 'bg-orange-500'
-    }
-  ]);
+  const progressStats = useProgressStats();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadStats = async () => {
-      if (!user) return;
+    if (!progressStats.loading) {
+      setLoading(false);
+    }
+  }, [progressStats.loading]);
 
-      try {
-        // Récupérer l'hydratation du jour
-        const todayHydration = await hydrationService.getTodayHydration(user.id);
-        const hydrationLiters = (todayHydration * 0.25); // 250ml par verre
-        
-        // Récupérer les paramètres utilisateur pour les objectifs
-        const userSettings = await settingsService.getSettings(user.id);
-        
-        setStats(prevStats => [
-          {
-            ...prevStats[0],
-            current: hydrationLiters,
-            progress: Math.min(100, (hydrationLiters / 2.5) * 100)
-          },
-          {
-            ...prevStats[1],
-            current: 4, // Pour l'instant, on garde une valeur par défaut
-            progress: 80
-          },
-          {
-            ...prevStats[2],
-            // Sommeil - pour l'instant valeur par défaut, pourra être étendu plus tard
-            current: 7.2,
-            progress: 90
-          },
-          {
-            ...prevStats[3],
-            current: 6, // Pour l'instant, on garde une valeur par défaut  
-            progress: 86
-          }
-        ]);
-      } catch (error) {
-        console.error('Error loading progress stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStats();
-  }, [user]);
-
-  if (loading) {
+  if (loading || progressStats.loading) {
     return (
       <Card>
         <CardHeader>
@@ -99,6 +29,47 @@ const ProgressStats = () => {
       </Card>
     );
   }
+
+  // Calculer les statistiques basées sur les vraies données
+  const hydrationLiters = (progressStats.hydrationGlasses * 0.25); // 250ml par verre
+  const activityProgress = Math.min(100, (progressStats.activityCount / 5) * 100); // 5 séances par semaine
+  const sleepProgress = progressStats.averageSleep > 0 ? Math.min(100, (progressStats.averageSleep / 8) * 100) : 0;
+  const planProgress = Math.min(100, progressStats.planComplianceRate);
+
+  const stats = [
+    {
+      label: 'Hydratation quotidienne',
+      current: hydrationLiters,
+      target: 2.5,
+      unit: 'L',
+      progress: Math.min(100, (hydrationLiters / 2.5) * 100),
+      color: 'bg-blue-500'
+    },
+    {
+      label: 'Activité physique',
+      current: progressStats.activityCount,
+      target: 5,
+      unit: 'séances/semaine',
+      progress: activityProgress,
+      color: 'bg-green-500'
+    },
+    {
+      label: 'Sommeil moyen',
+      current: progressStats.averageSleep,
+      target: 8,
+      unit: 'heures',
+      progress: sleepProgress,
+      color: 'bg-purple-500'
+    },
+    {
+      label: 'Respect du plan',
+      current: Math.round(progressStats.planComplianceRate / 100 * 7),
+      target: 7,
+      unit: 'jours/semaine',
+      progress: planProgress,
+      color: 'bg-orange-500'
+    }
+  ];
 
   return (
     <Card>

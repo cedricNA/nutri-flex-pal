@@ -1,9 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Settings, Trash2, Copy, Calendar, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { nutritionPlanService } from '@/services/supabaseServices';
+import { useToast } from "@/hooks/use-toast";
 import CreatePlanModal from './CreatePlanModal';
 import EditPlanModal from './EditPlanModal';
 
@@ -12,58 +15,20 @@ interface NutritionalPlan {
   name: string;
   description: string;
   type: 'weight-loss' | 'maintenance' | 'bulk';
-  targetCalories: number;
-  targetProtein: number;
-  targetCarbs: number;
-  targetFat: number;
-  isActive: boolean;
-  createdAt: string;
-  duration: number; // en semaines
+  target_calories: number;
+  target_protein: number;
+  target_carbs: number;
+  target_fat: number;
+  is_active: boolean;
+  created_at: string;
+  duration: number;
 }
 
 const PlanManager = () => {
-  const [plans, setPlans] = useState<NutritionalPlan[]>([
-    {
-      id: '1',
-      name: 'Perte de poids été',
-      description: 'Plan hypocalorique pour perdre 5kg avant l\'été',
-      type: 'weight-loss',
-      targetCalories: 1800,
-      targetProtein: 120,
-      targetCarbs: 180,
-      targetFat: 60,
-      isActive: true,
-      createdAt: '2024-01-15',
-      duration: 12
-    },
-    {
-      id: '2',
-      name: 'Maintien forme',
-      description: 'Plan équilibré pour maintenir le poids actuel',
-      type: 'maintenance',
-      targetCalories: 2200,
-      targetProtein: 110,
-      targetCarbs: 275,
-      targetFat: 75,
-      isActive: false,
-      createdAt: '2024-02-01',
-      duration: 8
-    },
-    {
-      id: '3',
-      name: 'Prise de masse',
-      description: 'Plan hypercalorique pour gagner du muscle',
-      type: 'bulk',
-      targetCalories: 2800,
-      targetProtein: 150,
-      targetCarbs: 350,
-      targetFat: 90,
-      isActive: false,
-      createdAt: '2024-03-01',
-      duration: 16
-    }
-  ]);
-
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [plans, setPlans] = useState<NutritionalPlan[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingPlan, setEditingPlan] = useState<NutritionalPlan | null>(null);
 
@@ -88,40 +53,149 @@ const PlanManager = () => {
     }
   };
 
-  const activatePlan = (planId: string) => {
-    setPlans(plans.map(plan => ({
-      ...plan,
-      isActive: plan.id === planId
-    })));
+  useEffect(() => {
+    loadPlans();
+  }, [user]);
+
+  const loadPlans = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const userPlans = await nutritionPlanService.getUserPlans(user.id);
+      setPlans(userPlans);
+    } catch (error) {
+      console.error('Error loading plans:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger vos plans nutritionnels.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deletePlan = (planId: string) => {
-    setPlans(plans.filter(plan => plan.id !== planId));
+  const activatePlan = async (planId: string) => {
+    if (!user) return;
+
+    try {
+      await nutritionPlanService.activatePlan(user.id, planId);
+      await loadPlans();
+      toast({
+        title: "Plan activé",
+        description: "Le plan nutritionnel a été activé avec succès.",
+      });
+    } catch (error) {
+      console.error('Error activating plan:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'activer le plan.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const duplicatePlan = (plan: NutritionalPlan) => {
-    const newPlan = {
-      ...plan,
-      id: Date.now().toString(),
-      name: `${plan.name} (Copie)`,
-      isActive: false,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    setPlans([...plans, newPlan]);
+  const deletePlan = async (planId: string) => {
+    try {
+      await nutritionPlanService.deletePlan(planId);
+      await loadPlans();
+      toast({
+        title: "Plan supprimé",
+        description: "Le plan nutritionnel a été supprimé.",
+      });
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le plan.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const createPlan = (newPlan: Omit<NutritionalPlan, 'id' | 'createdAt'>) => {
-    const plan: NutritionalPlan = {
-      ...newPlan,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    setPlans([...plans, plan]);
+  const duplicatePlan = async (plan: NutritionalPlan) => {
+    if (!user) return;
+
+    try {
+      const newPlan = {
+        name: `${plan.name} (Copie)`,
+        description: plan.description,
+        type: plan.type,
+        target_calories: plan.target_calories,
+        target_protein: plan.target_protein,
+        target_carbs: plan.target_carbs,
+        target_fat: plan.target_fat,
+        duration: plan.duration,
+        is_active: false
+      };
+
+      await nutritionPlanService.createPlan(user.id, newPlan);
+      await loadPlans();
+      toast({
+        title: "Plan dupliqué",
+        description: "Le plan a été copié avec succès.",
+      });
+    } catch (error) {
+      console.error('Error duplicating plan:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de dupliquer le plan.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const updatePlan = (updatedPlan: NutritionalPlan) => {
-    setPlans(plans.map(plan => plan.id === updatedPlan.id ? updatedPlan : plan));
+  const createPlan = async (newPlan: any) => {
+    if (!user) return;
+
+    try {
+      await nutritionPlanService.createPlan(user.id, newPlan);
+      await loadPlans();
+      toast({
+        title: "Plan créé",
+        description: "Le nouveau plan nutritionnel a été créé.",
+      });
+    } catch (error) {
+      console.error('Error creating plan:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le plan.",
+        variant: "destructive"
+      });
+    }
   };
+
+  const updatePlan = async (updatedPlan: NutritionalPlan) => {
+    try {
+      await nutritionPlanService.updatePlan(updatedPlan.id, updatedPlan);
+      await loadPlans();
+      toast({
+        title: "Plan modifié",
+        description: "Le plan nutritionnel a été mis à jour.",
+      });
+    } catch (error) {
+      console.error('Error updating plan:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le plan.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Plans alimentaires</h2>
+            <p className="text-muted-foreground">Chargement de vos plans...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -137,7 +211,7 @@ const PlanManager = () => {
       </div>
 
       {/* Plan actif */}
-      {plans.find(plan => plan.isActive) && (
+      {plans.find(plan => plan.is_active) && (
         <Card className="border-green-200 bg-green-50">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -147,7 +221,7 @@ const PlanManager = () => {
           </CardHeader>
           <CardContent>
             {(() => {
-              const activePlan = plans.find(plan => plan.isActive)!;
+              const activePlan = plans.find(plan => plan.is_active)!;
               const config = planTypeConfig[activePlan.type];
               return (
                 <div className="flex items-center space-x-4">
@@ -158,10 +232,10 @@ const PlanManager = () => {
                     <h3 className="text-lg font-bold text-green-800">{activePlan.name}</h3>
                     <p className="text-green-600 text-sm">{activePlan.description}</p>
                     <div className="flex space-x-4 mt-2 text-sm text-green-700">
-                      <span>{activePlan.targetCalories} kcal</span>
-                      <span>P: {activePlan.targetProtein}g</span>
-                      <span>G: {activePlan.targetCarbs}g</span>
-                      <span>L: {activePlan.targetFat}g</span>
+                      <span>{activePlan.target_calories} kcal</span>
+                      <span>P: {activePlan.target_protein}g</span>
+                      <span>G: {activePlan.target_carbs}g</span>
+                      <span>L: {activePlan.target_fat}g</span>
                     </div>
                   </div>
                 </div>
@@ -222,19 +296,19 @@ const PlanManager = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
                     <span>Calories:</span>
-                    <span className="font-medium">{plan.targetCalories} kcal</span>
+                    <span className="font-medium">{plan.target_calories} kcal</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Protéines:</span>
-                    <span className="font-medium">{plan.targetProtein}g</span>
+                    <span className="font-medium">{plan.target_protein}g</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Glucides:</span>
-                    <span className="font-medium">{plan.targetCarbs}g</span>
+                    <span className="font-medium">{plan.target_carbs}g</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Lipides:</span>
-                    <span className="font-medium">{plan.targetFat}g</span>
+                    <span className="font-medium">{plan.target_fat}g</span>
                   </div>
                 </div>
 
@@ -243,10 +317,10 @@ const PlanManager = () => {
                     <Calendar size={12} className="mr-1" />
                     {plan.duration} semaines
                   </div>
-                  <span>Créé le {new Date(plan.createdAt).toLocaleDateString('fr-FR')}</span>
+                  <span>Créé le {new Date(plan.created_at).toLocaleDateString('fr-FR')}</span>
                 </div>
 
-                {!plan.isActive && (
+                {!plan.is_active && (
                   <Button
                     onClick={() => activatePlan(plan.id)}
                     className="w-full"
@@ -260,6 +334,18 @@ const PlanManager = () => {
           );
         })}
       </div>
+
+      {plans.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground mb-4">Aucun plan nutritionnel créé</p>
+            <Button onClick={() => setShowCreateModal(true)} className="bg-green-500 hover:bg-green-600">
+              <Plus className="mr-2" size={16} />
+              Créer votre premier plan
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Modals */}
       <CreatePlanModal

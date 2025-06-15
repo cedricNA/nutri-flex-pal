@@ -324,3 +324,167 @@ export const goalService = {
     }
   }
 };
+
+export const nutritionPlanService = {
+  async getUserPlans(userId: string) {
+    const { data, error } = await supabase
+      .from('nutrition_plans')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching nutrition plans:', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async getActivePlan(userId: string) {
+    const { data, error } = await supabase
+      .from('nutrition_plans')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching active plan:', error);
+      return null;
+    }
+    return data;
+  },
+
+  async createPlan(userId: string, plan: any) {
+    const { error } = await supabase
+      .from('nutrition_plans')
+      .insert({
+        user_id: userId,
+        ...plan
+      });
+    
+    if (error) {
+      console.error('Error creating nutrition plan:', error);
+      throw error;
+    }
+  },
+
+  async updatePlan(planId: string, updates: any) {
+    const { error } = await supabase
+      .from('nutrition_plans')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', planId);
+    
+    if (error) {
+      console.error('Error updating nutrition plan:', error);
+      throw error;
+    }
+  },
+
+  async activatePlan(userId: string, planId: string) {
+    // Désactiver tous les plans existants
+    await supabase
+      .from('nutrition_plans')
+      .update({ is_active: false })
+      .eq('user_id', userId);
+    
+    // Activer le plan sélectionné
+    const { error } = await supabase
+      .from('nutrition_plans')
+      .update({ is_active: true })
+      .eq('id', planId);
+    
+    if (error) {
+      console.error('Error activating plan:', error);
+      throw error;
+    }
+  },
+
+  async deletePlan(planId: string) {
+    const { error } = await supabase
+      .from('nutrition_plans')
+      .delete()
+      .eq('id', planId);
+    
+    if (error) {
+      console.error('Error deleting plan:', error);
+      throw error;
+    }
+  }
+};
+
+export const activityService = {
+  async getActivityEntries(userId: string, startDate?: Date, endDate?: Date) {
+    let query = supabase
+      .from('activity_entries')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (startDate) {
+      query = query.gte('date', startDate.toISOString().split('T')[0]);
+    }
+    if (endDate) {
+      query = query.lte('date', endDate.toISOString().split('T')[0]);
+    }
+
+    const { data, error } = await query.order('date', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching activity entries:', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async addActivityEntry(userId: string, activity: any) {
+    const { error } = await supabase
+      .from('activity_entries')
+      .insert({
+        user_id: userId,
+        ...activity
+      });
+    
+    if (error) {
+      console.error('Error adding activity entry:', error);
+      throw error;
+    }
+  }
+};
+
+export const sleepService = {
+  async getSleepEntries(userId: string, startDate?: Date, endDate?: Date) {
+    let query = supabase
+      .from('sleep_entries')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (startDate) {
+      query = query.gte('date', startDate.toISOString().split('T')[0]);
+    }
+    if (endDate) {
+      query = query.lte('date', endDate.toISOString().split('T')[0]);
+    }
+
+    const { data, error } = await query.order('date', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching sleep entries:', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async addSleepEntry(userId: string, sleep: any) {
+    const { error } = await supabase
+      .from('sleep_entries')
+      .insert({
+        user_id: userId,
+        ...sleep
+      });
+    
+    if (error) {
+      console.error('Error adding sleep entry:', error);
+      throw error;
+    }
+  }
+};

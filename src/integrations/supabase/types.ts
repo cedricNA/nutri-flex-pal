@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_entries: {
+        Row: {
+          activity_type: string
+          calories_burned: number | null
+          created_at: string | null
+          date: string
+          duration_minutes: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          calories_burned?: number | null
+          created_at?: string | null
+          date?: string
+          duration_minutes: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          calories_burned?: number | null
+          created_at?: string | null
+          date?: string
+          duration_minutes?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       calorie_entries: {
         Row: {
           consumed: number
@@ -303,6 +333,131 @@ export type Database = {
           },
         ]
       }
+      nutrition_plans: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration: number
+          id: string
+          is_active: boolean | null
+          name: string
+          target_calories: number
+          target_carbs: number
+          target_fat: number
+          target_protein: number
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration?: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+          target_calories: number
+          target_carbs: number
+          target_fat: number
+          target_protein: number
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          target_calories?: number
+          target_carbs?: number
+          target_fat?: number
+          target_protein?: number
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      planned_meal_foods: {
+        Row: {
+          created_at: string | null
+          food_id: string | null
+          id: string
+          planned_meal_id: string | null
+          quantity: number
+        }
+        Insert: {
+          created_at?: string | null
+          food_id?: string | null
+          id?: string
+          planned_meal_id?: string | null
+          quantity: number
+        }
+        Update: {
+          created_at?: string | null
+          food_id?: string | null
+          id?: string
+          planned_meal_id?: string | null
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planned_meal_foods_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_meal_foods_planned_meal_id_fkey"
+            columns: ["planned_meal_id"]
+            isOneToOne: false
+            referencedRelation: "planned_meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planned_meals: {
+        Row: {
+          created_at: string | null
+          id: string
+          meal_order: number
+          meal_time: string
+          name: string
+          plan_id: string | null
+          target_calories: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meal_order?: number
+          meal_time: string
+          name: string
+          plan_id?: string | null
+          target_calories: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meal_order?: number
+          meal_time?: string
+          name?: string
+          plan_id?: string | null
+          target_calories?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planned_meals_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           activity_level: string | null
@@ -351,6 +506,33 @@ export type Database = {
           updated_at?: string | null
           weight?: number | null
           weight_target?: number | null
+        }
+        Relationships: []
+      }
+      sleep_entries: {
+        Row: {
+          created_at: string | null
+          date: string
+          hours_slept: number
+          id: string
+          quality_score: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          hours_slept: number
+          id?: string
+          quality_score?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          hours_slept?: number
+          id?: string
+          quality_score?: number | null
+          user_id?: string
         }
         Relationships: []
       }
