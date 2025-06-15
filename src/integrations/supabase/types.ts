@@ -46,6 +46,7 @@ export type Database = {
       }
       foods: {
         Row: {
+          calcium: number | null
           calories: number
           carbs: number
           category: string
@@ -54,11 +55,19 @@ export type Database = {
           fiber: number
           id: string
           image: string | null
+          iron: number | null
+          magnesium: number | null
           name: string
+          potassium: number | null
           protein: number
+          salt: number | null
+          sodium: number | null
           unit: string
+          vitamin_c: number | null
+          vitamin_d: number | null
         }
         Insert: {
+          calcium?: number | null
           calories: number
           carbs?: number
           category: string
@@ -67,11 +76,19 @@ export type Database = {
           fiber?: number
           id?: string
           image?: string | null
+          iron?: number | null
+          magnesium?: number | null
           name: string
+          potassium?: number | null
           protein?: number
+          salt?: number | null
+          sodium?: number | null
           unit?: string
+          vitamin_c?: number | null
+          vitamin_d?: number | null
         }
         Update: {
+          calcium?: number | null
           calories?: number
           carbs?: number
           category?: string
@@ -80,9 +97,16 @@ export type Database = {
           fiber?: number
           id?: string
           image?: string | null
+          iron?: number | null
+          magnesium?: number | null
           name?: string
+          potassium?: number | null
           protein?: number
+          salt?: number | null
+          sodium?: number | null
           unit?: string
+          vitamin_c?: number | null
+          vitamin_d?: number | null
         }
         Relationships: []
       }

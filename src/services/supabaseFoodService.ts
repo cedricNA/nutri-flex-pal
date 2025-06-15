@@ -14,7 +14,7 @@ class SupabaseFoodService {
   
   async loadFoods(userId?: string): Promise<ExtendedFood[]> {
     try {
-      // Load foods from Supabase
+      // Load foods from Supabase with new nutritional columns
       const { data: foods, error } = await supabase
         .from('foods')
         .select('*')

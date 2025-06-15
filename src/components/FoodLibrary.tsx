@@ -1,10 +1,10 @@
 
 import React from 'react';
-import FoodLibrarySupabase from './FoodLibrarySupabase';
+import FoodLibraryAdmin from './FoodLibraryAdmin';
 
-// Updated FoodLibrary to use the new Supabase version
+// Updated FoodLibrary to use the new admin version with import capabilities
 const FoodLibrary = () => {
-  return <FoodLibrarySupabase />;
+  return <FoodLibraryAdmin />;
 };
 
 export default FoodLibrary;
