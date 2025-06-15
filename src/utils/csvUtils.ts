@@ -98,3 +98,6 @@ export const createColumnMapping = (headers: string[]): ColumnMapping => {
     salt: findColumnIndex(headers, ['sel chlorure de sodium (g/100 g)', 'sel', 'salt'])
   };
 };
+
+// Re-export ColumnMapping for convenience
+export type { ColumnMapping } from '@/types/import';
