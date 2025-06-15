@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -149,10 +150,11 @@ const FoodImporter = () => {
     const headers = parseCSVLine(lines[0], separator);
     console.log('Headers found:', headers.slice(0, 10));
     
-    // Mapping exact avec les noms de colonnes CIQUAL
+    // Mapping exact avec les noms de colonnes CIQUAL incluant alim_ssgrp_nom_fr
     const columnMapping = {
       name: findColumnIndex(headers, 'alim_nom_fr'),
       category: findColumnIndex(headers, 'alim_grp_nom_fr'),
+      subgroup: findColumnIndex(headers, 'alim_ssgrp_nom_fr'), // Nouvelle colonne pour les sous-groupes
       calories: findColumnIndex(headers, 'kcal'),
       protein: findColumnIndex(headers, 'Protéines'),
       carbs: findColumnIndex(headers, 'Glucides'),
@@ -214,10 +216,12 @@ const FoodImporter = () => {
 
           const categoryRaw = columnMapping.category !== -1 ? row[columnMapping.category]?.trim() : '';
           const category = mapCategory(categoryRaw || '');
+          const subgroup = columnMapping.subgroup !== -1 ? row[columnMapping.subgroup]?.trim() : '';
 
           const foodItem = {
             name,
             category,
+            subgroup, // Ajouter le sous-groupe
             calories: columnMapping.calories !== -1 ? parseNumericValue(row[columnMapping.calories] || '0') : 0,
             protein: columnMapping.protein !== -1 ? parseNumericValue(row[columnMapping.protein] || '0') : 0,
             carbs: columnMapping.carbs !== -1 ? parseNumericValue(row[columnMapping.carbs] || '0') : 0,
@@ -388,7 +392,7 @@ const FoodImporter = () => {
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Fichier CSV avec colonnes CIQUAL exactes</li>
               <li>• Colonne requise : "alim_nom_fr"</li>
-              <li>• Colonnes supportées : catégorie, calories, macronutriments, vitamines, minéraux</li>
+              <li>• Colonnes supportées : "alim_ssgrp_nom_fr" (sous-groupes), calories, macronutriments, vitamines, minéraux</li>
               <li>• Validation automatique des données</li>
             </ul>
           </div>

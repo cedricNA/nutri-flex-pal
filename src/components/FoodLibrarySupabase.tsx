@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Search, Filter, Plus, Star, Loader2, RefreshCw } from 'lucide-react';
 import { useSupabaseFoodStore } from '../stores/useSupabaseFoodStore';
@@ -14,12 +13,12 @@ const FoodLibrarySupabase = () => {
     isLoaded,
     isLoading,
     searchTerm,
-    selectedCategory,
+    selectedSubgroup,
     showFavoritesOnly,
-    categories,
+    subgroups,
     loadFoods,
     setSearchTerm,
-    setSelectedCategory,
+    setSelectedSubgroup,
     setShowFavoritesOnly,
     toggleFavorite,
     getFilteredFoods,
@@ -210,21 +209,21 @@ const FoodLibrarySupabase = () => {
         </div>
       </div>
 
-      {/* Catégories */}
+      {/* Sous-groupes d'aliments */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">Catégories</h3>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
+        <h3 className="font-semibold text-gray-900 mb-4">Sous-groupes d'aliments</h3>
+        <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+          {subgroups.map((subgroup) => (
             <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                selectedCategory === category.id
+              key={subgroup.id}
+              onClick={() => setSelectedSubgroup(subgroup.id)}
+              className={`px-3 py-2 rounded-lg font-medium transition text-sm ${
+                selectedSubgroup === subgroup.id
                   ? 'bg-green-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {category.name} ({category.count})
+              {subgroup.name} ({subgroup.count})
             </button>
           ))}
         </div>
@@ -244,7 +243,7 @@ const FoodLibrarySupabase = () => {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun aliment trouvé</h3>
           <p className="text-gray-600 mb-4">
-            {categories.length > 1 && categories.find(c => c.id === 'all')?.count === 0 
+            {subgroups.length > 1 && subgroups.find(c => c.id === 'all')?.count === 0 
               ? "Il semble que la base de données soit vide. Essayez d'importer des aliments."
               : "Essayez de modifier vos critères de recherche"
             }

@@ -7,6 +7,7 @@ type UserFoodFavorite = Database['public']['Tables']['user_food_favorites']['Row
 
 export interface ExtendedFood extends Food {
   isFavorite?: boolean;
+  subgroup?: string; // Pour alim_ssgrp_nom_fr
 }
 
 class SupabaseFoodService {
@@ -102,7 +103,7 @@ class SupabaseFoodService {
 
   async searchFoods(
     searchTerm: string = '', 
-    category: string = 'all', 
+    subgroup: string = 'all', 
     showFavoritesOnly: boolean = false,
     userId?: string
   ): Promise<ExtendedFood[]> {
@@ -116,8 +117,8 @@ class SupabaseFoodService {
       );
     }
 
-    if (category !== 'all') {
-      filtered = filtered.filter(food => food.category === category);
+    if (subgroup !== 'all') {
+      filtered = filtered.filter(food => food.subgroup === subgroup);
     }
 
     if (showFavoritesOnly) {
@@ -210,37 +211,37 @@ class SupabaseFoodService {
     }
   }
 
-  async getCategories(userId?: string): Promise<{ id: string; name: string; count: number }[]> {
+  async getSubgroups(userId?: string): Promise<{ id: string; name: string; count: number }[]> {
     const foods = await this.loadFoods(userId);
-    const categoryMap = new Map<string, number>();
+    const subgroupMap = new Map<string, number>();
     
     foods.forEach(food => {
-      categoryMap.set(food.category, (categoryMap.get(food.category) || 0) + 1);
+      const subgroup = food.subgroup || 'Autres';
+      subgroupMap.set(subgroup, (subgroupMap.get(subgroup) || 0) + 1);
     });
 
-    const categories = [
+    const subgroups = [
       { id: 'all', name: 'Tous', count: foods.length }
     ];
 
-    const categoryNames: { [key: string]: string } = {
-      proteins: 'Protéines',
-      grains: 'Céréales',
-      vegetables: 'Légumes',
-      fruits: 'Fruits',
-      dairy: 'Laitiers',
-      fats: 'Matières grasses',
-      snacks: 'Collations'
-    };
-
-    categoryMap.forEach((count, categoryId) => {
-      categories.push({
-        id: categoryId,
-        name: categoryNames[categoryId] || categoryId,
-        count
-      });
+    subgroupMap.forEach((count, subgroupName) => {
+      if (subgroupName && subgroupName.trim() !== '') {
+        subgroups.push({
+          id: subgroupName,
+          name: subgroupName,
+          count
+        });
+      }
     });
 
-    return categories;
+    // Trier par nombre d'aliments (décroissant)
+    subgroups.sort((a, b) => {
+      if (a.id === 'all') return -1;
+      if (b.id === 'all') return 1;
+      return b.count - a.count;
+    });
+
+    return subgroups;
   }
 
   async addMealEntry(

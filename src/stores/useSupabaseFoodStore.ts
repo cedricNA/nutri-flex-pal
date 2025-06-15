@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { supabaseFoodService, type ExtendedFood } from '../services/supabaseFoodService';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,14 +8,14 @@ interface SupabaseFoodState {
   isLoaded: boolean;
   isLoading: boolean;
   searchTerm: string;
-  selectedCategory: string;
+  selectedSubgroup: string;
   showFavoritesOnly: boolean;
-  categories: { id: string; name: string; count: number }[];
+  subgroups: { id: string; name: string; count: number }[];
   
   // Actions
   loadFoods: () => Promise<void>;
   setSearchTerm: (term: string) => void;
-  setSelectedCategory: (category: string) => void;
+  setSelectedSubgroup: (subgroup: string) => void;
   setShowFavoritesOnly: (show: boolean) => void;
   toggleFavorite: (foodId: string) => Promise<void>;
   addMealEntry: (foodId: string, quantity: number, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => Promise<boolean>;
@@ -30,9 +29,9 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
   isLoaded: false,
   isLoading: false,
   searchTerm: '',
-  selectedCategory: 'all',
+  selectedSubgroup: 'all',
   showFavoritesOnly: false,
-  categories: [],
+  subgroups: [],
 
   // Actions
   loadFoods: async () => {
@@ -46,12 +45,12 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
       const foods = await supabaseFoodService.loadFoods();
       console.log('Loaded foods:', foods.length);
       
-      const categories = await supabaseFoodService.getCategories();
-      console.log('Loaded categories:', categories);
+      const subgroups = await supabaseFoodService.getSubgroups();
+      console.log('Loaded subgroups:', subgroups);
       
       set({ 
         foods, 
-        categories,
+        subgroups,
         isLoaded: true, 
         isLoading: false 
       });
@@ -65,8 +64,8 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
     set({ searchTerm });
   },
 
-  setSelectedCategory: (selectedCategory) => {
-    set({ selectedCategory });
+  setSelectedSubgroup: (selectedSubgroup) => {
+    set({ selectedSubgroup });
   },
 
   setShowFavoritesOnly: (showFavoritesOnly) => {
@@ -99,7 +98,7 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
   },
 
   getFilteredFoods: () => {
-    const { foods, searchTerm, selectedCategory, showFavoritesOnly } = get();
+    const { foods, searchTerm, selectedSubgroup, showFavoritesOnly } = get();
     
     let filtered = foods;
 
@@ -109,8 +108,8 @@ export const useSupabaseFoodStore = create<SupabaseFoodState>((set, get) => ({
       );
     }
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(food => food.category === selectedCategory);
+    if (selectedSubgroup !== 'all') {
+      filtered = filtered.filter(food => food.subgroup === selectedSubgroup);
     }
 
     if (showFavoritesOnly) {
