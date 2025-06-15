@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import NutritionStats from '../components/NutritionStats';
 import MealPlanner from '../components/MealPlanner';
@@ -10,11 +10,49 @@ import ProgressPage from '../components/ProgressPage';
 import PlanManager from '../components/PlanManager';
 import ChatBot from '../components/ChatBot';
 import MobileNavigation from '../components/MobileNavigation';
+import ThemeToggle from '../components/ThemeToggle';
 import { Bell, User, Menu, X } from 'lucide-react';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const savedSettings = localStorage.getItem('app-settings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        return settings.darkMode || false;
+      }
+    } catch (error) {
+      console.error("Impossible de charger les paramètres de thème", error);
+    }
+    return false;
+  });
+
+  // Apply dark mode to document
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  // Save theme preference
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem('app-settings');
+      const settings = savedSettings ? JSON.parse(savedSettings) : {};
+      const updatedSettings = { ...settings, darkMode: isDarkMode };
+      localStorage.setItem('app-settings', JSON.stringify(updatedSettings));
+    } catch (error) {
+      console.error("Impossible de sauvegarder les paramètres de thème", error);
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   const renderMainContent = () => {
     switch (activeSection) {
@@ -75,11 +113,11 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex transition-all duration-500">
       {/* Overlay pour mobile */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 z-40 md:hidden transition-opacity duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -98,35 +136,38 @@ const Index = () => {
       </div>
       
       <div className="flex-1 md:ml-64 pb-16 md:pb-0 min-h-screen">
-        {/* Header modernisé */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 md:px-8 py-4 shadow-sm">
+        {/* Header modernisé avec toggle de thème */}
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-4 md:px-8 py-4 shadow-sm transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {/* Bouton menu mobile */}
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
               >
                 {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
               
               <div>
-                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 dark:from-green-400 dark:to-blue-400 bg-clip-text text-transparent">
                   {getSectionTitle()}
                 </h1>
-                <p className="text-muted-foreground dark:text-gray-400 text-sm md:text-base">
+                <p className="text-muted-foreground dark:text-gray-400 text-sm md:text-base transition-colors duration-300">
                   {getSectionDescription()}
                 </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-3 md:space-x-4">
+              {/* Toggle de thème */}
+              <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} variant="compact" />
+              
               <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200 hover:scale-110">
                 <Bell size={20} />
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse"></span>
               </button>
               
-              <div className="flex items-center space-x-2 md:space-x-3 bg-gray-50 dark:bg-gray-700 rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+              <div className="flex items-center space-x-2 md:space-x-3 bg-gray-50 dark:bg-gray-700 rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
                 <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center shadow-md">
                   <User className="text-white" size={20} />
                 </div>
@@ -139,7 +180,7 @@ const Index = () => {
           </div>
         </header>
 
-        {/* Main Content avec animations */}
+        {/* Main Content avec animations améliorées */}
         <main className="p-4 md:p-8 max-w-7xl mx-auto animate-fade-in">
           {renderMainContent()}
         </main>

@@ -88,14 +88,18 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-300;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-all duration-300;
   }
 
-  /* Dark mode overrides for all elements */
+  /* Enhanced dark mode transitions */
+  html {
+    transition: color-scheme 0.3s ease;
+  }
+
   .dark {
     color-scheme: dark;
   }
@@ -104,6 +108,7 @@
     @apply bg-gray-900 text-gray-100;
   }
 
+  /* Improved dark mode color transitions */
   .dark .bg-white {
     @apply bg-gray-800;
   }
@@ -152,6 +157,14 @@
     @apply shadow-gray-900/30;
   }
 
+  .dark .shadow-xl {
+    @apply shadow-gray-900/40;
+  }
+
+  .dark .shadow-2xl {
+    @apply shadow-gray-900/50;
+  }
+
   .dark .hover\:bg-gray-50:hover {
     @apply bg-gray-700;
   }
@@ -166,6 +179,15 @@
 
   .dark .hover\:text-gray-900:hover {
     @apply text-gray-100;
+  }
+
+  /* Enhanced gradient support for dark mode */
+  .dark .from-gray-50 {
+    --tw-gradient-from: rgb(17 24 39) !important;
+  }
+
+  .dark .to-gray-100 {
+    --tw-gradient-to: rgb(31 41 55) !important;
   }
 
   /* Compact view styles */
@@ -211,7 +233,7 @@
     animation: none !important;
   }
 
-  /* New animations for improved UX */
+  /* Enhanced animations for improved UX */
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -234,12 +256,27 @@
     }
   }
 
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .animate-fade-in {
     animation: fade-in 0.3s ease-out;
   }
 
   .animate-scale-in {
     animation: scale-in 0.2s ease-out;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
   }
 
   /* Mobile optimizations */
@@ -257,7 +294,7 @@
     }
   }
 
-  /* Enhanced hover states */
+  /* Enhanced hover states with dark mode support */
   .hover-lift {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
@@ -267,14 +304,29 @@
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   }
 
+  .dark .hover-lift:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
 
-  /* Focus improvements for accessibility */
+  /* Focus improvements for accessibility with dark mode */
   .focus-visible {
     outline: 2px solid rgb(59, 130, 246);
     outline-offset: 2px;
+  }
+
+  .dark .focus-visible {
+    outline-color: rgb(96, 165, 250);
+  }
+
+  /* Theme transition for all elements */
+  * {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
   }
 }
