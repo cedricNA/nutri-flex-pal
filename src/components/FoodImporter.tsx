@@ -107,7 +107,6 @@ const FoodImporter = () => {
       return { isValid: false, errors };
     }
     
-    // Validation plus stricte du nom
     const name = foodItem.name.trim();
     if (name.match(/^\d+$/)) {
       errors.push('Nom invalide (code numérique uniquement)');
@@ -128,20 +127,13 @@ const FoodImporter = () => {
     };
   };
 
-  const findColumnIndex = (headers: string[], patterns: string[]): number => {
-    for (const pattern of patterns) {
-      const index = headers.findIndex(h => 
-        h && h.toLowerCase().includes(pattern.toLowerCase())
-      );
-      if (index !== -1) return index;
-    }
-    return -1;
+  const findColumnIndex = (headers: string[], columnName: string): number => {
+    return headers.findIndex(h => h && h.trim() === columnName);
   };
 
   const processCSVData = useCallback(async (csvContent: string) => {
     console.log('Starting CSV processing...');
     
-    // Nettoyer le contenu
     const lines = csvContent
       .split('\n')
       .map(line => line.trim())
@@ -151,36 +143,35 @@ const FoodImporter = () => {
       throw new Error('Fichier CSV vide ou invalide');
     }
 
-    // Détecter le séparateur
     const separator = detectSeparator(lines[0]);
     console.log('Detected separator:', separator === '\t' ? 'TAB' : separator);
 
     const headers = parseCSVLine(lines[0], separator);
     console.log('Headers found:', headers.slice(0, 10));
     
-    // Recherche des colonnes avec patterns multiples
+    // Mapping exact avec les noms de colonnes CIQUAL
     const columnMapping = {
-      name: findColumnIndex(headers, ['alim_nom_fr', 'nom_fr', 'nom', 'name']),
-      category: findColumnIndex(headers, ['alim_grp_nom_fr', 'groupe_nom_fr', 'groupe', 'categorie', 'category']),
-      calories: findColumnIndex(headers, ['energie_kcal', 'energie', 'energy', 'kcal', 'calories']),
-      protein: findColumnIndex(headers, ['proteines', 'protéines', 'protein']),
-      carbs: findColumnIndex(headers, ['glucides', 'carbohydrate', 'carbs']),
-      fat: findColumnIndex(headers, ['lipides', 'fat', 'matiere_grasse']),
-      fiber: findColumnIndex(headers, ['fibres', 'fiber']),
-      calcium: findColumnIndex(headers, ['calcium']),
-      iron: findColumnIndex(headers, ['fer', 'iron']),
-      magnesium: findColumnIndex(headers, ['magnesium', 'magnésium']),
-      potassium: findColumnIndex(headers, ['potassium']),
-      sodium: findColumnIndex(headers, ['sodium']),
-      vitamin_c: findColumnIndex(headers, ['vitamine_c', 'vitamin_c', 'vit_c']),
-      vitamin_d: findColumnIndex(headers, ['vitamine_d', 'vitamin_d', 'vit_d']),
-      salt: findColumnIndex(headers, ['sel', 'salt'])
+      name: findColumnIndex(headers, 'alim_nom_fr'),
+      category: findColumnIndex(headers, 'alim_grp_nom_fr'),
+      calories: findColumnIndex(headers, 'kcal'),
+      protein: findColumnIndex(headers, 'Protéines'),
+      carbs: findColumnIndex(headers, 'Glucides'),
+      fat: findColumnIndex(headers, 'Lipides'),
+      fiber: findColumnIndex(headers, 'Fibres alimentaires (g/100 g)'),
+      calcium: findColumnIndex(headers, 'Calcium (mg/100 g)'),
+      iron: findColumnIndex(headers, 'Fer (mg/100 g)'),
+      magnesium: findColumnIndex(headers, 'Magnésium (mg/100 g)'),
+      potassium: findColumnIndex(headers, 'Potassium (mg/100 g)'),
+      sodium: findColumnIndex(headers, 'Sodium (mg/100 g)'),
+      vitamin_c: findColumnIndex(headers, 'Vitamine C (mg/100 g)'),
+      vitamin_d: findColumnIndex(headers, 'Vitamine D (µg/100 g)'),
+      salt: findColumnIndex(headers, 'Sel chlorure de sodium (g/100 g)')
     };
 
     console.log('Column mapping:', columnMapping);
 
     if (columnMapping.name === -1) {
-      throw new Error('Colonne nom non trouvée. Colonnes disponibles: ' + headers.join(', '));
+      throw new Error('Colonne "alim_nom_fr" non trouvée. Colonnes disponibles: ' + headers.join(', '));
     }
 
     const total = lines.length - 1;
@@ -224,18 +215,10 @@ const FoodImporter = () => {
           const categoryRaw = columnMapping.category !== -1 ? row[columnMapping.category]?.trim() : '';
           const category = mapCategory(categoryRaw || '');
 
-          // Conversion des valeurs nutritionnelles
-          let calories = 0;
-          if (columnMapping.calories !== -1 && row[columnMapping.calories]) {
-            const energyValue = parseNumericValue(row[columnMapping.calories]);
-            // Si > 1000, probablement en kJ, convertir en kcal
-            calories = energyValue > 1000 ? Math.round(energyValue / 4.184) : energyValue;
-          }
-
           const foodItem = {
             name,
             category,
-            calories,
+            calories: columnMapping.calories !== -1 ? parseNumericValue(row[columnMapping.calories] || '0') : 0,
             protein: columnMapping.protein !== -1 ? parseNumericValue(row[columnMapping.protein] || '0') : 0,
             carbs: columnMapping.carbs !== -1 ? parseNumericValue(row[columnMapping.carbs] || '0') : 0,
             fat: columnMapping.fat !== -1 ? parseNumericValue(row[columnMapping.fat] || '0') : 0,
@@ -272,7 +255,6 @@ const FoodImporter = () => {
         }
       }
 
-      // Insertion en base
       if (foodItems.length > 0) {
         try {
           console.log(`Insertion de ${foodItems.length} aliments...`);
@@ -311,11 +293,9 @@ const FoodImporter = () => {
         errors: newErrors.length
       });
 
-      // Petite pause pour éviter la surcharge
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    // Add refresh after successful import
     if (successful > 0) {
       console.log('Import successful, refreshing food library...');
       await refreshData();
@@ -362,7 +342,6 @@ const FoodImporter = () => {
         variant: result.errors > 0 ? "destructive" : "default"
       });
 
-      // Force refresh of the food library
       if (result.successful > 0) {
         setTimeout(() => {
           refreshData();
@@ -378,7 +357,6 @@ const FoodImporter = () => {
       });
     } finally {
       setIsImporting(false);
-      // Reset file input
       event.target.value = '';
     }
   }, [user, isAdmin, processCSVData, toast, refreshData]);
@@ -408,10 +386,10 @@ const FoodImporter = () => {
           <div className="bg-blue-50 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">Instructions</h3>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Fichier CSV/TXT (séparateurs: ; , ou tabulation)</li>
-              <li>• Colonne requise : nom des aliments</li>
-              <li>• Détection automatique des colonnes</li>
-              <li>• Validation renforcée des données</li>
+              <li>• Fichier CSV avec colonnes CIQUAL exactes</li>
+              <li>• Colonne requise : "alim_nom_fr"</li>
+              <li>• Colonnes supportées : catégorie, calories, macronutriments, vitamines, minéraux</li>
+              <li>• Validation automatique des données</li>
             </ul>
           </div>
 
@@ -430,10 +408,10 @@ const FoodImporter = () => {
             >
               <FileSpreadsheet size={48} className="mx-auto text-gray-400 mb-4" />
               <p className="text-lg font-medium text-gray-900 mb-2">
-                {isImporting ? 'Import en cours...' : 'Sélectionner un fichier CSV/TXT'}
+                {isImporting ? 'Import en cours...' : 'Sélectionner un fichier CSV CIQUAL'}
               </p>
               <p className="text-sm text-gray-500">
-                Format CIQUAL ou compatible
+                Format CIQUAL avec colonnes françaises
               </p>
             </label>
           </div>
