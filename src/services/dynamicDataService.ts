@@ -21,6 +21,8 @@ export interface MealType {
   sort_order: number;
 }
 
+export type GoalType = 'weight_loss' | 'hydration' | 'exercise' | 'calorie_deficit' | 'sleep' | 'nutrition' | 'custom';
+
 export interface UserGoal {
   id: string;
   user_id: string;
@@ -29,7 +31,7 @@ export interface UserGoal {
   target_value: number;
   current_value: number;
   unit: string;
-  goal_type: 'weight_loss' | 'hydration' | 'exercise' | 'calorie_deficit' | 'sleep' | 'nutrition' | 'custom';
+  goal_type: GoalType;
   deadline?: string;
   is_active: boolean;
   created_at: string;
@@ -114,7 +116,12 @@ class DynamicDataService {
       console.error('Error fetching user goals:', error);
       return [];
     }
-    return data || [];
+    
+    // Assurer la compatibilité des types
+    return (data || []).map(goal => ({
+      ...goal,
+      goal_type: goal.goal_type as GoalType
+    }));
   }
 
   async createUserGoal(userId: string, goal: Omit<UserGoal, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<boolean> {

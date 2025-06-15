@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Plus, Calculator, Info, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import FoodItem from './FoodItem';
-import { getMealIcon } from './mealIcons';
+import { useMealIcon } from './mealIcons';
 
 interface Food {
   id: string;
@@ -52,13 +51,14 @@ const MealCard: React.FC<MealCardProps> = ({
 }) => {
   const totals = calculateMealTotals(meal.foods);
   const progress = (totals.calories / meal.targetCalories) * 100;
+  const mealIcon = useMealIcon(meal.name);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-xl hover:scale-102 group">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
           <div className="w-14 h-14 bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-            {getMealIcon(meal.name)}
+            {mealIcon}
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{meal.name}</h3>

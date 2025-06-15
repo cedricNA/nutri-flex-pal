@@ -17,7 +17,27 @@ const iconMapping: { [key: string]: React.ComponentType<any> } = {
   Clock
 };
 
-// Fonction pour obtenir l'icône depuis la base de données
+// Fonction de fallback avec les icônes hardcodées
+const getMealIconFallback = (mealName: string, size: number = 18, className?: string) => {
+  switch (mealName) {
+    case 'breakfast':
+    case 'Petit-déjeuner':
+      return React.createElement(Coffee, { size, className: className || "text-blue-500" });
+    case 'lunch':
+    case 'Déjeuner':
+      return React.createElement(Utensils, { size, className: className || "text-green-600" });
+    case 'snack':
+    case 'Collation':
+      return React.createElement(CakeSlice, { size, className: className || "text-pink-500" });
+    case 'dinner':
+    case 'Dîner':
+      return React.createElement(Egg, { size, className: className || "text-yellow-600" });
+    default:
+      return React.createElement(Clock, { size, className });
+  }
+};
+
+// Fonction pour obtenir l'icône depuis la base de données (asynchrone)
 export const getMealIcon = async (mealTypeKey: string, size: number = 18, className?: string) => {
   // Vérifier le cache
   const now = Date.now();
@@ -43,29 +63,9 @@ export const getMealIcon = async (mealTypeKey: string, size: number = 18, classN
   return React.createElement(IconComponent, { size, className });
 };
 
-// Fonction de fallback avec les icônes hardcodées
-const getMealIconFallback = (mealName: string, size: number = 18, className?: string) => {
-  switch (mealName) {
-    case 'breakfast':
-    case 'Petit-déjeuner':
-      return React.createElement(Coffee, { size, className: className || "text-blue-500" });
-    case 'lunch':
-    case 'Déjeuner':
-      return React.createElement(Utensils, { size, className: className || "text-green-600" });
-    case 'snack':
-    case 'Collation':
-      return React.createElement(CakeSlice, { size, className: className || "text-pink-500" });
-    case 'dinner':
-    case 'Dîner':
-      return React.createElement(Egg, { size, className: className || "text-yellow-600" });
-    default:
-      return React.createElement(Clock, { size, className });
-  }
-};
-
 // Hook pour utiliser les icônes de repas dans les composants React
 export const useMealIcon = (mealTypeKey: string) => {
-  const [icon, setIcon] = useState(getMealIconFallback(mealTypeKey));
+  const [icon, setIcon] = useState(() => getMealIconFallback(mealTypeKey));
 
   useEffect(() => {
     const loadIcon = async () => {

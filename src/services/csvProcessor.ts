@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { ImportStats, ImportError } from '@/types/import';
-import { detectSeparator, parseCSVLine, createColumnMapping } from '@/utils/csvUtils';
+import { detectSeparator, parseCSVLine, createColumnMappingSync } from '@/utils/csvUtils';
 import { validateFoodItem, createFoodItem } from '@/utils/foodValidation';
 
 export class CSVProcessor {
@@ -26,7 +26,8 @@ export class CSVProcessor {
     const headers = parseCSVLine(lines[0], separator);
     console.log('📋 Headers trouvés (premiers 15):', headers.slice(0, 15));
     
-    const columnMapping = createColumnMapping(headers);
+    // Utiliser la version synchrone pour le mapping des colonnes
+    const columnMapping = createColumnMappingSync(headers);
     console.log('🗂️ Mapping des colonnes:', columnMapping);
 
     if (columnMapping.name === -1) {
