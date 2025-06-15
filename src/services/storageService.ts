@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import {
   UserProfileSchema,
@@ -38,6 +37,7 @@ type StorageKeys = {
   searchTerm: string;
   selectedCategory: string;
   showFavoritesOnly: boolean;
+  todayWater: number;
 };
 
 const schemaMap = {
@@ -52,6 +52,7 @@ const schemaMap = {
   searchTerm: z.string(),
   selectedCategory: z.string(),
   showFavoritesOnly: z.boolean(),
+  todayWater: z.number(),
 } as const;
 
 const defaults: StorageKeys = {
@@ -81,6 +82,7 @@ const defaults: StorageKeys = {
   searchTerm: '',
   selectedCategory: 'all',
   showFavoritesOnly: false,
+  todayWater: 0,
 };
 
 function safeParse<K extends keyof StorageKeys>(
