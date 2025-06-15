@@ -3,7 +3,8 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FoodLibrarySupabase from './FoodLibrarySupabase';
 import FoodImporter from './FoodImporter';
-import { Database, Upload } from 'lucide-react';
+import FoodDataCleaner from './FoodDataCleaner';
+import { Database, Upload, Trash2 } from 'lucide-react';
 
 const FoodLibraryAdmin = () => {
   return (
@@ -13,7 +14,7 @@ const FoodLibraryAdmin = () => {
       </div>
 
       <Tabs defaultValue="library" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="library" className="flex items-center space-x-2">
             <Database size={18} />
             <span>Bibliothèque</span>
@@ -21,6 +22,10 @@ const FoodLibraryAdmin = () => {
           <TabsTrigger value="import" className="flex items-center space-x-2">
             <Upload size={18} />
             <span>Import CSV</span>
+          </TabsTrigger>
+          <TabsTrigger value="cleanup" className="flex items-center space-x-2">
+            <Trash2 size={18} />
+            <span>Nettoyage</span>
           </TabsTrigger>
         </TabsList>
         
@@ -30,6 +35,10 @@ const FoodLibraryAdmin = () => {
         
         <TabsContent value="import">
           <FoodImporter />
+        </TabsContent>
+        
+        <TabsContent value="cleanup">
+          <FoodDataCleaner />
         </TabsContent>
       </Tabs>
     </div>

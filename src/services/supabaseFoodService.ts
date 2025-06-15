@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -25,8 +24,21 @@ class SupabaseFoodService {
         return [];
       }
 
+      if (!foods) {
+        return [];
+      }
+
+      // Filter out corrupted entries with invalid names
+      const validFoods = foods.filter(food => 
+        food.name && 
+        food.name.length > 0 && 
+        !food.name.includes(':::') && // Remove entries with corrupted separators
+        !food.name.match(/^\d+:\d+/) && // Remove entries starting with numbers and colons
+        food.name.length < 200 // Remove extremely long names
+      );
+
       if (!userId) {
-        return foods.map(food => ({ ...food, isFavorite: false }));
+        return validFoods.map(food => ({ ...food, isFavorite: false }));
       }
 
       // Load user favorites
@@ -37,18 +49,44 @@ class SupabaseFoodService {
 
       if (favError) {
         console.error('Error loading favorites:', favError);
-        return foods.map(food => ({ ...food, isFavorite: false }));
+        return validFoods.map(food => ({ ...food, isFavorite: false }));
       }
 
       const favoriteIds = new Set(favorites?.map(fav => fav.food_id) || []);
       
-      return foods.map(food => ({
+      return validFoods.map(food => ({
         ...food,
         isFavorite: favoriteIds.has(food.id)
       }));
     } catch (error) {
       console.error('Error in loadFoods:', error);
       return [];
+    }
+  }
+
+  async cleanCorruptedData(): Promise<boolean> {
+    try {
+      // Delete entries with corrupted names
+      const { error } = await supabase
+        .from('foods')
+        .delete()
+        .or(
+          'name.like.*:::*,' +
+          'name.like.0*:*,' +
+          'name.like.1*:*,' +
+          'name.eq.,' +
+          'name.is.null'
+        );
+
+      if (error) {
+        console.error('Error cleaning corrupted data:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error in cleanCorruptedData:', error);
+      return false;
     }
   }
 
@@ -127,9 +165,26 @@ class SupabaseFoodService {
 
   async addFood(food: Omit<FoodInsert, 'id' | 'created_at'>): Promise<Food | null> {
     try {
+      // Validate the food data before insertion
+      if (!food.name || food.name.trim() === '') {
+        console.error('Food name is required');
+        return null;
+      }
+
+      // Clean the food name
+      const cleanedFood = {
+        ...food,
+        name: food.name.trim(),
+        calories: Math.max(0, food.calories || 0),
+        protein: Math.max(0, food.protein || 0),
+        carbs: Math.max(0, food.carbs || 0),
+        fat: Math.max(0, food.fat || 0),
+        fiber: Math.max(0, food.fiber || 0)
+      };
+
       const { data, error } = await supabase
         .from('foods')
-        .insert(food)
+        .insert(cleanedFood)
         .select()
         .single();
 
