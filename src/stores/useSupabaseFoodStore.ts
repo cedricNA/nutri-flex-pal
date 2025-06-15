@@ -1,7 +1,6 @@
 
 import { create } from 'zustand';
 import { supabaseFoodService, type ExtendedFood } from '../services/supabaseFoodService';
-import { useAuth } from '@/hooks/useAuth';
 
 interface SupabaseFoodState {
   // Food library
