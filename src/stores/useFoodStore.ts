@@ -36,7 +36,8 @@ function validateAndCastFoods(data: unknown): Food[] {
   const validFoods: Food[] = [];
   for (const item of data) {
     try {
-      const validFood = FoodSchema.parse(item);
+      // Cast item en unknown pour satisfaire TypeScript
+      const validFood = FoodSchema.parse(item as unknown);
       validFoods.push(validFood);
     } catch (error) {
       console.warn('Invalid food item, skipping:', item);
