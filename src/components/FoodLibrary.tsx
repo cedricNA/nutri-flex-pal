@@ -1,41 +1,35 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Search, Filter, Plus, Star, Loader2 } from 'lucide-react';
-import { foodDataService, type Food } from '../services/foodDataService';
+import { useFoodStore } from '../stores/useFoodStore';
+import { type Food } from '../services/foodDataService';
 
 const FoodLibrary = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [foods, setFoods] = useState<Food[]>([]);
-  const [categories, setCategories] = useState<{ id: string; name: string; count: number }[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    isLoaded,
+    searchTerm,
+    selectedCategory,
+    showFavoritesOnly,
+    loadFoods,
+    setSearchTerm,
+    setSelectedCategory,
+    setShowFavoritesOnly,
+    toggleFavorite,
+    getFilteredFoods,
+    addMealEntry
+  } = useFoodStore();
+
+  const filteredFoods = getFilteredFoods();
 
   useEffect(() => {
-    loadFoods();
-  }, []);
-
-  const loadFoods = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const loadedFoods = await foodDataService.loadFoods();
-      setFoods(loadedFoods);
-      setCategories(foodDataService.getCategories());
-    } catch (err) {
-      setError('Erreur lors du chargement des aliments');
-      console.error('Erreur:', err);
-    } finally {
-      setIsLoading(false);
+    if (!isLoaded) {
+      loadFoods();
     }
-  };
+  }, [isLoaded, loadFoods]);
 
-  const filteredFoods = foodDataService.searchFoods(searchTerm, selectedCategory, showFavoritesOnly);
-
-  const handleToggleFavorite = (foodId: string) => {
-    foodDataService.toggleFavorite(foodId);
-    setFoods([...foods]); // Force re-render
+  const handleAddToMeal = (foodId: string) => {
+    // For demo purposes, adding 100g to lunch
+    addMealEntry(foodId, 100, 'lunch');
+    console.log('Added to meal:', foodId);
   };
 
   const FoodCard = ({ food }: { food: Food }) => (
@@ -55,7 +49,7 @@ const FoodLibrary = () => {
           } shadow-sm hover:scale-110 transition-transform`}
           onClick={(e) => {
             e.stopPropagation();
-            handleToggleFavorite(food.id);
+            toggleFavorite(food.id);
           }}
         >
           <Star size={16} fill={food.isFavorite ? 'currentColor' : 'none'} />
@@ -94,36 +88,21 @@ const FoodLibrary = () => {
           </div>
         </div>
         
-        <button className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600 transition opacity-0 group-hover:opacity-100">
+        <button 
+          className="w-full bg-green-500 text-white py-2 rounded-lg font-medium hover:bg-green-600 transition opacity-0 group-hover:opacity-100"
+          onClick={() => handleAddToMeal(food.id)}
+        >
           Ajouter au repas
         </button>
       </div>
     </div>
   );
 
-  if (isLoading) {
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="animate-spin text-green-500" size={48} />
         <span className="ml-3 text-lg text-gray-600">Chargement des aliments...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-red-500 mb-4">
-          <Search size={48} className="mx-auto" />
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
-        <p className="text-gray-600 mb-4">{error}</p>
-        <button 
-          onClick={loadFoods}
-          className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition"
-        >
-          Réessayer
-        </button>
       </div>
     );
   }
@@ -175,7 +154,7 @@ const FoodLibrary = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-gray-900 mb-4">Catégories</h3>
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
+          {/*categories.map((category) => (
             <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
@@ -187,10 +166,10 @@ const FoodLibrary = () => {
             >
               {category.name} ({category.count})
             </button>
-          ))}
+          ))*/}
         </div>
       </div>
-
+      
       {/* Grille d'aliments */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredFoods.map((food) => (
@@ -198,7 +177,7 @@ const FoodLibrary = () => {
         ))}
       </div>
 
-      {filteredFoods.length === 0 && !isLoading && (
+      {filteredFoods.length === 0 && !isLoaded && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <Search size={48} className="mx-auto" />

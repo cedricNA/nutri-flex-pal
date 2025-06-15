@@ -7,18 +7,12 @@ import ProgressStats from './ProgressStats';
 import GoalsProgress from './GoalsProgress';
 import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
 import PeriodSelector from "./PeriodSelector";
-import { useState } from "react";
+import { useAppStore } from '../stores/useAppStore';
+import { useProgressStats } from '../hooks/useProgressStats';
 
 const ProgressPage = () => {
-  const progressData = {
-    weightChange: -2.5,
-    caloriesAverage: 1850,
-    workoutStreak: 7,
-    goalsAchieved: 3
-  };
-
-  // Ajout du filtre de période
-  const [period, setPeriod] = useState<"7d" | "30d" | "custom">("7d");
+  const { currentPeriod, setPeriod } = useAppStore();
+  const progressData = useProgressStats();
 
   return (
     <div className="space-y-8">
@@ -30,7 +24,7 @@ const ProgressPage = () => {
             <TrendingDown className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-800 dark:text-green-300">{progressData.weightChange} kg</div>
+            <div className="text-2xl font-bold text-green-800 dark:text-green-300">{progressData.weightChange.toFixed(1)} kg</div>
             <p className="text-xs text-green-600 dark:text-green-400">Ce mois-ci</p>
           </CardContent>
         </Card>
@@ -59,18 +53,18 @@ const ProgressPage = () => {
 
         <Card className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-400">Objectifs atteints</CardTitle>
+            <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-400">Score global</CardTitle>
             <Target className="h-4 w-4 text-orange-600 dark:text-orange-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-800 dark:text-orange-300">{progressData.goalsAchieved}/5</div>
-            <p className="text-xs text-orange-600 dark:text-orange-400">Ce mois-ci</p>
+            <div className="text-2xl font-bold text-orange-800 dark:text-orange-300">{progressData.globalScore}%</div>
+            <p className="text-xs text-orange-600 dark:text-orange-400">Performance</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Sélecteur de période */}
-      <PeriodSelector period={period} setPeriod={setPeriod} />
+      <PeriodSelector period={currentPeriod} setPeriod={setPeriod} />
 
       {/* Progress Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
@@ -83,14 +77,14 @@ const ProgressPage = () => {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <WeightChart period={period} />
-            <CaloriesChart period={period} />
+            <WeightChart period={currentPeriod} />
+            <CaloriesChart period={currentPeriod} />
           </div>
           <ProgressStats />
         </TabsContent>
 
         <TabsContent value="weight" className="space-y-6">
-          <WeightChart period={period} />
+          <WeightChart period={currentPeriod} />
           <Card>
             <CardHeader>
               <CardTitle>Analyse du poids</CardTitle>
@@ -108,7 +102,7 @@ const ProgressPage = () => {
                 </div>
                 <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <span className="font-medium text-green-700 dark:text-green-400">Progression</span>
-                  <span className="text-lg font-bold text-green-800 dark:text-green-300">-2.5 kg</span>
+                  <span className="text-lg font-bold text-green-800 dark:text-green-300">{progressData.weightChange.toFixed(1)} kg</span>
                 </div>
               </div>
             </CardContent>
@@ -116,7 +110,7 @@ const ProgressPage = () => {
         </TabsContent>
 
         <TabsContent value="nutrition" className="space-y-6">
-          <CaloriesChart period={period} />
+          <CaloriesChart period={currentPeriod} />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
