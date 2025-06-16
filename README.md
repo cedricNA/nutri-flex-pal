@@ -60,6 +60,12 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Environment Variables
+
+- `VITE_SUPABASE_URL`: URL of your Supabase instance.
+- `VITE_SUPABASE_ANON_KEY`: public anon key for your Supabase project.
+
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/275ee7c3-d818-47e2-a3a1-f45b247974ed) and click on Share -> Publish.
