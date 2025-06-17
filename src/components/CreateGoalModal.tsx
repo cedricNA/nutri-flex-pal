@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
-import { dynamicDataService } from '@/services/dynamicDataService';
+import { dynamicDataService, type GoalType } from '@/services/dynamicDataService';
 import { useToast } from '@/hooks/use-toast';
 
 interface CreateGoalModalProps {
@@ -132,7 +132,7 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="goal_type">Type d'objectif</Label>
-            <Select value={formData.goal_type} onValueChange={(value) => setFormData({ ...formData, goal_type: value as any })}>
+            <Select value={formData.goal_type} onValueChange={(value) => setFormData({ ...formData, goal_type: value as GoalType })}>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type" />
               </SelectTrigger>

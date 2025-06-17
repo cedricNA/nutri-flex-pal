@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -19,15 +19,9 @@ const GoalsProgress = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<UserGoal | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      loadGoals();
-    }
-  }, [user]);
-
-  const loadGoals = async () => {
+  const loadGoals = useCallback(async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
       const userGoals = await dynamicDataService.getUserGoals(user.id);
@@ -42,7 +36,11 @@ const GoalsProgress = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
+
+  useEffect(() => {
+    loadGoals();
+  }, [loadGoals]);
 
   const calculateProgress = (goal: UserGoal): number => {
     if (goal.target_value === 0) return 0;

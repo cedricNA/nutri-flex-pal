@@ -4,12 +4,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { weightService, calorieService, hydrationService } from '@/services/supabaseServices';
 import { activityService, sleepService } from '@/services/nutritionPlanService';
 import { useAppStore } from '../stores/useAppStore';
+import type { WeightEntry, CalorieEntry } from '@/schemas';
 
 export const useProgressStats = () => {
   const { user } = useAuth();
   const { currentPeriod } = useAppStore();
-  const [weightEntries, setWeightEntries] = useState<any[]>([]);
-  const [calorieEntries, setCalorieEntries] = useState<any[]>([]);
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
+  const [calorieEntries, setCalorieEntries] = useState<CalorieEntry[]>([]);
   const [activityEntries, setActivityEntries] = useState<any[]>([]);
   const [sleepEntries, setSleepEntries] = useState<any[]>([]);
   const [todayHydration, setTodayHydration] = useState(0);

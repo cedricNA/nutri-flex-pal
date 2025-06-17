@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
+import { type AppSettings } from '@/schemas';
 
 const SettingsPage = () => {
   const { toast } = useToast();
   const { settings, updateSetting, resetSettings } = useSettings();
 
   const handleSettingChange = (key: string, value: boolean | string) => {
-    updateSetting(key as any, value);
+    updateSetting(key as keyof AppSettings, value);
     toast({
       title: "Paramètres mis à jour",
       description: "Vos préférences ont été enregistrées.",
