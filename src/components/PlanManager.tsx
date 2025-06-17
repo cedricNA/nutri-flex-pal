@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Settings, Trash2, Copy, Calendar, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,11 +42,7 @@ const PlanManager = () => {
     }
   };
 
-  useEffect(() => {
-    loadPlans();
-  }, [user]);
-
-  const loadPlans = async () => {
+  const loadPlans = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -63,7 +59,11 @@ const PlanManager = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
+
+  useEffect(() => {
+    loadPlans();
+  }, [loadPlans]);
 
   const activatePlan = async (planId: string) => {
     if (!user) return;
