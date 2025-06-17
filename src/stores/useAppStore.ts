@@ -101,7 +101,7 @@ export const useAppStore = create<AppState>()(
       getFilteredWeightData: () => {
         const { weightEntries, currentPeriod } = get();
         const now = new Date();
-        let cutoffDate = new Date();
+        const cutoffDate = new Date();
 
         switch (currentPeriod) {
           case '7d':
@@ -120,7 +120,7 @@ export const useAppStore = create<AppState>()(
       getFilteredCalorieData: () => {
         const { calorieEntries, currentPeriod } = get();
         const now = new Date();
-        let cutoffDate = new Date();
+        const cutoffDate = new Date();
 
         switch (currentPeriod) {
           case '7d':
