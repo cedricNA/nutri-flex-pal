@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/hooks/useAuth';
 import { weightService } from '@/services/supabaseServices';
+import type { WeightEntry } from '@/schemas';
 
 interface WeightChartProps {
   period: "7d" | "30d" | "custom";
@@ -12,7 +13,7 @@ interface WeightChartProps {
 
 const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
   const { user } = useAuth();
-  const [weightData, setWeightData] = useState<any[]>([]);
+  const [weightData, setWeightData] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

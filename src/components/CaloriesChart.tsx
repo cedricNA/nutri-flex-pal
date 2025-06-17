@@ -5,6 +5,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/hooks/useAuth';
 import { calorieService } from '@/services/supabaseServices';
+import type { CalorieEntry } from '@/schemas';
 
 interface CaloriesChartProps {
   period: "7d" | "30d" | "custom";
@@ -12,7 +13,7 @@ interface CaloriesChartProps {
 
 const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
   const { user } = useAuth();
-  const [caloriesData, setCaloriesData] = useState<any[]>([]);
+  const [caloriesData, setCaloriesData] = useState<CalorieEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
