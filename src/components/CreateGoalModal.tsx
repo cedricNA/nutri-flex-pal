@@ -20,6 +20,35 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const goalTemplates = {
+    weight_loss: {
+      label: 'Perte de poids',
+      unit: 'kg',
+      goal_type: 'weight_loss' as GoalType,
+      description: "Objectif de perte de poids progressif"
+    },
+    hydration: {
+      label: 'Hydratation',
+      unit: 'L',
+      goal_type: 'hydration' as GoalType,
+      description: "Boire suffisamment d'eau chaque jour"
+    },
+    activity: {
+      label: 'Activité',
+      unit: 'séances',
+      goal_type: 'exercise' as GoalType,
+      description: "Augmenter le nombre de séances d'activité physique"
+    },
+    maintenance: {
+      label: 'Maintien',
+      unit: 'kg',
+      goal_type: 'nutrition' as GoalType,
+      description: "Maintenir votre poids actuel"
+    }
+  } as const;
+
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<keyof typeof goalTemplates | ''>('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -29,6 +58,18 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
     goal_type: 'custom' as const,
     deadline: ''
   });
+
+  const handleTemplateChange = (value: keyof typeof goalTemplates) => {
+    const template = goalTemplates[value];
+    setSelectedTemplate(value);
+    if (!template) return;
+    setFormData({
+      ...formData,
+      unit: template.unit,
+      goal_type: template.goal_type,
+      description: template.description
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +130,25 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
               placeholder="Décrivez votre objectif en détail..."
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="template">Modèle d'objectif</Label>
+            <Select
+              value={selectedTemplate}
+              onValueChange={(value) => handleTemplateChange(value as keyof typeof goalTemplates)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choisissez un modèle" />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(goalTemplates) as Array<keyof typeof goalTemplates>).map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {goalTemplates[key].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
