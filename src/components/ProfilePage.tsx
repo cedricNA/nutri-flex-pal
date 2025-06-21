@@ -1,6 +1,6 @@
 
-import React, { useRef, useState, useEffect } from 'react';
-import { User, Camera, Save, Edit3 } from 'lucide-react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { User, Camera, Save, Edit3, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,12 +8,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/hooks/useAuth';
+import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
+import { Progress } from '@/components/ui/progress';
+import CreateGoalModal from './CreateGoalModal';
 
 const ProfilePage = () => {
   const { profile: storedProfile, loading, updateProfile } = useProfile();
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeGoals, setActiveGoals] = useState<UserGoal[]>([]);
+  const [completedGoals, setCompletedGoals] = useState<UserGoal[]>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
@@ -39,6 +47,19 @@ const ProfilePage = () => {
     Object.entries(activityMap).map(([k, v]) => [v, k])
   ) as Record<string, string>;
 
+  const loadGoals = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const active = await dynamicDataService.getUserGoals(user.id);
+      const completed = await dynamicDataService.getCompletedUserGoals(user.id);
+      setActiveGoals(active);
+      setCompletedGoals(completed);
+    } catch (err) {
+      console.error('Error loading goals:', err);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (storedProfile) {
       const [first = '', ...rest] = (storedProfile.name || '').split(' ');
@@ -56,6 +77,10 @@ const ProfilePage = () => {
       });
     }
   }, [storedProfile]);
+
+  useEffect(() => {
+    loadGoals();
+  }, [loadGoals]);
 
   const handleSave = async () => {
     setIsEditing(false);
@@ -91,6 +116,14 @@ const ProfilePage = () => {
     const age = Number(profile.age);
     if (!weight || !height || !age) return 0;
     return 10 * weight + 6.25 * height - 5 * age;
+  };
+
+  const calculateProgress = (goal: UserGoal): number => {
+    if (goal.target_value === 0) return 0;
+    return Math.min(
+      Math.round((goal.current_value / goal.target_value) * 100),
+      100
+    );
   };
 
   if (loading && !storedProfile) {
@@ -312,6 +345,60 @@ const ProfilePage = () => {
         </Card>
       </div>
 
+      {/* Objectifs actifs */}
+      {activeGoals.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Objectifs actifs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {activeGoals.map(goal => (
+                <li key={goal.id} className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>{goal.title}</span>
+                    <span>
+                      {goal.current_value} / {goal.target_value} {goal.unit}
+                    </span>
+                  </div>
+                  <Progress value={calculateProgress(goal)} />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Objectifs actifs</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p>Aucun objectif actif.</p>
+            <Button onClick={() => setShowCreateModal(true)} className="gap-2">
+              <Plus size={16} /> Créer un objectif
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Objectifs récemment atteints */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Récemment atteints</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {completedGoals.length === 0 ? (
+            <p>Aucun objectif récemment atteint.</p>
+          ) : (
+            <ul className="list-disc list-inside space-y-1">
+              {completedGoals.map(goal => (
+                <li key={goal.id}>{goal.title}</li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Bouton de sauvegarde */}
       {isEditing && (
         <div className="flex justify-center">
@@ -320,6 +407,13 @@ const ProfilePage = () => {
             Sauvegarder les modifications
           </Button>
         </div>
+      )}
+
+      {showCreateModal && (
+        <CreateGoalModal
+          onClose={() => setShowCreateModal(false)}
+          onGoalCreated={loadGoals}
+        />
       )}
     </div>
   );
