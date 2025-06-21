@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { storageService } from '../services/storageService';
 import { UserProfileSchema, WeightEntrySchema, CalorieEntrySchema, type UserProfile, type WeightEntry, type CalorieEntry } from '../schemas';
+import { calculateAdjustedCalories } from '../utils/calorieUtils';
 
 interface AppState {
   // User data
@@ -23,6 +24,7 @@ interface AppState {
   setPeriod: (period: '7d' | '30d' | 'custom') => void;
   addWater: () => void;
   resetDailyWater: () => void;
+  recalculateCalorieTarget: () => void;
   getFilteredWeightData: () => WeightEntry[];
   getFilteredCalorieData: () => CalorieEntry[];
 }
@@ -45,15 +47,39 @@ export const useAppStore = create<AppState>()(
 
       // Actions
       setUser: (user) => {
-        const validated = UserProfileSchema.parse(user);
+        let validated = UserProfileSchema.parse(user);
+        const daily = calculateAdjustedCalories({
+          weight: validated.weight,
+          height: validated.height,
+          age: validated.age,
+          activityLevel: validated.activityLevel,
+          weightTarget: validated.goals.weightTarget,
+        });
+        validated = {
+          ...validated,
+          goals: {
+            ...validated.goals,
+            dailyCalories: daily,
+          },
+        };
         storageService.set('user', validated);
         set({ user: validated });
       },
 
       updateUserGoals: (goals) => set((state) => {
         if (!state.user) return state;
-        const newGoals = { ...state.user.goals, ...goals };
-        const newUser = { ...state.user, goals: newGoals };
+        const mergedGoals = { ...state.user.goals, ...goals };
+        const daily = calculateAdjustedCalories({
+          weight: state.user.weight,
+          height: state.user.height,
+          age: state.user.age,
+          activityLevel: state.user.activityLevel,
+          weightTarget: mergedGoals.weightTarget,
+        });
+        const newUser = {
+          ...state.user,
+          goals: { ...mergedGoals, dailyCalories: daily },
+        };
         const validated = UserProfileSchema.parse(newUser);
         storageService.set('user', validated);
         return { user: validated };
@@ -80,6 +106,23 @@ export const useAppStore = create<AppState>()(
         const newEntries = [...state.calorieEntries, entry];
         storageService.set('calorieEntries', newEntries);
         return { calorieEntries: newEntries };
+      }),
+
+      recalculateCalorieTarget: () => set((state) => {
+        if (!state.user) return state;
+        const daily = calculateAdjustedCalories({
+          weight: state.user.weight,
+          height: state.user.height,
+          age: state.user.age,
+          activityLevel: state.user.activityLevel,
+          weightTarget: state.user.goals.weightTarget,
+        });
+        const newUser = {
+          ...state.user,
+          goals: { ...state.user.goals, dailyCalories: daily },
+        };
+        storageService.set('user', newUser);
+        return { user: newUser };
       }),
 
       setPeriod: (period) => {
