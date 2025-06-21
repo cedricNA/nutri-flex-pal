@@ -6,6 +6,7 @@ import WeightChart from './WeightChart';
 import CaloriesChart from './CaloriesChart';
 import ProgressStats from './ProgressStats';
 import GoalsProgress from './GoalsProgress';
+import WeightEntrySection from './WeightEntrySection';
 import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
 import PeriodSelector from "./PeriodSelector";
 import { useAppStore } from '../stores/useAppStore';
@@ -139,6 +140,7 @@ const ProgressPage = () => {
               </div>
             </CardContent>
           </Card>
+          <WeightEntrySection />
         </TabsContent>
 
         <TabsContent value="nutrition" className="space-y-6">

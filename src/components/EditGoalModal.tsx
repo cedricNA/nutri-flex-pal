@@ -196,7 +196,7 @@ const EditGoalModal = ({ goal, onClose, onGoalUpdated }: EditGoalModalProps) => 
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tracking_interval">Intervalle</Label>
+              <Label htmlFor="tracking_interval">Intervalle de mesure</Label>
               <Select value={formData.tracking_interval} onValueChange={(v) => setFormData({ ...formData, tracking_interval: v as 'jour' | 'semaine' | 'mois' })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Intervalle" />
@@ -209,7 +209,7 @@ const EditGoalModal = ({ goal, onClose, onGoalUpdated }: EditGoalModalProps) => 
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tracking_repetition">Répétitions</Label>
+              <Label htmlFor="tracking_repetition">Fréquence</Label>
               <Input
                 id="tracking_repetition"
                 type="number"
