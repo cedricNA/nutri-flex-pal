@@ -60,10 +60,27 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+
 ## Environment Variables
 
 - `VITE_SUPABASE_URL`: URL of your Supabase instance.
 - `VITE_SUPABASE_ANON_KEY`: public anon key for your Supabase project.
+
+## Supabase Setup
+
+1. Copy `.env.example` to `.env` and provide values for
+   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+2. Install the [Supabase CLI](https://supabase.com/docs/guides/cli) if you
+   don't have it already.
+3. Apply the migrations under `supabase/migrations/` by running either:
+
+   ```sh
+   supabase db push
+   ```
+
+   or use `supabase db reset` to recreate the database. This will apply all
+   migrations, including the one that adds `start_date` and `end_date` to the
+   `user_goals` table.
 
 
 ## How can I deploy this project?
