@@ -1,14 +1,13 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Target, Plus, Edit, Trash2 } from 'lucide-react';
+import { Target, Plus, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import ObjectiveSummary from './ObjectiveSummary';
 import CreateGoalModal from './CreateGoalModal';
 import EditGoalModal from './EditGoalModal';
 
@@ -137,63 +136,27 @@ const GoalsProgress = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {goals.map((goal) => {
-                const progress = calculateProgress(goal);
-                const isCompleted = progress >= 100;
-                
-                return (
-                  <div key={goal.id} className="space-y-3 p-4 border rounded-lg">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center space-x-2">
-                          {isCompleted ? (
-                            <CheckCircle className="h-5 w-5 text-green-500" />
-                          ) : (
-                            <Circle className="h-5 w-5 text-muted-foreground" />
-                          )}
-                          <h4 className="font-medium">{goal.title}</h4>
-                          <Badge variant={isCompleted ? "default" : progress >= 80 ? "secondary" : "outline"}>
-                            {progress}%
-                          </Badge>
-                        </div>
-                        {goal.description && (
-                          <p className="text-sm text-muted-foreground">{goal.description}</p>
-                        )}
-                        <div className="flex items-center justify-between text-sm">
-                          <span>
-                            {goal.current_value} / {goal.target_value} {goal.unit}
-                          </span>
-                          {goal.deadline && (
-                            <span className="text-muted-foreground">
-                              Échéance: {new Date(goal.deadline).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2 ml-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditingGoal(goal)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteGoal(goal.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <Progress 
-                      value={progress} 
-                      className={`h-2 ${isCompleted ? 'bg-green-100' : ''}`}
-                    />
-                  </div>
-                );
-              })}
+              {goals.map((goal) => (
+                <ObjectiveSummary
+                  key={goal.id}
+                  goal={goal}
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditingGoal(goal)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteGoal(goal.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </ObjectiveSummary>
+              ))}
             </div>
           )}
         </CardContent>

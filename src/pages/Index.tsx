@@ -11,7 +11,7 @@ import SettingsPage from '@/components/SettingsPage';
 import AdminPanel from '@/components/AdminPanel';
 import AdminRoute from '@/components/AdminRoute';
 import NutritionStats from '@/components/NutritionStats';
-import GoalsProgress from '@/components/GoalsProgress';
+import DashboardGoals from '@/components/DashboardGoals';
 import CaloriesChart from '@/components/CaloriesChart';
 import WeightChart from '@/components/WeightChart';
 import NotificationCenter from '@/components/NotificationCenter';
@@ -67,7 +67,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <NutritionStats />
-              <GoalsProgress />
+              <DashboardGoals onViewProgress={() => setActiveSection('progress')} />
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -85,7 +85,7 @@ const Index = () => {
       case 'progress':
         return <ProgressPage />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage onManageGoals={() => setActiveSection('progress')} />;
       case 'settings':
         return <SettingsPage />;
       case 'admin':
