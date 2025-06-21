@@ -1,19 +1,23 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { User, Camera, Save, Edit3, Plus } from 'lucide-react';
+import { User, Camera, Save, Edit3, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
-import { Progress } from '@/components/ui/progress';
-import CreateGoalModal from './CreateGoalModal';
+import ObjectiveSummary from './ObjectiveSummary';
 
-const ProfilePage = () => {
+interface ProfilePageProps {
+  onManageGoals?: () => void;
+}
+
+const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
   const { profile: storedProfile, loading, updateProfile } = useProfile();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -21,7 +25,6 @@ const ProfilePage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeGoals, setActiveGoals] = useState<UserGoal[]>([]);
   const [completedGoals, setCompletedGoals] = useState<UserGoal[]>([]);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
@@ -118,13 +121,6 @@ const ProfilePage = () => {
     return 10 * weight + 6.25 * height - 5 * age;
   };
 
-  const calculateProgress = (goal: UserGoal): number => {
-    if (goal.target_value === 0) return 0;
-    return Math.min(
-      Math.round((goal.current_value / goal.target_value) * 100),
-      100
-    );
-  };
 
   if (loading && !storedProfile) {
     return <div>Chargement du profil...</div>;
@@ -308,7 +304,17 @@ const ProfilePage = () => {
             </div>
             
             <div>
-              <Label htmlFor="goal">Objectif</Label>
+              <Label htmlFor="goal" className="flex items-center gap-1">
+                Objectif nutritionnel
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info size={14} className="cursor-help text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Ceci est votre objectif nutritionnel de base, utilisé pour le calcul des besoins caloriques.
+                  </TooltipContent>
+                </Tooltip>
+              </Label>
               <select
                 id="goal"
                 value={profile.goal}
@@ -352,19 +358,11 @@ const ProfilePage = () => {
             <CardTitle>Objectifs actifs</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-4">
+            <div className="space-y-4">
               {activeGoals.map(goal => (
-                <li key={goal.id} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>{goal.title}</span>
-                    <span>
-                      {goal.current_value} / {goal.target_value} {goal.unit}
-                    </span>
-                  </div>
-                  <Progress value={calculateProgress(goal)} />
-                </li>
+                <ObjectiveSummary key={goal.id} goal={goal} />
               ))}
-            </ul>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -372,11 +370,9 @@ const ProfilePage = () => {
           <CardHeader>
             <CardTitle>Objectifs actifs</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-center">
+          <CardContent className="space-y-2 text-center">
             <p>Aucun objectif actif.</p>
-            <Button onClick={() => setShowCreateModal(true)} className="gap-2">
-              <Plus size={16} /> Créer un objectif
-            </Button>
+            <p className="text-sm text-muted-foreground">Fixez-en un dans la section Progression.</p>
           </CardContent>
         </Card>
       )}
@@ -399,6 +395,12 @@ const ProfilePage = () => {
         </CardContent>
       </Card>
 
+      <div className="text-right">
+        <Button variant="link" onClick={onManageGoals} className="p-0 h-auto">
+          Gérer mes objectifs
+        </Button>
+      </div>
+
       {/* Bouton de sauvegarde */}
       {isEditing && (
         <div className="flex justify-center">
@@ -409,12 +411,6 @@ const ProfilePage = () => {
         </div>
       )}
 
-      {showCreateModal && (
-        <CreateGoalModal
-          onClose={() => setShowCreateModal(false)}
-          onGoalCreated={loadGoals}
-        />
-      )}
     </div>
   );
 };

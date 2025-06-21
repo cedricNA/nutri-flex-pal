@@ -1,0 +1,63 @@
+import React, { useEffect, useState } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
+import ObjectiveSummary from './ObjectiveSummary';
+
+interface DashboardGoalsProps {
+  onViewProgress: () => void;
+}
+
+const DashboardGoals = ({ onViewProgress }: DashboardGoalsProps) => {
+  const { user } = useAuth();
+  const [goals, setGoals] = useState<UserGoal[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    dynamicDataService
+      .getUserGoals(user.id)
+      .then(setGoals)
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Objectifs actifs</CardTitle>
+        <CardDescription>Suivi rapide de vos progrès</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p>Chargement...</p>
+        ) : goals.length === 0 ? (
+          <div className="space-y-2 text-center">
+            <p>Aucun objectif actif actuellement.</p>
+            <Button variant="link" onClick={onViewProgress} className="p-0 h-auto">
+              Fixez-en un dans la section Progression
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {goals.map((goal) => (
+              <ObjectiveSummary key={goal.id} goal={goal} />
+            ))}
+            <div className="text-right">
+              <Button variant="link" onClick={onViewProgress} className="p-0 h-auto">
+                Voir mes objectifs
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default DashboardGoals;
