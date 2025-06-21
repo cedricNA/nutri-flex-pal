@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Circle, Target, Plus, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
+import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import CreateGoalModal from './CreateGoalModal';
 import EditGoalModal from './EditGoalModal';
@@ -14,6 +15,7 @@ import EditGoalModal from './EditGoalModal';
 const GoalsProgress = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { recalculateCalorieTarget } = useAppStore();
   const [goals, setGoals] = useState<UserGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -26,6 +28,12 @@ const GoalsProgress = () => {
     try {
       const userGoals = await dynamicDataService.getUserGoals(user.id);
       setGoals(userGoals);
+
+      const hasWeightGoal = userGoals.some(g => g.is_active && g.goal_type === 'weight_loss');
+      const hasMaintenanceGoal = userGoals.some(g => g.is_active && g.goal_type === 'nutrition');
+      if (hasWeightGoal || hasMaintenanceGoal) {
+        recalculateCalorieTarget();
+      }
     } catch (error) {
       console.error('Error loading goals:', error);
       toast({
