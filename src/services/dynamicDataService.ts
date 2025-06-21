@@ -32,6 +32,11 @@ export interface UserGoal {
   current_value: number;
   unit: string;
   goal_type: GoalType;
+  start_date?: string;
+  end_date?: string;
+  tracking_type?: 'auto' | 'manual';
+  tracking_interval?: 'jour' | 'semaine' | 'mois';
+  tracking_repetition?: number;
   deadline?: string;
   is_active: boolean;
   created_at: string;

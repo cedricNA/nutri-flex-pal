@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import ObjectiveSummary from './ObjectiveSummary';
 import CreateGoalModal from './CreateGoalModal';
 import EditGoalModal from './EditGoalModal';
+import { calculateGoalProgress } from '@/utils/progress';
 
 const GoalsProgress = () => {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ const GoalsProgress = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<UserGoal | null>(null);
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
 
   const loadGoals = useCallback(async () => {
     if (!user) return;
@@ -27,6 +29,10 @@ const GoalsProgress = () => {
     try {
       const userGoals = await dynamicDataService.getUserGoals(user.id);
       setGoals(userGoals);
+      const progressValues = await Promise.all(
+        userGoals.map(async g => [g.id, await calculateGoalProgress(g)] as [string, number])
+      );
+      setProgressMap(Object.fromEntries(progressValues));
 
       const hasWeightGoal = userGoals.some(g => g.is_active && g.goal_type === 'weight_loss');
       const hasMaintenanceGoal = userGoals.some(g => g.is_active && g.goal_type === 'nutrition');
@@ -49,10 +55,6 @@ const GoalsProgress = () => {
     loadGoals();
   }, [loadGoals]);
 
-  const calculateProgress = (goal: UserGoal): number => {
-    if (goal.target_value === 0) return 0;
-    return Math.min(Math.round((goal.current_value / goal.target_value) * 100), 100);
-  };
 
   const handleDeleteGoal = async (goalId: string) => {
     try {
@@ -81,9 +83,9 @@ const GoalsProgress = () => {
     loadGoals();
   };
 
-  const completedGoals = goals.filter(g => calculateProgress(g) >= 100).length;
-  const averageProgress = goals.length > 0 
-    ? Math.round(goals.reduce((sum, goal) => sum + calculateProgress(goal), 0) / goals.length)
+  const completedGoals = goals.filter(g => (progressMap[g.id] || 0) >= 100).length;
+  const averageProgress = goals.length > 0
+    ? Math.round(goals.reduce((sum, goal) => sum + (progressMap[goal.id] || 0), 0) / goals.length)
     : 0;
 
   if (!user) {
@@ -142,6 +144,7 @@ const GoalsProgress = () => {
                 <ObjectiveSummary
                   key={goal.id}
                   goal={goal}
+                  progress={progressMap[goal.id] || 0}
                 >
                   <Button
                     variant="ghost"

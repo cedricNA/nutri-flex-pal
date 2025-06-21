@@ -6,13 +6,11 @@ import type { UserGoal } from '@/services/dynamicDataService';
 
 interface ObjectiveSummaryProps {
   goal: UserGoal;
+  progress: number;
   children?: React.ReactNode;
 }
 
-const ObjectiveSummary = ({ goal, children }: ObjectiveSummaryProps) => {
-  const progress = goal.target_value === 0
-    ? 0
-    : Math.min(Math.round((goal.current_value / goal.target_value) * 100), 100);
+const ObjectiveSummary = ({ goal, progress, children }: ObjectiveSummaryProps) => {
   const isCompleted = progress >= 100;
 
   return (
