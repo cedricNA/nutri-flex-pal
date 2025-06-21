@@ -124,6 +124,26 @@ class DynamicDataService {
     }));
   }
 
+  async getCompletedUserGoals(userId: string, limit = 5): Promise<UserGoal[]> {
+    const { data, error } = await supabase
+      .from('user_goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', false)
+      .order('updated_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching completed user goals:', error);
+      return [];
+    }
+
+    return (data || []).map(goal => ({
+      ...goal,
+      goal_type: goal.goal_type as GoalType
+    }));
+  }
+
   async createUserGoal(userId: string, goal: Omit<UserGoal, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<boolean> {
     const { error } = await supabase
       .from('user_goals')
