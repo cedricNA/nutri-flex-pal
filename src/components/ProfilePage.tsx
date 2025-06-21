@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { User, Camera, Save, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState({
     firstName: 'Marie',
     lastName: 'Dupont',
@@ -33,6 +35,26 @@ const ProfilePage = () => {
     setProfile(prev => ({ ...prev, [field]: value }));
   };
 
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setAvatarUrl(url);
+    }
+  };
+
+  const calculateBMR = () => {
+    const weight = Number(profile.weight);
+    const height = Number(profile.height);
+    const age = Number(profile.age);
+    if (!weight || !height || !age) return 0;
+    return 10 * weight + 6.25 * height - 5 * age;
+  };
+
   return (
     <div className="space-y-8">
       {/* Header avec photo de profil */}
@@ -41,14 +63,28 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative group">
               <Avatar className="w-32 h-32">
-                <AvatarImage src="/placeholder.svg" alt="Photo de profil" />
+                <AvatarImage
+                  src={avatarUrl || "/placeholder.svg"}
+                  alt="Photo de profil"
+                />
                 <AvatarFallback className="text-2xl bg-gradient-to-r from-green-500 to-blue-500 text-white">
                   {profile.firstName[0]}{profile.lastName[0]}
                 </AvatarFallback>
               </Avatar>
-              <button className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                type="button"
+                onClick={handlePhotoClick}
+                className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
                 <Camera className="text-white" size={24} />
               </button>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
             </div>
             
             <div className="flex-1 text-center md:text-left">
@@ -224,7 +260,9 @@ const ProfilePage = () => {
                 </div>
                 <div>
                   <span className="text-gray-600">Métabolisme de base:</span>
-                  <span className="ml-2 font-medium">1650 kcal</span>
+                  <span className="ml-2 font-medium">
+                    {calculateBMR().toFixed(0)} kcal
+                  </span>
                 </div>
               </div>
             </div>
