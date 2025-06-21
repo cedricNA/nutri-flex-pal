@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { User, Camera, Save, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,28 +7,66 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useProfile } from '@/hooks/useProfile';
 
 const ProfilePage = () => {
+  const { profile: storedProfile, loading, updateProfile } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState({
-    firstName: 'Marie',
-    lastName: 'Dupont',
-    email: 'marie.dupont@email.com',
-    phone: '+33 6 12 34 56 78',
-    age: '32',
-    weight: '65',
-    height: '168',
-    activityLevel: 'modérée',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    age: '',
+    weight: '',
+    height: '',
+    activityLevel: 'sédentaire',
     goal: 'maintien',
-    bio: 'Coach certifiée en nutrition avec 8 ans d\'expérience dans l\'accompagnement personnalisé.',
+    bio: '',
   });
 
-  const handleSave = () => {
+  const activityMap: Record<string, string> = {
+    sedentary: 'sédentaire',
+    light: 'légère',
+    moderate: 'modérée',
+    active: 'intense',
+    very_active: 'très intense',
+  };
+
+  const reverseActivityMap = Object.fromEntries(
+    Object.entries(activityMap).map(([k, v]) => [v, k])
+  ) as Record<string, string>;
+
+  useEffect(() => {
+    if (storedProfile) {
+      const [first = '', ...rest] = (storedProfile.name || '').split(' ');
+      setProfile({
+        firstName: first,
+        lastName: rest.join(' '),
+        email: storedProfile.email || '',
+        phone: '',
+        age: storedProfile.age?.toString() || '',
+        weight: storedProfile.weight?.toString() || '',
+        height: storedProfile.height?.toString() || '',
+        activityLevel: activityMap[storedProfile.activity_level || 'sedentary'],
+        goal: 'maintien',
+        bio: '',
+      });
+    }
+  }, [storedProfile]);
+
+  const handleSave = async () => {
     setIsEditing(false);
-    // Ici on sauvegarderait les données
-    console.log('Profil sauvegardé:', profile);
+    await updateProfile({
+      name: `${profile.firstName} ${profile.lastName}`,
+      email: profile.email,
+      age: Number(profile.age) || null,
+      weight: Number(profile.weight) || null,
+      height: Number(profile.height) || null,
+      activity_level: reverseActivityMap[profile.activityLevel] || 'sedentary',
+    });
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -54,6 +92,10 @@ const ProfilePage = () => {
     if (!weight || !height || !age) return 0;
     return 10 * weight + 6.25 * height - 5 * age;
   };
+
+  if (loading && !storedProfile) {
+    return <div>Chargement du profil...</div>;
+  }
 
   return (
     <div className="space-y-8">
