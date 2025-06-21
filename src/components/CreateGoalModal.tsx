@@ -49,13 +49,21 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
 
   const [selectedTemplate, setSelectedTemplate] =
     useState<keyof typeof goalTemplates | ''>('');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    target_value: string;
+    current_value: string;
+    unit: string;
+    goal_type: GoalType;
+    deadline: string;
+  }>({
     title: '',
     description: '',
-    target_value: 0,
-    current_value: 0,
+    target_value: '',
+    current_value: '',
     unit: '',
-    goal_type: 'custom' as const,
+    goal_type: 'custom',
     deadline: ''
   });
 
@@ -79,6 +87,8 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
     try {
       await dynamicDataService.createUserGoal(user.id, {
         ...formData,
+        target_value: parseFloat(formData.target_value) || 0,
+        current_value: parseFloat(formData.current_value) || 0,
         is_active: true
       });
       
@@ -160,7 +170,7 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
                     id="target_value"
                     type="number"
                     value={formData.target_value}
-                    onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setFormData({ ...formData, target_value: e.target.value })}
                     placeholder="10"
                     required
                     min="0"
@@ -200,7 +210,7 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
                   id="current_value"
                   type="number"
                   value={formData.current_value}
-                  onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setFormData({ ...formData, current_value: e.target.value })}
                   placeholder="0"
                   min="0"
                   step="0.1"

@@ -147,7 +147,9 @@ export const useProgressStats = () => {
     const planComplianceRate = (filteredCalories.length / totalDays) * 100;
 
     // Score global amélioré
-    const weightProgress = Math.max(0, Math.min(100, 100 - Math.abs(weightChange) * 10));
+    const weightProgress = filteredWeights.length >= 2
+      ? Math.max(0, Math.min(100, 100 - Math.abs(weightChange) * 10))
+      : 0;
     const calorieProgress = filteredCalories.length > 0 
       ? (goalsAchieved / filteredCalories.length) * 100 
       : 0;
