@@ -55,6 +55,10 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
     target_value: string;
     unit: string;
     goal_type: GoalType;
+    start_date: string;
+    end_date: string;
+    tracking_interval: 'jour' | 'semaine' | 'mois';
+    tracking_repetition: string;
     deadline: string;
   }>({
     title: '',
@@ -62,6 +66,10 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
     target_value: '',
     unit: '',
     goal_type: 'custom',
+    start_date: '',
+    end_date: '',
+    tracking_interval: 'jour',
+    tracking_repetition: '1',
     deadline: ''
   });
 
@@ -86,6 +94,7 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
       await dynamicDataService.createUserGoal(user.id, {
         ...formData,
         target_value: parseFloat(formData.target_value) || 0,
+        tracking_repetition: parseInt(formData.tracking_repetition) || 0,
         // progress starts at 0 for new goals
         is_active: true
       });
@@ -217,6 +226,53 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
                 <SelectItem value="custom">Personnalisé</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start_date">Début</Label>
+              <Input
+                id="start_date"
+                type="date"
+                value={formData.start_date}
+                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="end_date">Fin</Label>
+              <Input
+                id="end_date"
+                type="date"
+                value={formData.end_date}
+                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tracking_interval">Intervalle</Label>
+              <Select value={formData.tracking_interval} onValueChange={(v) => setFormData({ ...formData, tracking_interval: v as 'jour' | 'semaine' | 'mois' })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Intervalle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="jour">Jour</SelectItem>
+                  <SelectItem value="semaine">Semaine</SelectItem>
+                  <SelectItem value="mois">Mois</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tracking_repetition">Répétitions</Label>
+              <Input
+                id="tracking_repetition"
+                type="number"
+                min="0"
+                value={formData.tracking_repetition}
+                onChange={(e) => setFormData({ ...formData, tracking_repetition: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">

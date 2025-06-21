@@ -578,10 +578,15 @@ export type Database = {
           current_value: number | null
           deadline: string | null
           description: string | null
+          end_date: string | null
           goal_type: string
           id: string
           is_active: boolean | null
+          start_date: string | null
           target_value: number
+          tracking_interval: string | null
+          tracking_repetition: number | null
+          tracking_type: string | null
           title: string
           unit: string
           updated_at: string | null
@@ -592,10 +597,15 @@ export type Database = {
           current_value?: number | null
           deadline?: string | null
           description?: string | null
+          end_date?: string | null
           goal_type: string
           id?: string
           is_active?: boolean | null
+          start_date?: string | null
           target_value: number
+          tracking_interval?: string | null
+          tracking_repetition?: number | null
+          tracking_type?: string | null
           title: string
           unit: string
           updated_at?: string | null
@@ -606,10 +616,15 @@ export type Database = {
           current_value?: number | null
           deadline?: string | null
           description?: string | null
+          end_date?: string | null
           goal_type?: string
           id?: string
           is_active?: boolean | null
+          start_date?: string | null
           target_value?: number
+          tracking_interval?: string | null
+          tracking_repetition?: number | null
+          tracking_type?: string | null
           title?: string
           unit?: string
           updated_at?: string | null

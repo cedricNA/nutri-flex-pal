@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
+import { calculateGoalProgress } from '@/utils/progress';
 import ObjectiveSummary from './ObjectiveSummary';
 
 interface DashboardGoalsProps {
@@ -13,13 +14,20 @@ const DashboardGoals = ({ onViewProgress }: DashboardGoalsProps) => {
   const { user } = useAuth();
   const [goals, setGoals] = useState<UserGoal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (!user) return;
     setLoading(true);
     dynamicDataService
       .getUserGoals(user.id)
-      .then(setGoals)
+      .then(async (data) => {
+        setGoals(data);
+        const progressValues = await Promise.all(
+          data.map(async g => [g.id, await calculateGoalProgress(g)] as [string, number])
+        );
+        setProgressMap(Object.fromEntries(progressValues));
+      })
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -46,7 +54,7 @@ const DashboardGoals = ({ onViewProgress }: DashboardGoalsProps) => {
         ) : (
           <div className="space-y-4">
             {goals.map((goal) => (
-              <ObjectiveSummary key={goal.id} goal={goal} />
+              <ObjectiveSummary key={goal.id} goal={goal} progress={progressMap[goal.id] || 0} />
             ))}
             <div className="text-right">
               <Button variant="link" onClick={onViewProgress} className="p-0 h-auto">
