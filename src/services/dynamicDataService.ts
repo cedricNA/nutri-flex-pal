@@ -149,7 +149,9 @@ class DynamicDataService {
       .from('user_goals')
       .insert({
         user_id: userId,
-        ...goal
+        ...goal,
+        // Start every new goal with 0 progress
+        current_value: 0
       });
     
     if (error) {

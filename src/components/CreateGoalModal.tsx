@@ -53,7 +53,6 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
     title: string;
     description: string;
     target_value: string;
-    current_value: string;
     unit: string;
     goal_type: GoalType;
     deadline: string;
@@ -61,7 +60,6 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
     title: '',
     description: '',
     target_value: '',
-    current_value: '',
     unit: '',
     goal_type: 'custom',
     deadline: ''
@@ -88,7 +86,7 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
       await dynamicDataService.createUserGoal(user.id, {
         ...formData,
         target_value: parseFloat(formData.target_value) || 0,
-        current_value: parseFloat(formData.current_value) || 0,
+        // progress starts at 0 for new goals
         is_active: true
       });
       
@@ -202,25 +200,6 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="current_value">Valeur actuelle</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="current_value"
-                  type="number"
-                  value={formData.current_value}
-                  onChange={(e) => setFormData({ ...formData, current_value: e.target.value })}
-                  placeholder="0"
-                  min="0"
-                  step="0.1"
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                Valeur actuelle de votre progression
-              </TooltipContent>
-            </Tooltip>
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="goal_type">Type d'objectif</Label>
