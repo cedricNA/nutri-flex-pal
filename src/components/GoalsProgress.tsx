@@ -113,10 +113,12 @@ const GoalsProgress = () => {
                 Suivez vos objectifs personnalisés et votre progression
               </CardDescription>
             </div>
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nouvel objectif
-            </Button>
+            {!loading && goals.length > 0 && (
+              <Button onClick={() => setShowCreateModal(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvel objectif
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
