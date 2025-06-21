@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -93,41 +94,62 @@ const CreateGoalModal = ({ onClose, onGoalCreated }: CreateGoalModalProps) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="target_value">Objectif cible</Label>
-              <Input
-                id="target_value"
-                type="number"
-                value={formData.target_value}
-                onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) || 0 })}
-                placeholder="10"
-                required
-                min="0"
-                step="0.1"
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="target_value"
+                    type="number"
+                    value={formData.target_value}
+                    onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) || 0 })}
+                    placeholder="10"
+                    required
+                    min="0"
+                    step="0.1"
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  Valeur que vous souhaitez atteindre
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="unit">Unité</Label>
-              <Input
-                id="unit"
-                value={formData.unit}
-                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                placeholder="kg, L, séances..."
-                required
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="unit"
+                    value={formData.unit}
+                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                    placeholder="kg, L, séances..."
+                    required
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  Spécifiez l'unité de mesure
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="current_value">Valeur actuelle</Label>
-            <Input
-              id="current_value"
-              type="number"
-              value={formData.current_value}
-              onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) || 0 })}
-              placeholder="0"
-              min="0"
-              step="0.1"
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Input
+                  id="current_value"
+                  type="number"
+                  value={formData.current_value}
+                  onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) || 0 })}
+                  placeholder="0"
+                  min="0"
+                  step="0.1"
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                Valeur actuelle de votre progression
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           <div className="space-y-2">
