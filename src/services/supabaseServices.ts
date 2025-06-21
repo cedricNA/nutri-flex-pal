@@ -291,7 +291,9 @@ export const goalService = {
       .from('user_goals')
       .insert({
         user_id: userId,
-        ...goal
+        ...goal,
+        // Ensure newly created goals start without progress
+        current_value: 0
       });
     
     if (error) {
