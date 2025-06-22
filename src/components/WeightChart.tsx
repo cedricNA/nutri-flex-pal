@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Brush } from 'recharts';
 import { Loader2 } from 'lucide-react';
+import ChartSkeleton from './skeletons/ChartSkeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { weightService } from '@/services/supabaseServices';
 import type { WeightEntry } from '@/schemas';
@@ -86,19 +87,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
   };
 
   if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Évolution du poids</CardTitle>
-          <CardDescription>Chargement des données...</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
-            <Loader2 className="animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <ChartSkeleton title="Évolution du poids" />;
   }
 
   if (error) {
