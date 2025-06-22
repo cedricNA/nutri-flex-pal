@@ -97,3 +97,5 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 ## Troubleshooting
 
 - If login fails with a CORS error during token refresh, update your Supabase project settings to include the app's URL in the **Authorized Redirect URLs** and **Allowed Domains** lists.
+- If `npm install` fails with peer dependency errors, run `npm install --legacy-peer-deps`.
+- Execute `npm test` to run the Vitest unit tests.
