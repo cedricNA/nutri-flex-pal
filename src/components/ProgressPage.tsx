@@ -2,11 +2,13 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import WeightChart from './WeightChart';
 import CaloriesChart from './CaloriesChart';
 import ProgressStats from './ProgressStats';
 import GoalsProgress from './GoalsProgress';
 import WeightEntrySection from './WeightEntrySection';
+import ProgressHeaderSkeleton from './skeletons/ProgressHeaderSkeleton';
 import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
 import PeriodSelector from "./PeriodSelector";
 import { useAppStore } from '../stores/useAppStore';
@@ -19,26 +21,23 @@ const ProgressPage = () => {
   if (progressData.loading) {
     return (
       <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="h-4 bg-gray-200 rounded w-24"></div>
-                <div className="h-4 w-4 bg-gray-200 rounded"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-20"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ProgressHeaderSkeleton />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
+      <Breadcrumb className="hidden md:block">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="#">Tableau de bord</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Progression</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
@@ -99,11 +98,10 @@ const ProgressPage = () => {
 
       {/* Progress Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="weight">Poids</TabsTrigger>
           <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
-          <TabsTrigger value="goals">Objectifs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -112,6 +110,7 @@ const ProgressPage = () => {
             <CaloriesChart period={currentPeriod} />
           </div>
           <ProgressStats />
+          <GoalsProgress />
         </TabsContent>
 
         <TabsContent value="weight" className="space-y-6">
@@ -176,9 +175,6 @@ const ProgressPage = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="goals" className="space-y-6">
-          <GoalsProgress />
-        </TabsContent>
       </Tabs>
     </div>
   );

@@ -1,10 +1,11 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { User, Camera, Save, Edit3, Info } from 'lucide-react';
+import { User, Camera, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import InlineEditableInput from './InlineEditableInput';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -12,6 +13,9 @@ import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
 import ObjectiveSummary from './ObjectiveSummary';
+import { useToast } from '@/hooks/use-toast';
+import ProfileSkeleton from './skeletons/ProfileSkeleton';
+import { useProfileValidation } from '@/hooks/useProfileValidation';
 
 interface ProfilePageProps {
   onManageGoals?: () => void;
@@ -20,7 +24,8 @@ interface ProfilePageProps {
 const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
   const { profile: storedProfile, loading, updateProfile } = useProfile();
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
+  const { errors, validateField } = useProfileValidation();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeGoals, setActiveGoals] = useState<UserGoal[]>([]);
@@ -37,6 +42,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     goal: 'maintien',
     bio: '',
   });
+  const initialProfileRef = useRef<typeof profile | null>(null);
 
   const activityMap: Record<string, string> = {
     sedentary: 'sédentaire',
@@ -66,7 +72,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
   useEffect(() => {
     if (storedProfile) {
       const [first = '', ...rest] = (storedProfile.name || '').split(' ');
-      setProfile({
+      const mapped = {
         firstName: first,
         lastName: rest.join(' '),
         email: storedProfile.email || '',
@@ -77,7 +83,11 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         activityLevel: activityMap[storedProfile.activity_level || 'sedentary'],
         goal: 'maintien',
         bio: '',
-      });
+      };
+      setProfile(mapped);
+      if (!initialProfileRef.current) {
+        initialProfileRef.current = mapped;
+      }
     }
   }, [storedProfile]);
 
@@ -85,32 +95,73 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     loadGoals();
   }, [loadGoals]);
 
-  const handleSave = async () => {
-    setIsEditing(false);
-    await updateProfile({
-      name: `${profile.firstName} ${profile.lastName}`,
-      email: profile.email,
-      age: Number(profile.age) || null,
-      weight: Number(profile.weight) || null,
-      height: Number(profile.height) || null,
-      activity_level: reverseActivityMap[profile.activityLevel] || 'sedentary',
-    });
-  };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = async (field: string, value: string) => {
+    validateField(field as any, value);
     setProfile(prev => ({ ...prev, [field]: value }));
+
+    const updates: Record<string, any> = {};
+    if (field === 'firstName' || field === 'lastName') {
+      const first = field === 'firstName' ? value : profile.firstName;
+      const last = field === 'lastName' ? value : profile.lastName;
+      updates.name = `${first} ${last}`.trim();
+    } else if (field === 'email') {
+      updates.email = value;
+    } else if (field === 'age') {
+      updates.age = Number(value) || null;
+    } else if (field === 'weight') {
+      updates.weight = Number(value) || null;
+    } else if (field === 'height') {
+      updates.height = Number(value) || null;
+    } else if (field === 'activityLevel') {
+      updates.activity_level = reverseActivityMap[value] || 'sedentary';
+    }
+
+    if (Object.keys(updates).length) {
+      await updateProfile(updates);
+      toast({ title: 'Profil mis à jour' });
+    }
   };
 
   const handlePhotoClick = () => {
     fileInputRef.current?.click();
   };
 
+  const processImage = (file: File) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const size = 256;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const minSide = Math.min(img.width, img.height);
+      const sx = (img.width - minSide) / 2;
+      const sy = (img.height - minSide) / 2;
+      ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        setAvatarUrl(url);
+      }, 'image/jpeg', 0.8);
+    };
+    img.src = URL.createObjectURL(file);
+  };
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setAvatarUrl(url);
-    }
+    if (file) processImage(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) processImage(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
   };
 
   const calculateBMR = () => {
@@ -121,9 +172,30 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     return 10 * weight + 6.25 * height - 5 * age;
   };
 
+  const handleResetProfile = async () => {
+    if (!initialProfileRef.current) return;
+    const p = initialProfileRef.current;
+    setProfile(p);
+    await updateProfile({
+      name: `${p.firstName} ${p.lastName}`.trim(),
+      email: p.email,
+      age: Number(p.age) || null,
+      weight: Number(p.weight) || null,
+      height: Number(p.height) || null,
+      activity_level: reverseActivityMap[p.activityLevel] || 'sedentary',
+    });
+    toast({ title: 'Modifications annulées' });
+  };
+
+  const hasChanges = initialProfileRef.current
+    ? Object.keys(initialProfileRef.current).some(
+        key => (profile as any)[key] !== (initialProfileRef.current as any)[key]
+      )
+    : false;
+
 
   if (loading && !storedProfile) {
-    return <div>Chargement du profil...</div>;
+    return <ProfileSkeleton />;
   }
 
   return (
@@ -132,7 +204,11 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <div className="relative group">
+            <div
+              className="relative group"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+            >
               <Avatar className="w-32 h-32">
                 <AvatarImage
                   src={avatarUrl || "/placeholder.svg"}
@@ -145,9 +221,10 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
               <button
                 type="button"
                 onClick={handlePhotoClick}
-                className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm"
               >
-                <Camera className="text-white" size={24} />
+                <Camera className="mr-1" size={20} />
+                <span>Changer</span>
               </button>
               <input
                 type="file"
@@ -173,14 +250,6 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
               </div>
             </div>
             
-            <Button
-              onClick={() => setIsEditing(!isEditing)}
-              variant={isEditing ? "outline" : "default"}
-              className="gap-2"
-            >
-              <Edit3 size={16} />
-              {isEditing ? 'Annuler' : 'Modifier'}
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -198,42 +267,46 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">Prénom</Label>
-                <Input
+                <InlineEditableInput
                   id="firstName"
                   value={profile.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  disabled={!isEditing}
+                  onSave={(val) => handleInputChange('firstName', val)}
+                  className="w-full"
+                  error={errors.firstName}
                 />
               </div>
               <div>
                 <Label htmlFor="lastName">Nom</Label>
-                <Input
+                <InlineEditableInput
                   id="lastName"
                   value={profile.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  disabled={!isEditing}
+                  onSave={(val) => handleInputChange('lastName', val)}
+                  className="w-full"
+                  error={errors.lastName}
                 />
               </div>
             </div>
             
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input
+              <InlineEditableInput
                 id="email"
                 type="email"
                 value={profile.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                disabled={!isEditing}
+                onSave={(val) => handleInputChange('email', val)}
+                className="w-full"
+                error={errors.email}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="phone">Téléphone</Label>
-              <Input
+              <InlineEditableInput
                 id="phone"
                 value={profile.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                disabled={!isEditing}
+                onSave={(val) => handleInputChange('phone', val)}
+                className="w-full"
+                error={errors.phone}
               />
             </div>
             
@@ -243,7 +316,6 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 id="bio"
                 value={profile.bio}
                 onChange={(e) => handleInputChange('bio', e.target.value)}
-                disabled={!isEditing}
                 rows={3}
               />
             </div>
@@ -259,30 +331,30 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="age">Âge</Label>
-                <Input
-                  id="age"
-                  value={profile.age}
-                  onChange={(e) => handleInputChange('age', e.target.value)}
-                  disabled={!isEditing}
-                />
+              <Input
+                id="age"
+                value={profile.age}
+                onChange={(e) => handleInputChange('age', e.target.value)}
+              />
+              {errors.age && <p className="text-xs text-red-600">{errors.age}</p>}
               </div>
               <div>
                 <Label htmlFor="weight">Poids (kg)</Label>
-                <Input
-                  id="weight"
-                  value={profile.weight}
-                  onChange={(e) => handleInputChange('weight', e.target.value)}
-                  disabled={!isEditing}
-                />
+              <Input
+                id="weight"
+                value={profile.weight}
+                onChange={(e) => handleInputChange('weight', e.target.value)}
+              />
+              {errors.weight && <p className="text-xs text-red-600">{errors.weight}</p>}
               </div>
               <div>
                 <Label htmlFor="height">Taille (cm)</Label>
-                <Input
-                  id="height"
-                  value={profile.height}
-                  onChange={(e) => handleInputChange('height', e.target.value)}
-                  disabled={!isEditing}
-                />
+              <Input
+                id="height"
+                value={profile.height}
+                onChange={(e) => handleInputChange('height', e.target.value)}
+              />
+              {errors.height && <p className="text-xs text-red-600">{errors.height}</p>}
               </div>
             </div>
             
@@ -292,7 +364,6 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 id="activityLevel"
                 value={profile.activityLevel}
                 onChange={(e) => handleInputChange('activityLevel', e.target.value)}
-                disabled={!isEditing}
                 className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
               >
                 <option value="sédentaire">Sédentaire</option>
@@ -319,7 +390,6 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 id="goal"
                 value={profile.goal}
                 onChange={(e) => handleInputChange('goal', e.target.value)}
-                disabled={!isEditing}
                 className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
               >
                 <option value="perte">Perte de poids</option>
@@ -401,15 +471,15 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         </Button>
       </div>
 
-      {/* Bouton de sauvegarde */}
-      {isEditing && (
-        <div className="flex justify-center">
-          <Button onClick={handleSave} className="gap-2 px-8">
-            <Save size={16} />
-            Sauvegarder les modifications
+      {hasChanges && (
+        <div className="text-right">
+          <Button onClick={handleResetProfile} variant="outline" className="mt-2">
+            Annuler les modifications
           </Button>
         </div>
       )}
+
+
 
     </div>
   );

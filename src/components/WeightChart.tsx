@@ -1,8 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Brush } from 'recharts';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { weightService } from '@/services/supabaseServices';
 import type { WeightEntry } from '@/schemas';
@@ -14,7 +16,10 @@ interface WeightChartProps {
 const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
   const { user } = useAuth();
   const [weightData, setWeightData] = useState<WeightEntry[]>([]);
+  const [prevData, setPrevData] = useState<WeightEntry[]>([]);
+  const [compare, setCompare] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadWeightData = async () => {
@@ -43,16 +48,30 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
           .filter(entry => new Date(entry.date) >= cutoffDate)
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
           .map(entry => ({
-            date: new Date(entry.date).toLocaleDateString('fr-FR', { 
-              day: 'numeric', 
-              month: 'short' 
+            date: new Date(entry.date).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'short'
             }),
             weight: Number(entry.weight)
           }));
 
         setWeightData(filteredEntries);
+
+        const prevCutoff = new Date(cutoffDate);
+        prevCutoff.setDate(prevCutoff.getDate() - (period === '7d' ? 7 : period === '30d' ? 30 : 30));
+        const prevEntries = entries
+          .filter(e => new Date(e.date) >= prevCutoff && new Date(e.date) < cutoffDate)
+          .map(entry => ({
+            date: new Date(entry.date).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'short'
+            }),
+            weight: Number(entry.weight)
+          }));
+        setPrevData(prevEntries);
       } catch (error) {
         console.error('Error loading weight data:', error);
+        setError('Impossible de charger les données');
       } finally {
         setLoading(false);
       }
@@ -62,7 +81,8 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
   }, [user, period]);
 
   const chartConfig = {
-    weight: { label: 'Poids (kg)', color: 'hsl(var(--primary))' }
+    weight: { label: 'Poids (kg)', color: 'hsl(var(--primary))' },
+    prev: { label: 'Période précédente', color: 'hsl(var(--muted-foreground))' }
   };
 
   if (loading) {
@@ -74,7 +94,23 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Chargement...</p>
+            <Loader2 className="animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Évolution du poids</CardTitle>
+          <CardDescription>{error}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
           </div>
         </CardContent>
       </Card>
@@ -104,6 +140,9 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
         <CardDescription>Suivi de votre poids au fil du temps</CardDescription>
       </CardHeader>
       <CardContent>
+        <Button onClick={() => setCompare((c) => !c)} variant="outline" size="sm" className="mb-2">
+          {compare ? 'Masquer comparaison' : 'Comparer'}
+        </Button>
         <div className="overflow-x-auto">
           <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" minWidth={320} height={300}>
@@ -115,6 +154,10 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
                   dot={{ fill: 'var(--color-weight)', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: 'var(--color-weight)', strokeWidth: 2 }}
                 />
+                {compare && prevData.length > 0 && (
+                  <Line type="monotone" dataKey="weight" data={prevData} stroke="var(--color-prev)" strokeDasharray="3 3" />
+                )}
+                <Brush dataKey="date" height={20} stroke="var(--color-weight)" />
               </LineChart>
             </ResponsiveContainer>
           </ChartContainer>
