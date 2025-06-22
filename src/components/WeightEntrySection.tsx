@@ -52,7 +52,7 @@ const WeightEntrySection = () => {
   };
 
   return (
-    <Card>
+    <Card id="weight-entry">
       <CardHeader>
         <CardTitle>Saisie du poids</CardTitle>
       </CardHeader>

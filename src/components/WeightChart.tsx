@@ -138,7 +138,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
             </div>
           )}
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" minWidth={320} height={300}>
+            <ResponsiveContainer width="100%" minWidth={320} height={300} role="img" aria-label="Graphique du poids">
               <LineChart data={weightData}>
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis domain={['dataMin - 0.5', 'dataMax + 0.5']} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />

@@ -1,22 +1,43 @@
 
-import React from 'react';
+import React, { lazy, Suspense, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import WeightChart from './WeightChart';
-import CaloriesChart from './CaloriesChart';
+import ChartSkeleton from './skeletons/ChartSkeleton';
+const WeightChart = lazy(() => import('./WeightChart'));
+const CaloriesChart = lazy(() => import('./CaloriesChart'));
 import ProgressStats from './ProgressStats';
 import GoalsProgress from './GoalsProgress';
 import WeightEntrySection from './WeightEntrySection';
 import ProgressHeaderSkeleton from './skeletons/ProgressHeaderSkeleton';
+import Recommendations from './Recommendations';
 import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
 import PeriodSelector from "./PeriodSelector";
 import { useAppStore } from '../stores/useAppStore';
 import { useProgressStats } from '../hooks/useProgressStats';
+import { useSwipeTabs } from '../hooks/useSwipeTabs';
+import { usePullToRefresh } from '../hooks/usePullToRefresh';
+import { useRecommendations } from '../hooks/useRecommendations';
 
 const ProgressPage = () => {
   const { currentPeriod, setPeriod } = useAppStore();
   const progressData = useProgressStats();
+  const tabRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState('overview');
+  useSwipeTabs(tabRef, dir => {
+    setTab((prev) => {
+      const order = ['overview', 'weight', 'nutrition'];
+      const idx = order.indexOf(prev);
+      const next = dir === 'left' ? order[idx + 1] : order[idx - 1];
+      return next || prev;
+    });
+  });
+  usePullToRefresh(containerRef, () => progressData.refetch?.());
+  const recs = useRecommendations({
+    weightChange: progressData.weightChange,
+    caloriesAverage: progressData.caloriesAverage,
+  });
 
   if (progressData.loading) {
     return (
@@ -27,7 +48,7 @@ const ProgressPage = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" ref={containerRef}>
       <Breadcrumb className="hidden md:block">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -97,8 +118,21 @@ const ProgressPage = () => {
       <PeriodSelector period={currentPeriod} setPeriod={setPeriod} />
 
       {/* Progress Tabs */}
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs value={tab} onValueChange={setTab} className="space-y-6" ref={tabRef}>
+        <TabsList
+          className="grid w-full grid-cols-3"
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+              const dir = e.key === 'ArrowRight' ? 'left' : 'right';
+              setTab((prev) => {
+                const order = ['overview', 'weight', 'nutrition'];
+                const idx = order.indexOf(prev);
+                const next = dir === 'left' ? order[idx + 1] : order[idx - 1];
+                return next || prev;
+              });
+            }
+          }}
+        >
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="weight">Poids</TabsTrigger>
           <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
@@ -106,15 +140,22 @@ const ProgressPage = () => {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <WeightChart period={currentPeriod} />
-            <CaloriesChart period={currentPeriod} />
+            <Suspense fallback={<ChartSkeleton />}>
+              <WeightChart period={currentPeriod} />
+            </Suspense>
+            <Suspense fallback={<ChartSkeleton />}>
+              <CaloriesChart period={currentPeriod} />
+            </Suspense>
           </div>
           <ProgressStats />
           <GoalsProgress />
+          <Recommendations messages={recs} />
         </TabsContent>
 
         <TabsContent value="weight" className="space-y-6">
-          <WeightChart period={currentPeriod} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <WeightChart period={currentPeriod} />
+          </Suspense>
           <Card>
             <CardHeader>
               <CardTitle>Analyse du poids</CardTitle>
@@ -143,7 +184,9 @@ const ProgressPage = () => {
         </TabsContent>
 
         <TabsContent value="nutrition" className="space-y-6">
-          <CaloriesChart period={currentPeriod} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <CaloriesChart period={currentPeriod} />
+          </Suspense>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
@@ -176,6 +219,13 @@ const ProgressPage = () => {
         </TabsContent>
 
       </Tabs>
+      <button
+        aria-label="Ajouter un poids"
+        onClick={() => document.getElementById('weight-entry')?.scrollIntoView({ behavior: 'smooth' })}
+        className="fixed bottom-4 right-4 md:hidden bg-primary text-primary-foreground rounded-full h-12 w-12 flex items-center justify-center shadow-lg"
+      >
+        +
+      </button>
     </div>
   );
 };

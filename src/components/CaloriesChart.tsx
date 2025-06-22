@@ -137,7 +137,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
             </div>
           )}
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" minWidth={320} height={300}>
+            <ResponsiveContainer width="100%" minWidth={320} height={300} role="img" aria-label="Graphique des calories">
               <BarChart data={caloriesData} barCategoryGap="20%">
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
