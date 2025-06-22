@@ -3,14 +3,18 @@ import React, { lazy, Suspense, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from '@/components/ui/breadcrumb';
+
 import ChartSkeleton from './skeletons/ChartSkeleton';
 const WeightChart = lazy(() => import('./WeightChart'));
 const CaloriesChart = lazy(() => import('./CaloriesChart'));
+
 import ProgressStats from './ProgressStats';
 import GoalsProgress from './GoalsProgress';
 import WeightEntrySection from './WeightEntrySection';
 import ProgressHeaderSkeleton from './skeletons/ProgressHeaderSkeleton';
+
 import Recommendations from './Recommendations';
+
 import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
 import PeriodSelector from "./PeriodSelector";
 import { useAppStore } from '../stores/useAppStore';
@@ -48,7 +52,9 @@ const ProgressPage = () => {
   }
 
   return (
+
     <div className="space-y-8" ref={containerRef}>
+
       <Breadcrumb className="hidden md:block">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -118,6 +124,7 @@ const ProgressPage = () => {
       <PeriodSelector period={currentPeriod} setPeriod={setPeriod} />
 
       {/* Progress Tabs */}
+
       <Tabs value={tab} onValueChange={setTab} className="space-y-6" ref={tabRef}>
         <TabsList
           className="grid w-full grid-cols-3"
@@ -133,6 +140,7 @@ const ProgressPage = () => {
             }
           }}
         >
+
           <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="weight">Poids</TabsTrigger>
           <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
@@ -149,7 +157,9 @@ const ProgressPage = () => {
           </div>
           <ProgressStats />
           <GoalsProgress />
+
           <Recommendations messages={recs} />
+
         </TabsContent>
 
         <TabsContent value="weight" className="space-y-6">

@@ -3,9 +3,11 @@ import { z } from 'zod';
 
 const schema = z.object({
   email: z.string().email({ message: 'Email invalide' }),
+
   age: z.string().optional().regex(/^\d*$/, 'Nombre uniquement'),
   weight: z.string().optional().regex(/^\d*(\.\d+)?$/, 'Nombre'),
   height: z.string().optional().regex(/^\d*(\.\d+)?$/, 'Nombre'),
+
   phone: z.string().optional(),
 });
 

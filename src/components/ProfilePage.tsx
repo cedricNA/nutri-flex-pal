@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { User, Camera, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { errors, validateField } = useProfileValidation();
+
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeGoals, setActiveGoals] = useState<UserGoal[]>([]);
@@ -233,7 +233,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 className="hidden"
               />
             </div>
-            
+
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 {profile.firstName} {profile.lastName}
@@ -248,7 +248,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 </span>
               </div>
             </div>
-            
+
           </div>
         </CardContent>
       </Card>
@@ -285,7 +285,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 />
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="email">Email</Label>
               <InlineEditableInput
@@ -308,7 +308,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 error={errors.phone}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="bio">Biographie</Label>
               <Textarea
@@ -362,7 +362,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
               />
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="activityLevel">Niveau d'activité</Label>
               <select
@@ -378,7 +378,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 <option value="très intense">Très intense</option>
               </select>
             </div>
-            
+
             <div>
               <Label htmlFor="goal" className="flex items-center gap-1">
                 Objectif nutritionnel

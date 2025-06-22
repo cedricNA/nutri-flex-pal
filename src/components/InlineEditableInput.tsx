@@ -20,6 +20,7 @@ const InlineEditableInput: React.FC<InlineEditableInputProps> = ({
 }) => {
   const { value, setValue, editing, startEditing, handleBlur, handleKeyDown, saved } = useInlineEdit(initial, onSave);
 
+
   return editing ? (
     <div className="relative space-y-1">
       <Input
@@ -40,7 +41,9 @@ const InlineEditableInput: React.FC<InlineEditableInputProps> = ({
       )}
     </div>
   ) : (
+
     <span onDoubleClick={startEditing} className="cursor-pointer">
+
       {initial || '—'}
     </span>
   );
