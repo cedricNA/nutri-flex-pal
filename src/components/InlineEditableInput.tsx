@@ -31,7 +31,18 @@ const InlineEditableInput: React.FC<InlineEditableInputProps> = ({
       {saved && <Check className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500" size={16} />}
     </div>
   ) : (
-    <span onDoubleClick={startEditing} className="cursor-pointer">
+    <span
+      role="button"
+      tabIndex={0}
+      onDoubleClick={startEditing}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          startEditing();
+        }
+      }}
+      className="cursor-pointer"
+    >
       {initial || '—'}
     </span>
   );
