@@ -1,8 +1,7 @@
-# Welcome to your Lovable project
+# Welcome to Nutri-Flex project
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/275ee7c3-d818-47e2-a3a1-f45b247974ed
 
 ## How can I edit this code?
 
