@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
 import ObjectiveSummary from './ObjectiveSummary';
 import { useToast } from '@/hooks/use-toast';
+import ProfileSkeleton from './skeletons/ProfileSkeleton';
 
 interface ProfilePageProps {
   onManageGoals?: () => void;
@@ -39,6 +40,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     goal: 'maintien',
     bio: '',
   });
+  const initialProfileRef = useRef<typeof profile | null>(null);
 
   const activityMap: Record<string, string> = {
     sedentary: 'sédentaire',
@@ -68,7 +70,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
   useEffect(() => {
     if (storedProfile) {
       const [first = '', ...rest] = (storedProfile.name || '').split(' ');
-      setProfile({
+      const mapped = {
         firstName: first,
         lastName: rest.join(' '),
         email: storedProfile.email || '',
@@ -79,7 +81,11 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         activityLevel: activityMap[storedProfile.activity_level || 'sedentary'],
         goal: 'maintien',
         bio: '',
-      });
+      };
+      setProfile(mapped);
+      if (!initialProfileRef.current) {
+        initialProfileRef.current = mapped;
+      }
     }
   }, [storedProfile]);
 
@@ -134,9 +140,30 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     return 10 * weight + 6.25 * height - 5 * age;
   };
 
+  const handleResetProfile = async () => {
+    if (!initialProfileRef.current) return;
+    const p = initialProfileRef.current;
+    setProfile(p);
+    await updateProfile({
+      name: `${p.firstName} ${p.lastName}`.trim(),
+      email: p.email,
+      age: Number(p.age) || null,
+      weight: Number(p.weight) || null,
+      height: Number(p.height) || null,
+      activity_level: reverseActivityMap[p.activityLevel] || 'sedentary',
+    });
+    toast({ title: 'Modifications annulées' });
+  };
+
+  const hasChanges = initialProfileRef.current
+    ? Object.keys(initialProfileRef.current).some(
+        key => (profile as any)[key] !== (initialProfileRef.current as any)[key]
+      )
+    : false;
+
 
   if (loading && !storedProfile) {
-    return <div>Chargement du profil...</div>;
+    return <ProfileSkeleton />;
   }
 
   return (
@@ -399,6 +426,14 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
           Gérer mes objectifs
         </Button>
       </div>
+
+      {hasChanges && (
+        <div className="text-right">
+          <Button onClick={handleResetProfile} variant="outline" className="mt-2">
+            Annuler les modifications
+          </Button>
+        </div>
+      )}
 
 
 
