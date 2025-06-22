@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Brush } from 'recharts';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { calorieService } from '@/services/supabaseServices';
 import type { CalorieEntry } from '@/schemas';
@@ -15,6 +17,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
   const { user } = useAuth();
   const [caloriesData, setCaloriesData] = useState<CalorieEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadCaloriesData = async () => {
@@ -53,6 +56,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         setCaloriesData(filteredEntries);
       } catch (error) {
         console.error('Error loading calories data:', error);
+        setError('Impossible de charger les données');
       } finally {
         setLoading(false);
       }
@@ -75,7 +79,23 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Chargement...</p>
+            <Loader2 className="animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Calories journalières</CardTitle>
+          <CardDescription>{error}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
           </div>
         </CardContent>
       </Card>
@@ -114,6 +134,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar dataKey="target" fill="var(--color-target)" radius={[4, 4, 0, 0]} opacity={0.6} />
                 <Bar dataKey="consumed" fill="var(--color-consumed)" radius={[4, 4, 0, 0]} />
+                <Brush dataKey="day" height={20} stroke="var(--color-target)" />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>

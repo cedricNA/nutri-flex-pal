@@ -1,8 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Brush } from 'recharts';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { weightService } from '@/services/supabaseServices';
 import type { WeightEntry } from '@/schemas';
@@ -15,6 +17,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
   const { user } = useAuth();
   const [weightData, setWeightData] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadWeightData = async () => {
@@ -53,6 +56,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
         setWeightData(filteredEntries);
       } catch (error) {
         console.error('Error loading weight data:', error);
+        setError('Impossible de charger les données');
       } finally {
         setLoading(false);
       }
@@ -74,7 +78,23 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Chargement...</p>
+            <Loader2 className="animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Évolution du poids</CardTitle>
+          <CardDescription>{error}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
           </div>
         </CardContent>
       </Card>
@@ -115,6 +135,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
                   dot={{ fill: 'var(--color-weight)', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: 'var(--color-weight)', strokeWidth: 2 }}
                 />
+                <Brush dataKey="date" height={20} stroke="var(--color-weight)" />
               </LineChart>
             </ResponsiveContainer>
           </ChartContainer>
