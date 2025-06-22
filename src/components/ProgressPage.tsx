@@ -140,10 +140,10 @@ const ProgressPage = () => {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Suspense fallback={<ChartSkeleton />}>
+            <Suspense fallback={<ChartSkeleton title="Évolution du poids" />}>
               <WeightChart period={currentPeriod} />
             </Suspense>
-            <Suspense fallback={<ChartSkeleton />}>
+            <Suspense fallback={<ChartSkeleton title="Calories journalières" />}>
               <CaloriesChart period={currentPeriod} />
             </Suspense>
           </div>
@@ -153,7 +153,7 @@ const ProgressPage = () => {
         </TabsContent>
 
         <TabsContent value="weight" className="space-y-6">
-          <Suspense fallback={<ChartSkeleton />}>
+          <Suspense fallback={<ChartSkeleton title="Évolution du poids" />}>
             <WeightChart period={currentPeriod} />
           </Suspense>
           <Card>
@@ -184,7 +184,7 @@ const ProgressPage = () => {
         </TabsContent>
 
         <TabsContent value="nutrition" className="space-y-6">
-          <Suspense fallback={<ChartSkeleton />}>
+          <Suspense fallback={<ChartSkeleton title="Calories journalières" />}>
             <CaloriesChart period={currentPeriod} />
           </Suspense>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
