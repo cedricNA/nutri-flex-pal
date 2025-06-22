@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,6 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
       try {
         const entries = await weightService.getWeightEntries(user.id);
         
-        // Filtrer selon la période
         const now = new Date();
         let cutoffDate = new Date();
         
@@ -98,7 +96,8 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="h-[300px] flex items-center justify-center gap-4">
+            <Loader2 className="animate-spin text-muted-foreground" />
             <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
           </div>
         </CardContent>
@@ -144,12 +143,22 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis domain={['dataMin - 0.5', 'dataMax + 0.5']} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="weight" stroke="var(--color-weight)" strokeWidth={2}
+                <Line
+                  type="monotone"
+                  dataKey="weight"
+                  stroke="var(--color-weight)"
+                  strokeWidth={2}
                   dot={{ fill: 'var(--color-weight)', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: 'var(--color-weight)', strokeWidth: 2 }}
                 />
                 {compare && prevData.length > 0 && (
-                  <Line type="monotone" dataKey="weight" data={prevData} stroke="var(--color-prev)" strokeDasharray="3 3" />
+                  <Line
+                    type="monotone"
+                    dataKey="weight"
+                    data={prevData}
+                    stroke="var(--color-prev)"
+                    strokeDasharray="3 3"
+                  />
                 )}
                 <Brush dataKey="date" height={20} stroke="var(--color-weight)" />
               </LineChart>

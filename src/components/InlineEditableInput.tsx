@@ -18,7 +18,15 @@ const InlineEditableInput: React.FC<InlineEditableInputProps> = ({
   error,
   ...props
 }) => {
-  const { value, setValue, editing, startEditing, handleBlur, handleKeyDown, saved } = useInlineEdit(initial, onSave);
+  const {
+    value,
+    setValue,
+    editing,
+    startEditing,
+    handleBlur,
+    handleKeyDown,
+    saved,
+  } = useInlineEdit(initial, onSave);
 
   return editing ? (
     <div className="relative space-y-1">
@@ -40,7 +48,18 @@ const InlineEditableInput: React.FC<InlineEditableInputProps> = ({
       )}
     </div>
   ) : (
-    <span onDoubleClick={startEditing} className="cursor-pointer">
+    <span
+      role="button"
+      tabIndex={0}
+      onDoubleClick={startEditing}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          startEditing();
+        }
+      }}
+      className="cursor-pointer"
+    >
       {initial || '—'}
     </span>
   );

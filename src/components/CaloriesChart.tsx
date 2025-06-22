@@ -30,7 +30,6 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
       try {
         const entries = await calorieService.getCalorieEntries(user.id);
         
-        // Filtrer selon la période
         const now = new Date();
         let cutoffDate = new Date();
         
@@ -42,16 +41,14 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
             cutoffDate.setDate(now.getDate() - 30);
             break;
           default:
-            cutoffDate = new Date(0); // Toutes les données
+            cutoffDate = new Date(0);
         }
 
         const filteredEntries = entries
           .filter(entry => new Date(entry.date) >= cutoffDate)
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
           .map(entry => ({
-            day: new Date(entry.date).toLocaleDateString('fr-FR', {
-              weekday: 'short'
-            }),
+            day: new Date(entry.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
             consumed: Number(entry.consumed),
             target: Number(entry.target)
           }));
@@ -59,13 +56,11 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         setCaloriesData(filteredEntries);
 
         const prevCutoff = new Date(cutoffDate);
-        prevCutoff.setDate(prevCutoff.getDate() - (period === '7d' ? 7 : period === '30d' ? 30 : 30));
+        prevCutoff.setDate(prevCutoff.getDate() - (period === '7d' ? 7 : 30));
         const prevEntries = entries
           .filter(e => new Date(e.date) >= prevCutoff && new Date(e.date) < cutoffDate)
           .map(entry => ({
-            day: new Date(entry.date).toLocaleDateString('fr-FR', {
-              weekday: 'short'
-            }),
+            day: new Date(entry.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
             consumed: Number(entry.consumed),
             target: Number(entry.target)
           }));
@@ -100,7 +95,8 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="h-[300px] flex items-center justify-center gap-4">
+            <Loader2 className="animate-spin text-muted-foreground" />
             <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
           </div>
         </CardContent>
