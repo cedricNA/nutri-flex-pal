@@ -8,6 +8,7 @@ import CaloriesChart from './CaloriesChart';
 import ProgressStats from './ProgressStats';
 import GoalsProgress from './GoalsProgress';
 import WeightEntrySection from './WeightEntrySection';
+import ProgressHeaderSkeleton from './skeletons/ProgressHeaderSkeleton';
 import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
 import PeriodSelector from "./PeriodSelector";
 import { useAppStore } from '../stores/useAppStore';
@@ -20,20 +21,7 @@ const ProgressPage = () => {
   if (progressData.loading) {
     return (
       <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="h-4 bg-gray-200 rounded w-24"></div>
-                <div className="h-4 w-4 bg-gray-200 rounded"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-20"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ProgressHeaderSkeleton />
       </div>
     );
   }
