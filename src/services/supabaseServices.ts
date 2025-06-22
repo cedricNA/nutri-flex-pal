@@ -61,10 +61,19 @@ export const weightService = {
         weight,
         date: date?.toISOString() || new Date().toISOString()
       });
-    
+
     if (error) {
       console.error('Error adding weight entry:', error);
       throw error;
+    }
+
+    const activeGoal = await goalService.getActiveGoalByType(userId, 'weight_loss');
+    if (activeGoal) {
+      try {
+        await goalService.setGoalCurrentValue(activeGoal.id, weight);
+      } catch (goalError) {
+        console.error('Error updating weight goal:', goalError);
+      }
     }
   }
 };
@@ -286,6 +295,23 @@ export const goalService = {
     return data || [];
   },
 
+  async getActiveGoalByType(userId: string, goalType: string) {
+    const { data, error } = await supabase
+      .from('user_goals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('goal_type', goalType)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching active goal:', error);
+      return null;
+    }
+
+    return data;
+  },
+
   async createUserGoal(userId: string, goal: any) {
     const { error } = await supabase
       .from('user_goals')
@@ -310,6 +336,18 @@ export const goalService = {
     
     if (error) {
       console.error('Error updating user goal:', error);
+      throw error;
+    }
+  },
+
+  async setGoalCurrentValue(goalId: string, value: number) {
+    const { error } = await supabase
+      .from('user_goals')
+      .update({ current_value: value, updated_at: new Date().toISOString() })
+      .eq('id', goalId);
+
+    if (error) {
+      console.error('Error updating goal current value:', error);
       throw error;
     }
   },
