@@ -13,6 +13,7 @@ const WeightEntrySection = () => {
   const [weight, setWeight] = useState('');
   const [loading, setLoading] = useState(false);
   const [entries, setEntries] = useState<WeightEntry[]>([]);
+  const [suggestion, setSuggestion] = useState<string>('');
 
   const loadEntries = async () => {
     if (!user) return;
@@ -23,6 +24,13 @@ const WeightEntrySection = () => {
   useEffect(() => {
     loadEntries();
   }, [user]);
+
+  useEffect(() => {
+    if (entries.length > 0) {
+      const last = entries[entries.length - 1];
+      setSuggestion(last.weight.toString());
+    }
+  }, [entries]);
 
   const handleAdd = async () => {
     if (!user || !weight) return;
@@ -44,7 +52,7 @@ const WeightEntrySection = () => {
   };
 
   return (
-    <Card>
+    <Card id="weight-entry">
       <CardHeader>
         <CardTitle>Saisie du poids</CardTitle>
       </CardHeader>
@@ -52,7 +60,7 @@ const WeightEntrySection = () => {
         <div className="flex space-x-2">
           <Input
             type="number"
-            placeholder="kg"
+            placeholder={suggestion ? `Dernier: ${suggestion}` : 'kg'}
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             className="flex-1"

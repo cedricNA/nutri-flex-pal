@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Target, Plus, Edit, Trash2 } from 'lucide-react';
+import { Target, Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
 import { useAppStore } from '@/stores/useAppStore';
@@ -125,7 +125,9 @@ const GoalsProgress = () => {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Chargement de vos objectifs...</div>
+            <div className="text-center py-8">
+              <Loader2 className="mx-auto animate-spin text-muted-foreground" />
+            </div>
           ) : goals.length === 0 ? (
             <div className="text-center py-8">
               <Target className="h-12 w-12 mx-auto text-gray-400 mb-4" />
