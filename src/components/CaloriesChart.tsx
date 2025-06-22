@@ -48,7 +48,11 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
           .filter(entry => new Date(entry.date) >= cutoffDate)
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
           .map(entry => ({
-            day: new Date(entry.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
+
+            day: new Date(entry.date).toLocaleDateString('fr-FR', {
+              weekday: 'short'
+            }),
+
             consumed: Number(entry.consumed),
             target: Number(entry.target)
           }));
@@ -56,11 +60,15 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         setCaloriesData(filteredEntries);
 
         const prevCutoff = new Date(cutoffDate);
-        prevCutoff.setDate(prevCutoff.getDate() - (period === '7d' ? 7 : 30));
+
+        prevCutoff.setDate(prevCutoff.getDate() - (period === '7d' ? 7 : period === '30d' ? 30 : 30));
         const prevEntries = entries
           .filter(e => new Date(e.date) >= prevCutoff && new Date(e.date) < cutoffDate)
           .map(entry => ({
-            day: new Date(entry.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
+            day: new Date(entry.date).toLocaleDateString('fr-FR', {
+              weekday: 'short'
+            }),
+
             consumed: Number(entry.consumed),
             target: Number(entry.target)
           }));
@@ -95,8 +103,9 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center gap-4">
-            <Loader2 className="animate-spin text-muted-foreground" />
+
+          <div className="h-[300px] flex items-center justify-center">
+
             <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
           </div>
         </CardContent>
@@ -137,7 +146,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
             </div>
           )}
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" minWidth={320} height={300}>
+            <ResponsiveContainer width="100%" minWidth={320} height={300} role="img" aria-label="Graphique des calories">
               <BarChart data={caloriesData} barCategoryGap="20%">
                 <XAxis dataKey="day" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />

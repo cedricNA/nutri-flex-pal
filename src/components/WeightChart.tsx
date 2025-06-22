@@ -96,8 +96,9 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center gap-4">
-            <Loader2 className="animate-spin text-muted-foreground" />
+
+          <div className="h-[300px] flex items-center justify-center">
+
             <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
           </div>
         </CardContent>
@@ -138,7 +139,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
             </div>
           )}
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" minWidth={320} height={300}>
+            <ResponsiveContainer width="100%" minWidth={320} height={300} role="img" aria-label="Graphique du poids">
               <LineChart data={weightData}>
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                 <YAxis domain={['dataMin - 0.5', 'dataMax + 0.5']} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
@@ -152,13 +153,9 @@ const WeightChart: React.FC<WeightChartProps> = ({ period }) => {
                   activeDot={{ r: 6, stroke: 'var(--color-weight)', strokeWidth: 2 }}
                 />
                 {compare && prevData.length > 0 && (
-                  <Line
-                    type="monotone"
-                    dataKey="weight"
-                    data={prevData}
-                    stroke="var(--color-prev)"
-                    strokeDasharray="3 3"
-                  />
+
+                  <Line type="monotone" dataKey="weight" data={prevData} stroke="var(--color-prev)" strokeDasharray="3 3" />
+
                 )}
                 <Brush dataKey="date" height={20} stroke="var(--color-weight)" />
               </LineChart>

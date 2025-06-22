@@ -94,6 +94,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     loadGoals();
   }, [loadGoals]);
 
+
   const handleInputChange = async (field: string, value: string) => {
     validateField(field as any, value);
     setProfile(prev => ({ ...prev, [field]: value }));
@@ -190,6 +191,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         key => (profile as any)[key] !== (initialProfileRef.current as any)[key]
       )
     : false;
+
 
   if (loading && !storedProfile) {
     return <ProfileSkeleton />;
