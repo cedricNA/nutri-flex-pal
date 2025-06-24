@@ -179,7 +179,9 @@ const NutritionStats = () => {
             </div>
           </div>
           <Button
+ ewct44-codex/mettre-à-jour-le-style-du-bouton--ajouter
             className="px-4 py-2 rounded-md font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 shadow hover:brightness-110 transition cursor-pointer border border-blue-400/20"
+
             onClick={handleAddWater}
           >
             <Plus className="w-4 h-4" />
