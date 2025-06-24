@@ -28,8 +28,8 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
   const menuItems = isAdmin ? [...baseMenuItems, ...adminMenuItems] : baseMenuItems;
 
   return (
-    <div className="h-screen w-64 bg-white dark:bg-gray-800 shadow-xl border-r border-gray-200 dark:border-gray-700 flex flex-col">
-      <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+    <div className="h-screen w-64 bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-800 flex flex-col">
+      <div className="p-6 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center space-x-3 mb-8">
           <div className="w-12 h-12 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl">N</span>
@@ -38,7 +38,7 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
             <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
               NutriFlex
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground dark:text-gray-400">
               {role === 'admin' ? 'Admin' : 'Utilisateur'}
             </p>
           </div>
@@ -58,7 +58,7 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive
                   ? `bg-gradient-to-r ${isAdminItem ? 'from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 text-red-600 dark:text-red-400' : 'from-green-50 to-blue-50 dark:from-green-900/30 dark:to-blue-900/30 text-green-600 dark:text-green-400'} shadow-md scale-105`
-                  : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 hover:scale-102'
+                  : 'text-muted-foreground hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 hover:scale-102'
               }`}
             >
               <Icon size={20} className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
@@ -71,7 +71,7 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
         })}
       </nav>
       
-      <div className="p-6 border-t border-gray-100 dark:border-gray-700">
+      <div className="p-6 border-t border-gray-100 dark:border-gray-800">
         <div className="bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 rounded-2xl p-6 text-white relative overflow-hidden">
           <div className="absolute top-2 right-2">
             <Sparkles size={20} className="animate-pulse" />

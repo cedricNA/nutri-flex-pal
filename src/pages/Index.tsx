@@ -15,6 +15,7 @@ import DashboardGoals from '@/components/DashboardGoals';
 import CaloriesChart from '@/components/CaloriesChart';
 import WeightChart from '@/components/WeightChart';
 import NotificationCenter from '@/components/NotificationCenter';
+import ThemeToggle from '@/components/ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -36,10 +37,11 @@ const Index = () => {
           <div className="space-y-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-gray-600">Bienvenue dans votre espace nutrition personnel</p>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+                <p className="text-gray-600 dark:text-gray-400">Bienvenue dans votre espace nutrition personnel</p>
               </div>
               <div className="flex items-center space-x-4">
+                <ThemeToggle variant="compact" />
                 <Button
                   variant="outline"
                   size="sm"
@@ -100,7 +102,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <div className="hidden lg:block">
         <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
       </div>

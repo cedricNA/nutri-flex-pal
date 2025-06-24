@@ -4,7 +4,7 @@
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 84% 6.9%;
     --card-foreground: 210 40% 98%;
 
     --popover: 222.2 84% 4.9%;
@@ -28,13 +28,13 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-background: 220 13% 8%;
+    --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-accent: 220 13% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 13% 12%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     color-scheme: dark;
   }
@@ -44,17 +44,16 @@
     @apply bg-gray-900 text-gray-100;
   }
 
-  /* Improved dark mode color transitions */
-  .dark .bg-white {
-    @apply bg-gray-800;
-  }
-
   .dark .bg-gray-50 {
     @apply bg-gray-900;
   }
 
-  .dark .bg-gray-100 {
+  .dark .bg-white {
     @apply bg-gray-800;
+  }
+
+  .dark .bg-gray-100 {
+    @apply bg-gray-700;
   }
 
   .dark .text-gray-900 {
@@ -134,5 +133,21 @@
   /* Focus improvements for accessibility with dark mode */
   .dark .focus-visible {
     outline-color: rgb(96, 165, 250);
+  }
+
+  /* Modern dark mode specific styles */
+  .dark {
+    /* Sidebar with darker background */
+    --sidebar-bg: 220 13% 8%;
+    --sidebar-hover: 220 13% 12%;
+    
+    /* Cards with better contrast */
+    --card-bg: 220 13% 10%;
+    --card-border: 220 13% 15%;
+    
+    /* Enhanced text contrast */
+    --text-primary: 210 40% 98%;
+    --text-secondary: 215 20.2% 65.1%;
+    --text-muted: 215 20.2% 45.1%;
   }
 }
