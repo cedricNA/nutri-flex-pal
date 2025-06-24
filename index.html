@@ -17,8 +17,16 @@
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
   </head>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+    <body>
+      <div id="root"></div>
+      <script>
+        (() => {
+          const t = localStorage.getItem('theme');
+          const m = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = t || (m ? 'dark' : 'light');
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+        })();
+      </script>
+      <script type="module" src="/src/main.tsx"></script>
+    </body>
+  </html>
