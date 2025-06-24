@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Utensils, Flame, Droplets, TrendingDown, Minus, TrendingUp } from 'lucide-react';
+import { Utensils, Flame, Droplets, TrendingDown, Minus, TrendingUp, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useNutritionStats } from '../hooks/useNutritionStats';
@@ -178,11 +178,12 @@ const NutritionStats = () => {
               <p className="text-sm text-gray-600 dark:text-gray-400">{stats.water.current} / {stats.water.target} verres</p>
             </div>
           </div>
-          <Button 
-            className="bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition"
+          <Button
+            className="px-4 py-2 rounded-md font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 shadow hover:brightness-110 transition cursor-pointer border border-blue-400/20"
             onClick={handleAddWater}
           >
-            + Ajouter
+            <Plus className="w-4 h-4" />
+            Ajouter
           </Button>
         </div>
       </div>
