@@ -584,10 +584,10 @@ export type Database = {
           is_active: boolean | null
           start_date: string | null
           target_value: number
+          title: string
           tracking_interval: string | null
           tracking_repetition: number | null
           tracking_type: string | null
-          title: string
           unit: string
           updated_at: string | null
           user_id: string
@@ -603,10 +603,10 @@ export type Database = {
           is_active?: boolean | null
           start_date?: string | null
           target_value: number
+          title: string
           tracking_interval?: string | null
           tracking_repetition?: number | null
           tracking_type?: string | null
-          title: string
           unit: string
           updated_at?: string | null
           user_id: string
@@ -622,10 +622,10 @@ export type Database = {
           is_active?: boolean | null
           start_date?: string | null
           target_value?: number
+          title?: string
           tracking_interval?: string | null
           tracking_repetition?: number | null
           tracking_type?: string | null
-          title?: string
           unit?: string
           updated_at?: string | null
           user_id?: string
