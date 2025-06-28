@@ -23,7 +23,6 @@ const ObjectiveSummary = ({ goal, progress, children }: ObjectiveSummaryProps) =
             ) : (
               <Circle className="h-5 w-5 text-muted-foreground" />
             )}
- pcdz19-codex/créer-composant-macronutriments
             <h4 className="font-medium transition-colors group-hover:text-primary">{goal.title}</h4>
             <Badge className={`bg-white/10 px-2 rounded-full ${progressColor} transition-colors group-hover:brightness-110`}>
 
@@ -48,7 +47,6 @@ const ObjectiveSummary = ({ goal, progress, children }: ObjectiveSummaryProps) =
       </div>
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
         <div
- pcdz19-codex/créer-composant-macronutriments
           className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-700 ease-out relative overflow-hidden group-hover:brightness-110"
 
           style={{ width: `${Math.min(progress, 100)}%` }}
