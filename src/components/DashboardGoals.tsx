@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Target } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
 import { calculateGoalProgress } from '@/utils/progress';
@@ -38,7 +39,10 @@ const DashboardGoals = ({ onViewProgress }: DashboardGoalsProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Objectifs actifs</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Target size={20} />
+          Objectifs actifs
+        </CardTitle>
         <CardDescription>Suivi rapide de vos progrès</CardDescription>
       </CardHeader>
       <CardContent>
