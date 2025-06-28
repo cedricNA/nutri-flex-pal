@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { User, Camera, Info } from 'lucide-react';
+import { User, Camera, Info, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -255,7 +255,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
 
       {/* Informations personnelles */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User size={20} />
@@ -322,7 +322,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         </Card>
 
         {/* Informations physiques */}
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
             <CardTitle>Informations physiques</CardTitle>
           </CardHeader>
@@ -428,9 +428,12 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
 
       {/* Objectifs actifs */}
       {activeGoals.length > 0 ? (
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
-            <CardTitle>Objectifs actifs</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Target size={20} />
+              Objectifs actifs
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -441,13 +444,16 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
-            <CardTitle>Objectifs actifs</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Target size={20} />
+              Objectifs actifs
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-center">
-            <p>Aucun objectif actif.</p>
-            <p className="text-sm text-muted-foreground">Fixez-en un dans la section Progression.</p>
+            <p className="transition-colors group-hover:text-primary">Aucun objectif actif.</p>
+            <p className="text-sm text-muted-foreground transition-colors group-hover:text-primary">Fixez-en un dans la section Progression.</p>
           </CardContent>
         </Card>
       )}

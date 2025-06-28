@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Target } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { dynamicDataService, type UserGoal } from '@/services/dynamicDataService';
 import { calculateGoalProgress } from '@/utils/progress';
@@ -36,9 +37,12 @@ const DashboardGoals = ({ onViewProgress }: DashboardGoalsProps) => {
   }
 
   return (
-    <Card>
+    <Card className="group hover:shadow-lg transition-all duration-200">
       <CardHeader>
-        <CardTitle>Objectifs actifs</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Target size={20} />
+          Objectifs actifs
+        </CardTitle>
         <CardDescription>Suivi rapide de vos progrès</CardDescription>
       </CardHeader>
       <CardContent>
@@ -47,7 +51,7 @@ const DashboardGoals = ({ onViewProgress }: DashboardGoalsProps) => {
         ) : goals.length === 0 ? (
           <div className="space-y-2 text-center">
             <p>Aucun objectif actif actuellement.</p>
-            <Button variant="link" onClick={onViewProgress} className="p-0 h-auto">
+            <Button variant="link" onClick={onViewProgress} className="p-0 h-auto transition-all group-hover:text-primary">
               Fixez-en un dans la section Progression
             </Button>
           </div>
@@ -57,7 +61,7 @@ const DashboardGoals = ({ onViewProgress }: DashboardGoalsProps) => {
               <ObjectiveSummary key={goal.id} goal={goal} progress={progressMap[goal.id] || 0} />
             ))}
             <div className="text-right">
-              <Button variant="link" onClick={onViewProgress} className="p-0 h-auto">
+              <Button variant="link" onClick={onViewProgress} className="p-0 h-auto transition-all group-hover:text-primary">
                 Voir mes objectifs
               </Button>
             </div>

@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Brush } from 'recharts';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Flame } from 'lucide-react';
 import ChartSkeleton from './skeletons/ChartSkeleton';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { calorieService } from '@/services/supabaseServices';
 import type { CalorieEntry } from '@/schemas';
@@ -22,11 +23,19 @@ interface ChartDataPoint {
 
 const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [caloriesData, setCaloriesData] = useState<ChartDataPoint[]>([]);
   const [prevData, setPrevData] = useState<ChartDataPoint[]>([]);
   const [compare, setCompare] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleAddEntry = () => {
+    toast({
+      title: 'Fonctionnalité à venir',
+      description: "L'ajout d'entrées de calories sera bientôt disponible.",
+    });
+  };
 
   useEffect(() => {
     const loadCaloriesData = async () => {
@@ -99,14 +108,17 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
 
   if (error) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Calories journalières</CardTitle>
+      <Card className="group hover:shadow-lg transition-all duration-200">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2">
+            <Flame className="text-orange-500" size={20} />
+            Calories journalières
+          </CardTitle>
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
+            <Button onClick={() => setError(null)} variant="outline" className="transition-all group-hover:scale-105">Réessayer</Button>
           </div>
         </CardContent>
       </Card>
@@ -115,14 +127,21 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
 
   if (caloriesData.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Calories journalières</CardTitle>
-          <CardDescription>Aucune donnée disponible pour cette période</CardDescription>
+      <Card className="group hover:shadow-lg transition-all duration-200">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2">
+            <Flame className="text-orange-500" size={20} />
+            Calories journalières
+          </CardTitle>
+          <CardDescription>
+            Aucune donnée pour l'instant. Enregistrez vos repas pour voir votre évolution calorique.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
-            <p className="text-muted-foreground">Aucune donnée de calories trouvée</p>
+          <div className="h-[300px] flex flex-col items-center justify-center gap-3">
+            <Button onClick={handleAddEntry} size="sm" className="transition-all group-hover:scale-105">
+              Ajouter une entrée
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -130,13 +149,16 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Calories journalières</CardTitle>
+    <Card className="group hover:shadow-lg transition-all duration-200">
+      <CardHeader className="text-center">
+        <CardTitle className="flex items-center justify-center gap-2">
+          <Flame className="text-orange-500" size={20} />
+          Calories journalières
+        </CardTitle>
         <CardDescription>Comparaison entre calories consommées et objectif</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button onClick={() => setCompare((c) => !c)} variant="outline" size="sm" className="mb-2">
+        <Button onClick={() => setCompare((c) => !c)} variant="outline" size="sm" className="mb-2 transition-all group-hover:scale-105">
           {compare ? 'Masquer comparaison' : 'Comparer'}
         </Button>
         <div className="relative overflow-x-auto">

@@ -1,61 +1,10 @@
 import React, { useState } from 'react';
-import { Utensils, Flame, Droplets, TrendingDown, Minus, TrendingUp, Plus } from 'lucide-react';
+import { Utensils, Droplets, TrendingDown, Minus, TrendingUp, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useNutritionStats } from '../hooks/useNutritionStats';
+import MacroIcons from './MacroIcons';
 
-interface MacroCircleProps {
-  label: string;
-  current: number;
-  target: number;
-  color: string;
-  unit: string;
-}
-
-const MacroCircle = ({ label, current, target, color, unit }: MacroCircleProps) => {
-  const percentage = Math.min((current / target) * 100, 100);
-  const circumference = 2 * Math.PI * 40;
-  const strokeDasharray = circumference;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
-
-  return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-20 h-20">
-        <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 88 88">
-          <circle
-            cx="44"
-            cy="44"
-            r="40"
-            stroke="currentColor"
-            strokeWidth="5"
-            fill="transparent"
-            className="text-gray-200 dark:text-gray-700"
-          />
-          <circle
-            cx="44"
-            cy="44"
-            r="40"
-            stroke={color}
-            strokeWidth="5"
-            fill="transparent"
-            strokeDasharray={strokeDasharray}
-            strokeDashoffset={strokeDashoffset}
-            className="transition-all duration-1000 ease-out"
-            strokeLinecap="round"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xs font-bold text-gray-900 dark:text-gray-100">{current}</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">/{target}</span>
-        </div>
-      </div>
-      <div className="mt-2 text-center">
-        <p className="text-xs font-medium text-gray-900 dark:text-gray-100">{label}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{unit}</p>
-      </div>
-    </div>
-  );
-};
 
 const NutritionStats = () => {
   const { toast } = useToast();
@@ -101,7 +50,7 @@ const NutritionStats = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6 space-y-6">
+    <div className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6 space-y-6 hover:shadow-lg transition-all duration-200">
       <div className="flex items-center justify-between">
         <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Nutrition du jour</h2>
         <div className={`flex items-center space-x-2 ${currentGoal.textColor}`}>
@@ -142,29 +91,11 @@ const NutritionStats = () => {
       </div>
 
       {/* Macronutriments */}
-      <div className="grid grid-cols-3 gap-3 md:gap-4">
-        <MacroCircle
-          label="Protéines"
-          current={stats.proteins.current}
-          target={stats.proteins.target}
-          color="#10B981"
-          unit="g"
-        />
-        <MacroCircle
-          label="Glucides"
-          current={stats.carbs.current}
-          target={stats.carbs.target}
-          color="#3B82F6"
-          unit="g"
-        />
-        <MacroCircle
-          label="Lipides"
-          current={stats.fats.current}
-          target={stats.fats.target}
-          color="#F59E0B"
-          unit="g"
-        />
-      </div>
+      <MacroIcons
+        proteins={stats.proteins}
+        carbs={stats.carbs}
+        fats={stats.fats}
+      />
 
       {/* Hydratation */}
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4">
@@ -179,7 +110,7 @@ const NutritionStats = () => {
             </div>
           </div>
           <Button
-            className="px-4 py-2 rounded-md font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 shadow hover:brightness-110 transition cursor-pointer border border-blue-400/20"
+            className="px-4 py-2 rounded-md font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 shadow hover:brightness-110 transition cursor-pointer border border-blue-400/20 group-hover:scale-105"
             onClick={handleAddWater}
           >
             <Plus className="w-4 h-4" />
