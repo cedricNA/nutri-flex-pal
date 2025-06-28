@@ -108,7 +108,6 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
 
   if (error) {
     return (
- pcdz19-codex/créer-composant-macronutriments
       <Card className="group hover:shadow-lg transition-all duration-200">
 
         <CardHeader className="text-center">
@@ -129,7 +128,6 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
 
   if (caloriesData.length === 0) {
     return (
- pcdz19-codex/créer-composant-macronutriments
       <Card className="group hover:shadow-lg transition-all duration-200">
 
         <CardHeader className="text-center">
@@ -143,7 +141,6 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex flex-col items-center justify-center gap-3">
- pcdz19-codex/créer-composant-macronutriments
             <Button onClick={handleAddEntry} size="sm" className="transition-all group-hover:scale-105">
 
               Ajouter une entrée
@@ -155,7 +152,6 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
   }
 
   return (
- pcdz19-codex/créer-composant-macronutriments
     <Card className="group hover:shadow-lg transition-all duration-200">
 
       <CardHeader className="text-center">
