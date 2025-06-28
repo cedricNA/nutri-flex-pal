@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { User, Camera, Info } from 'lucide-react';
+import { User, Camera, Info, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -430,7 +430,10 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
       {activeGoals.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>Objectifs actifs</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Target size={20} />
+              Objectifs actifs
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -443,7 +446,10 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Objectifs actifs</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Target size={20} />
+              Objectifs actifs
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-center">
             <p>Aucun objectif actif.</p>
