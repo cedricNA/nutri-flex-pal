@@ -50,7 +50,7 @@ const NutritionStats = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6 space-y-6">
+    <div className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6 space-y-6 hover:shadow-lg transition-all duration-200">
       <div className="flex items-center justify-between">
         <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">Nutrition du jour</h2>
         <div className={`flex items-center space-x-2 ${currentGoal.textColor}`}>
@@ -110,7 +110,7 @@ const NutritionStats = () => {
             </div>
           </div>
           <Button
-            className="px-4 py-2 rounded-md font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 shadow hover:brightness-110 transition cursor-pointer border border-blue-400/20"
+            className="px-4 py-2 rounded-md font-bold text-white bg-gradient-to-r from-indigo-500 to-blue-500 shadow hover:brightness-110 transition cursor-pointer border border-blue-400/20 group-hover:scale-105"
             onClick={handleAddWater}
           >
             <Plus className="w-4 h-4" />

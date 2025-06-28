@@ -255,7 +255,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
 
       {/* Informations personnelles */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User size={20} />
@@ -322,7 +322,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         </Card>
 
         {/* Informations physiques */}
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
             <CardTitle>Informations physiques</CardTitle>
           </CardHeader>
@@ -428,7 +428,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
 
       {/* Objectifs actifs */}
       {activeGoals.length > 0 ? (
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target size={20} />
@@ -444,7 +444,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="group hover:shadow-lg transition-all duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target size={20} />
@@ -452,8 +452,8 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-center">
-            <p>Aucun objectif actif.</p>
-            <p className="text-sm text-muted-foreground">Fixez-en un dans la section Progression.</p>
+            <p className="transition-colors group-hover:text-primary">Aucun objectif actif.</p>
+            <p className="text-sm text-muted-foreground transition-colors group-hover:text-primary">Fixez-en un dans la section Progression.</p>
           </CardContent>
         </Card>
       )}

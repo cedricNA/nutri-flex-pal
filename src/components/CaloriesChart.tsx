@@ -108,7 +108,9 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
 
   if (error) {
     return (
-      <Card>
+ pcdz19-codex/créer-composant-macronutriments
+      <Card className="group hover:shadow-lg transition-all duration-200">
+
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-2">
             <Flame className="text-orange-500" size={20} />
@@ -118,7 +120,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex items-center justify-center">
-            <Button onClick={() => setError(null)} variant="outline">Réessayer</Button>
+            <Button onClick={() => setError(null)} variant="outline" className="transition-all group-hover:scale-105">Réessayer</Button>
           </div>
         </CardContent>
       </Card>
@@ -127,7 +129,9 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
 
   if (caloriesData.length === 0) {
     return (
-      <Card>
+ pcdz19-codex/créer-composant-macronutriments
+      <Card className="group hover:shadow-lg transition-all duration-200">
+
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-2">
             <Flame className="text-orange-500" size={20} />
@@ -139,7 +143,9 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         </CardHeader>
         <CardContent>
           <div className="h-[300px] flex flex-col items-center justify-center gap-3">
-            <Button onClick={handleAddEntry} size="sm">
+ pcdz19-codex/créer-composant-macronutriments
+            <Button onClick={handleAddEntry} size="sm" className="transition-all group-hover:scale-105">
+
               Ajouter une entrée
             </Button>
           </div>
@@ -149,7 +155,9 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
   }
 
   return (
-    <Card>
+ pcdz19-codex/créer-composant-macronutriments
+    <Card className="group hover:shadow-lg transition-all duration-200">
+
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
           <Flame className="text-orange-500" size={20} />
@@ -158,7 +166,7 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
         <CardDescription>Comparaison entre calories consommées et objectif</CardDescription>
       </CardHeader>
       <CardContent>
-        <Button onClick={() => setCompare((c) => !c)} variant="outline" size="sm" className="mb-2">
+        <Button onClick={() => setCompare((c) => !c)} variant="outline" size="sm" className="mb-2 transition-all group-hover:scale-105">
           {compare ? 'Masquer comparaison' : 'Comparer'}
         </Button>
         <div className="relative overflow-x-auto">

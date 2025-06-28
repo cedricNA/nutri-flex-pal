@@ -25,7 +25,7 @@ const MacroIcons = ({ proteins, carbs, fats }: MacroIconsProps) => {
         const percentage = data.target > 0 ? Math.round((data.current / data.target) * 100) : 0
         return (
           <div key={label} className="flex flex-col items-center space-y-1">
- o75rg6-codex/créer-composant-macronutriments
+ pcdz19-codex/créer-composant-macronutriments
             <div className="w-16 h-16 rounded-full border-2 border-gray-500/40 flex items-center justify-center">
               <Icon size={28} className="text-gray-400" />
 
