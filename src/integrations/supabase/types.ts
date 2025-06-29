@@ -385,23 +385,26 @@ export type Database = {
         Row: {
           created_at: string | null
           food_id: string | null
+          grams: number
           id: string
           planned_meal_id: string | null
-          quantity: number
+          target_date: string | null
         }
         Insert: {
           created_at?: string | null
           food_id?: string | null
+          grams: number
           id?: string
           planned_meal_id?: string | null
-          quantity: number
+          target_date?: string | null
         }
         Update: {
           created_at?: string | null
           food_id?: string | null
+          grams?: number
           id?: string
           planned_meal_id?: string | null
-          quantity?: number
+          target_date?: string | null
         }
         Relationships: [
           {

@@ -153,13 +153,19 @@ export const plannedMealService = {
     }
   },
 
-  async addFoodToMeal(plannedMealId: string, foodId: number, quantity: number) {
+  async addFoodToMeal(
+    plannedMealId: string,
+    foodId: number,
+    quantity: number,
+    targetDate?: string
+  ) {
     const { error } = await supabase
       .from('planned_meal_foods')
       .insert({
         planned_meal_id: plannedMealId,
         food_id: foodId,
-        quantity,
+        grams: quantity,
+        target_date: targetDate,
       });
 
     if (error) {

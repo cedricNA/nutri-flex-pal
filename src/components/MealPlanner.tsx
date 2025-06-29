@@ -42,11 +42,11 @@ const MealPlanner = () => {
     foods: meal.planned_meal_foods?.map((plannedFood: any) => ({
       id: plannedFood.id,
       name: plannedFood.foods?.name || 'Aliment inconnu',
-      calories: Math.round((plannedFood.foods?.calories || 0) * plannedFood.quantity / 100),
-      protein: Math.round((plannedFood.foods?.protein || 0) * plannedFood.quantity / 100 * 10) / 10,
-      carbs: Math.round((plannedFood.foods?.carbs || 0) * plannedFood.quantity / 100 * 10) / 10,
-      fat: Math.round((plannedFood.foods?.fat || 0) * plannedFood.quantity / 100 * 10) / 10,
-      quantity: plannedFood.quantity,
+      calories: Math.round((plannedFood.foods?.calories || 0) * plannedFood.grams / 100),
+      protein: Math.round((plannedFood.foods?.protein || 0) * plannedFood.grams / 100 * 10) / 10,
+      carbs: Math.round((plannedFood.foods?.carbs || 0) * plannedFood.grams / 100 * 10) / 10,
+      fat: Math.round((plannedFood.foods?.fat || 0) * plannedFood.grams / 100 * 10) / 10,
+      quantity: plannedFood.grams,
       unit: plannedFood.foods?.unit || 'g'
     })) || []
   }));
