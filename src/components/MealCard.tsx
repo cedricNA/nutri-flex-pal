@@ -28,7 +28,7 @@ interface MealCardProps {
   meal: Meal;
   isShowingMacros: boolean;
   onToggleMacros: (mealId: string) => void;
-  onAddFood: (mealName: string) => void;
+  onAddFood: (meal: Meal) => void;
 }
 
 const calculateMealTotals = (foods: Food[]) => {
@@ -73,7 +73,7 @@ const MealCard: React.FC<MealCardProps> = ({
             <TooltipTrigger asChild>
               <Button
                 className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-3 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                onClick={() => onAddFood(meal.name)}
+                onClick={() => onAddFood(meal)}
               >
                 <Plus size={18} className="mr-2" />
                 <span className="hidden sm:inline font-medium">Ajouter</span>
@@ -99,7 +99,7 @@ const MealCard: React.FC<MealCardProps> = ({
             <p className="text-sm mb-4">Commencez par ajouter des aliments à votre repas</p>
             <Button
               className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-2 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              onClick={() => onAddFood(meal.name)}
+              onClick={() => onAddFood(meal)}
             >
               <Plus size={16} className="mr-2" />
               Ajouter un aliment
