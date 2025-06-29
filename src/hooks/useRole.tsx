@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { roleService } from '@/services/roleService';
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 
 type UserRole = Database['public']['Enums']['app_role'];
 

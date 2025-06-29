@@ -46,7 +46,7 @@ class SupabaseFoodService {
     return foodDataService.searchFoods(foods, searchTerm, subgroup, showFavoritesOnly);
   }
 
-  async toggleFavorite(foodId: string, userId: string): Promise<boolean> {
+  async toggleFavorite(foodId: number, userId: string): Promise<boolean> {
     return await favoritesService.toggleFavorite(foodId, userId);
   }
 
@@ -61,11 +61,11 @@ class SupabaseFoodService {
 
   async addMealEntry(
     userId: string,
-    foodId: string,
-    quantity: number,
+    foodId: number,
+    grams: number,
     mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
   ): Promise<boolean> {
-    return await mealService.addMealEntry(userId, foodId, quantity, mealType);
+    return await mealService.addMealEntry(userId, foodId, grams, mealType);
   }
 }
 

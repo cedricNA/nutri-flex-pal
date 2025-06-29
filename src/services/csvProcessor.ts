@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import supabase from '@/lib/supabase';
 import { ImportStats, ImportError } from '@/types/import';
 import { detectSeparator, parseCSVLine, createColumnMappingSync } from '@/utils/csvUtils';
 import { validateFoodItem, createFoodItem } from '@/utils/foodValidation';

@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import supabase from '@/lib/supabase';
 import { Food, FoodInsert } from '@/types/food';
 
 export class FoodRepository {

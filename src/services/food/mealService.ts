@@ -1,11 +1,11 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import supabase from '@/lib/supabase';
 
 export class MealService {
   async addMealEntry(
     userId: string,
-    foodId: string,
-    quantity: number,
+    foodId: number,
+    grams: number,
     mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
   ): Promise<boolean> {
     try {
@@ -14,9 +14,9 @@ export class MealService {
         .insert({
           user_id: userId,
           food_id: foodId,
-          quantity,
+          grams,
           meal_type: mealType,
-          date: new Date().toISOString()
+          eaten_at: new Date().toISOString()
         });
 
       if (error) {

@@ -1,5 +1,5 @@
 
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 
 export type Food = Database['public']['Tables']['foods']['Row'];
 export type FoodInsert = Database['public']['Tables']['foods']['Insert'];

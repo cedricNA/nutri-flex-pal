@@ -1,9 +1,9 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import supabase from '@/lib/supabase';
 import { Food, ExtendedFood } from '@/types/food';
 
 export class FavoritesService {
-  async getUserFavorites(userId: string): Promise<string[]> {
+  async getUserFavorites(userId: string): Promise<number[]> {
     try {
       const { data: favorites, error } = await supabase
         .from('user_food_favorites')
@@ -36,7 +36,7 @@ export class FavoritesService {
     }));
   }
 
-  async toggleFavorite(foodId: string, userId: string): Promise<boolean> {
+  async toggleFavorite(foodId: number, userId: string): Promise<boolean> {
     try {
       // Check if favorite already exists
       const { data: existing, error: checkError } = await supabase

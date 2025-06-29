@@ -44,7 +44,7 @@ const FoodLibrarySupabase = () => {
     });
   };
 
-  const handleAddToMeal = async (foodId: string) => {
+  const handleAddToMeal = async (foodId: number) => {
     if (!user) {
       toast({
         title: "Connexion requise",
@@ -69,7 +69,7 @@ const FoodLibrarySupabase = () => {
     }
   };
 
-  const handleToggleFavorite = async (foodId: string) => {
+  const handleToggleFavorite = async (foodId: number) => {
     if (!user) {
       toast({
         title: "Connexion requise",
