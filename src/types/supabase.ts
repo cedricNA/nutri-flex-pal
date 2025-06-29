@@ -43,6 +43,7 @@ export interface PlannedMealFood {
   id: string
   planned_meal_id: string
   food_id: number
-  quantity: number
+  grams: number
+  target_date?: string
   created_at: string
 }
