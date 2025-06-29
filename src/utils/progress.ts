@@ -1,5 +1,6 @@
 import { differenceInDays, differenceInWeeks, differenceInMonths } from 'date-fns'
-import { weightService, sleepService } from '@/services/supabaseServices'
+import { weightService } from '@/services/supabaseServices'
+import { sleepService } from '@/services/nutritionPlanService'
 import supabase from '@/lib/supabase'
 import type { UserGoal } from '@/services/dynamicDataService'
 
