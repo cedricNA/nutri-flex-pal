@@ -21,9 +21,9 @@ interface AddFoodDialogProps {
 const AddFoodDialog = ({ open, mealId, mealName, onClose, onFoodAdded }: AddFoodDialogProps) => {
   const [search, setSearch] = useState('');
   const [quantity, setQuantity] = useState(100);
-  const [group, setGroup] = useState('');
+  const [group, setGroup] = useState('all');
   const { groups } = useFoodGroups();
-  const { foods, loading } = useFoods({ search, group });
+  const { foods, loading } = useFoods({ search, group: group === 'all' ? '' : group });
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -50,7 +50,7 @@ const AddFoodDialog = ({ open, mealId, mealName, onClose, onFoodAdded }: AddFood
             <SelectValue placeholder="Choisir un groupe" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous</SelectItem>
+            <SelectItem value="all">Tous</SelectItem>
             {groups.map((g) => (
               <SelectItem key={g} value={g}>{g}</SelectItem>
             ))}
