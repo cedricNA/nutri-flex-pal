@@ -9,7 +9,7 @@ import { nutritionPlanService } from '@/services/nutritionPlanService';
 import { useToast } from "@/hooks/use-toast";
 import CreatePlanModal from './CreatePlanModal';
 import EditPlanModal from './EditPlanModal';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/supabase';
 
 type NutritionalPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 

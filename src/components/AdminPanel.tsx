@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Users, Shield, UserCog, Database } from 'lucide-react';
 import { roleService, UserWithRole } from '@/services/roleService';
 import { useToast } from '@/hooks/use-toast';
-import { Database as DatabaseType } from '@/integrations/supabase/types';
+import { Database as DatabaseType } from '@/types/supabase';
 import FoodLibraryAdmin from './FoodLibraryAdmin';
 
 type UserRole = DatabaseType['public']['Enums']['app_role'];

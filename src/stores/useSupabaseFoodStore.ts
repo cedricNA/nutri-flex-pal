@@ -17,8 +17,8 @@ interface SupabaseFoodState {
   setSearchTerm: (term: string) => void;
   setSelectedSubgroup: (subgroup: string) => void;
   setShowFavoritesOnly: (show: boolean) => void;
-  toggleFavorite: (foodId: string) => Promise<void>;
-  addMealEntry: (foodId: string, quantity: number, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => Promise<boolean>;
+  toggleFavorite: (foodId: number) => Promise<void>;
+  addMealEntry: (foodId: number, quantity: number, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => Promise<boolean>;
   getFilteredFoods: () => ExtendedFood[];
   refreshData: () => Promise<void>;
 }

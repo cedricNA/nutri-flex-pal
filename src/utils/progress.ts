@@ -1,6 +1,6 @@
 import { differenceInDays, differenceInWeeks, differenceInMonths } from 'date-fns'
 import { weightService, sleepService } from '@/services/supabaseServices'
-import { supabase } from '@/integrations/supabase/client'
+import supabase from '@/lib/supabase'
 import type { UserGoal } from '@/services/dynamicDataService'
 
 export async function calculateGoalProgress(goal: UserGoal): Promise<number> {

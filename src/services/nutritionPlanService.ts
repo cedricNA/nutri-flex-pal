@@ -1,6 +1,6 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import supabase from '@/lib/supabase';
+import type { Database } from '@/types/supabase';
 
 type NutritionPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 type PlannedMeal = Database['public']['Tables']['planned_meals']['Row'];
@@ -141,7 +141,7 @@ export const plannedMealService = {
     }
   },
 
-  async addFoodToMeal(plannedMealId: string, foodId: string, quantity: number) {
+  async addFoodToMeal(plannedMealId: string, foodId: number, quantity: number) {
     const { error } = await supabase
       .from('planned_meal_foods')
       .insert({

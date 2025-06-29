@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
+import supabase from '@/lib/supabase';
+import type { Database } from '@/types/supabase';
 
 // Type definitions from the database
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -124,7 +124,7 @@ export const foodService = {
     return data || [];
   },
 
-  async getUserFavorites(userId: string): Promise<string[]> {
+  async getUserFavorites(userId: string): Promise<number[]> {
     const { data, error } = await supabase
       .from('user_food_favorites')
       .select('food_id')
@@ -137,7 +137,7 @@ export const foodService = {
     return data?.map(f => f.food_id) || [];
   },
 
-  async toggleFavorite(userId: string, foodId: string) {
+  async toggleFavorite(userId: string, foodId: number) {
     // Check if already favorite
     const { data: existing } = await supabase
       .from('user_food_favorites')
@@ -181,13 +181,13 @@ export const mealService = {
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
-      
+
       query = query
-        .gte('date', startOfDay.toISOString())
-        .lte('date', endOfDay.toISOString());
+        .gte('eaten_at', startOfDay.toISOString())
+        .lte('eaten_at', endOfDay.toISOString());
     }
 
-    const { data, error } = await query.order('date', { ascending: false });
+    const { data, error } = await query.order('eaten_at', { ascending: false });
     
     if (error) {
       console.error('Error fetching meal entries:', error);
@@ -196,15 +196,15 @@ export const mealService = {
     return data || [];
   },
 
-  async addMealEntry(userId: string, foodId: string, quantity: number, mealType: string, date?: Date) {
+  async addMealEntry(userId: string, foodId: number, grams: number, eatenAt?: Date) {
     const { error } = await supabase
       .from('meal_entries')
       .insert({
         user_id: userId,
         food_id: foodId,
-        quantity,
+        grams,
         meal_type: mealType,
-        date: date?.toISOString() || new Date().toISOString()
+        eaten_at: eatenAt?.toISOString() || new Date().toISOString()
       });
     
     if (error) {
