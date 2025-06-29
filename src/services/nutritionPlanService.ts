@@ -98,33 +98,46 @@ export const nutritionPlanService = {
 
 export const plannedMealService = {
   async getPlannedMeals(planId: string): Promise<(PlannedMeal & { foods: Array<PlannedMealFood & { food: any }> })[]> {
-    const { data, error } = await supabase
+    const { data: meals, error } = await supabase
       .from('planned_meals')
-      .select(`
-        *,
-        planned_meal_foods (
-          *,
-          foods (*)
-        )
-      `)
+      .select('*')
       .eq('plan_id', planId)
       .order('meal_order');
-    
+
     if (error) {
       console.error('Error fetching planned meals:', error);
       return [];
     }
 
-    // Transform the data to match the expected structure
-    const transformedData = (data || []).map(meal => ({
-      ...meal,
-      foods: (meal.planned_meal_foods || []).map((pmf: any) => ({
-        ...pmf,
-        food: pmf.foods
-      }))
-    }));
+    if (!meals || meals.length === 0) {
+      return [];
+    }
 
-    return transformedData;
+    const { data: mealFoods, error: foodsError } = await supabase
+      .from('planned_meal_foods')
+      .select('*, foods(*)')
+      .in('planned_meal_id', meals.map((m) => m.id));
+
+    if (foodsError) {
+      console.error('Error fetching planned meal foods:', foodsError);
+    }
+
+    const foodsByMeal: Record<string, any[]> = {};
+    (mealFoods || []).forEach((food: any) => {
+      const mealId = food.planned_meal_id || (food as any).meal_id;
+      if (!foodsByMeal[mealId]) {
+        foodsByMeal[mealId] = [];
+      }
+      foodsByMeal[mealId].push({
+        ...food,
+        food: food.foods,
+      });
+    });
+
+    return meals.map((meal) => ({
+      ...meal,
+      foods: foodsByMeal[meal.id] || [],
+    }));
   },
 
   async createPlannedMeal(planId: string, meal: Omit<PlannedMeal, 'id' | 'plan_id' | 'created_at'>) {
@@ -142,15 +155,28 @@ export const plannedMealService = {
   },
 
   async addFoodToMeal(plannedMealId: string, foodId: number, quantity: number) {
-    const { error } = await supabase
+    let { error } = await supabase
       .from('planned_meal_foods')
       .insert({
         planned_meal_id: plannedMealId,
         food_id: foodId,
-        quantity
+        quantity,
       });
-    
-    if (error) {
+
+    if (error && error.message?.includes('planned_meal_id')) {
+      const { error: fallbackError } = await supabase
+        .from('planned_meal_foods')
+        .insert({
+          meal_id: plannedMealId,
+          food_id: foodId,
+          quantity,
+        });
+
+      if (fallbackError) {
+        console.error('Error adding food to meal:', fallbackError);
+        throw fallbackError;
+      }
+    } else if (error) {
       console.error('Error adding food to meal:', error);
       throw error;
     }
