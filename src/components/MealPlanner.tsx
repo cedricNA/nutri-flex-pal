@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useNutritionPlan } from '@/hooks/useNutritionPlan';
 import MealCard from './MealCard';
+import AddFoodDialog from './AddFoodDialog';
 
 // Types pour les repas dynamiques
 interface Food {
@@ -28,8 +29,9 @@ interface Meal {
 
 const MealPlanner = () => {
   const { toast } = useToast();
-  const { activePlan, plannedMeals, loading } = useNutritionPlan();
+  const { activePlan, plannedMeals, loading, refreshPlan } = useNutritionPlan();
   const [showMacros, setShowMacros] = useState<string | null>(null);
+  const [mealToAddFood, setMealToAddFood] = useState<Meal | null>(null);
 
   // Transformer les repas planifiés en format attendu par MealCard
   const transformedMeals: Meal[] = plannedMeals.map(meal => ({
@@ -97,11 +99,8 @@ const MealPlanner = () => {
     });
   };
 
-  const handleAddFood = (mealName: string) => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: `L'ajout d'aliments à ${mealName} sera bientôt disponible.`,
-    });
+  const handleAddFood = (meal: Meal) => {
+    setMealToAddFood(meal);
   };
 
   if (loading) {
@@ -167,6 +166,15 @@ const MealPlanner = () => {
           />
         ))}
       </div>
+      {mealToAddFood && (
+        <AddFoodDialog
+          open={!!mealToAddFood}
+          mealId={mealToAddFood.id}
+          mealName={mealToAddFood.name}
+          onClose={() => setMealToAddFood(null)}
+          onFoodAdded={refreshPlan}
+        />
+      )}
     </div>
   );
 };
