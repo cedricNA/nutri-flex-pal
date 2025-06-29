@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import MobileNavigation from '@/components/MobileNavigation';
 import MealPlanner from '@/components/MealPlanner';
+import PlanManager from '@/components/PlanManager';
 import FoodLibrary from '@/components/FoodLibrary';
 import ChatBot from '@/components/ChatBot';
 import ProgressPage from '@/components/ProgressPage';
@@ -79,7 +80,12 @@ const Index = () => {
           </div>
         );
       case 'plans':
-        return <MealPlanner />;
+        return (
+          <div className="space-y-6">
+            <PlanManager />
+            <MealPlanner />
+          </div>
+        );
       case 'foods':
         return <FoodLibrary />;
       case 'chat':
