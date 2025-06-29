@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -44,6 +44,7 @@ const AddFoodDialog = ({ open, mealId, mealName, onClose, onFoodAdded }: AddFood
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Ajouter un aliment à {mealName}</DialogTitle>
+          <DialogDescription>Sélectionnez un aliment et la quantité à ajouter.</DialogDescription>
         </DialogHeader>
         <Select value={group} onValueChange={setGroup}>
           <SelectTrigger className="mb-4">
