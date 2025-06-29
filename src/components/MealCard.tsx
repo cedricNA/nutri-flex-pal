@@ -72,7 +72,7 @@ const MealCard: React.FC<MealCardProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-3 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                 onClick={() => onAddFood(meal.name)}
               >
                 <Plus size={18} className="mr-2" />
@@ -98,8 +98,7 @@ const MealCard: React.FC<MealCardProps> = ({
             <p className="text-lg font-medium mb-2">Aucun aliment ajouté</p>
             <p className="text-sm mb-4">Commencez par ajouter des aliments à votre repas</p>
             <Button
-              variant="ghost"
-              className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 px-6 py-2 rounded-xl transition-all duration-200"
+              className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-2 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               onClick={() => onAddFood(meal.name)}
             >
               <Plus size={16} className="mr-2" />
