@@ -68,7 +68,7 @@ const MealCard: React.FC<MealCardProps> = ({
             </div>
           </div>
         </div>
-        {/* Removed top-right "Ajouter" button to avoid redundancy */
+        {/* Removed top-right "Ajouter" button to avoid redundancy */}
       </div>
 
       <div className="space-y-3 mb-6">
