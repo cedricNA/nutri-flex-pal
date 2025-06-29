@@ -22,18 +22,18 @@ const getMealIconFallback = (mealName: string, size: number = 18, className?: st
   switch (mealName) {
     case 'breakfast':
     case 'Petit-déjeuner':
-      return React.createElement(Coffee, { size, className: className || "text-blue-500" });
+      return React.createElement(Coffee, { size, className: className || "text-white" });
     case 'lunch':
     case 'Déjeuner':
-      return React.createElement(Utensils, { size, className: className || "text-green-600" });
+      return React.createElement(Utensils, { size, className: className || "text-white" });
     case 'snack':
     case 'Collation':
-      return React.createElement(CakeSlice, { size, className: className || "text-pink-500" });
+      return React.createElement(CakeSlice, { size, className: className || "text-white" });
     case 'dinner':
     case 'Dîner':
-      return React.createElement(Egg, { size, className: className || "text-yellow-600" });
+      return React.createElement(Egg, { size, className: className || "text-white" });
     default:
-      return React.createElement(Clock, { size, className });
+      return React.createElement(Clock, { size, className: className || "text-white" });
   }
 };
 
@@ -60,7 +60,7 @@ export const getMealIcon = async (mealTypeKey: string, size: number = 18, classN
 
   // Obtenir l'icône correspondante
   const IconComponent = iconMapping[mealType.icon_name] || Clock;
-  return React.createElement(IconComponent, { size, className });
+  return React.createElement(IconComponent, { size, className: className || "text-white" });
 };
 
 // Hook pour utiliser les icônes de repas dans les composants React
