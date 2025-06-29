@@ -13,6 +13,18 @@ import type { Database } from '@/types/supabase';
 
 type NutritionalPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 
+interface NewPlan {
+  name: string;
+  description: string;
+  type: 'weight-loss' | 'maintenance' | 'bulk';
+  targetCalories: number;
+  targetProtein: number;
+  targetCarbs: number;
+  targetFat: number;
+  duration: number;
+  isActive: boolean;
+}
+
 const PlanManager = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -135,11 +147,21 @@ const PlanManager = () => {
     }
   };
 
-  const createPlan = async (newPlan: any) => {
+  const createPlan = async (newPlan: NewPlan) => {
     if (!user) return;
 
     try {
-      await nutritionPlanService.createPlan(user.id, newPlan);
+      await nutritionPlanService.createPlan(user.id, {
+        name: newPlan.name,
+        description: newPlan.description,
+        type: newPlan.type,
+        target_calories: newPlan.targetCalories,
+        target_protein: newPlan.targetProtein,
+        target_carbs: newPlan.targetCarbs,
+        target_fat: newPlan.targetFat,
+        duration: newPlan.duration,
+        is_active: newPlan.isActive,
+      });
       await loadPlans();
       toast({
         title: "Plan créé",
