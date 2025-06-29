@@ -68,22 +68,7 @@ const MealCard: React.FC<MealCardProps> = ({
             </div>
           </div>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-3 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                onClick={() => onAddFood(meal)}
-              >
-                <Plus size={18} className="mr-2" />
-                <span className="hidden sm:inline font-medium">Ajouter</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Ajouter un aliment à {meal.name}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {/* Removed top-right "Ajouter" button to avoid redundancy */
       </div>
 
       <div className="space-y-3 mb-6">
@@ -97,13 +82,22 @@ const MealCard: React.FC<MealCardProps> = ({
             </div>
             <p className="text-lg font-medium mb-2">Aucun aliment ajouté</p>
             <p className="text-sm mb-4">Commencez par ajouter des aliments à votre repas</p>
-            <Button
-              className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-2 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              onClick={() => onAddFood(meal)}
-            >
-              <Plus size={16} className="mr-2" />
-              Ajouter un aliment
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-2 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    onClick={() => onAddFood(meal)}
+                  >
+                    <Plus size={16} className="mr-2" />
+                    Ajouter un aliment
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Ajouter un aliment à votre {meal.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )}
       </div>
