@@ -6,11 +6,17 @@ const PAGE_SIZE = 20
 
 interface Params {
   search?: string
+  group?: string
   page?: number
   limit?: number
 }
 
-export function useFoods({ search = '', page = 0, limit = PAGE_SIZE }: Params) {
+export function useFoods({
+  search = '',
+  group = '',
+  page = 0,
+  limit = PAGE_SIZE
+}: Params) {
   const [foods, setFoods] = useState<FoodClean[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -28,6 +34,9 @@ export function useFoods({ search = '', page = 0, limit = PAGE_SIZE }: Params) {
       if (search) {
         query = query.ilike('name_fr', `%${search}%`)
       }
+      if (group) {
+        query = query.eq('group_fr', group)
+      }
       const { data, error } = await query
       if (!mounted) return
       if (error) {
@@ -40,7 +49,7 @@ export function useFoods({ search = '', page = 0, limit = PAGE_SIZE }: Params) {
     return () => {
       mounted = false
     }
-  }, [search, page, limit])
+  }, [search, group, page, limit])
 
   return { foods, loading, error }
 }

@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFoods } from '@/hooks/useFoods';
+import { useFoodGroups } from '@/hooks/useFoodGroups';
 import { plannedMealService } from '@/services/nutritionPlanService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -19,7 +21,9 @@ interface AddFoodDialogProps {
 const AddFoodDialog = ({ open, mealId, mealName, onClose, onFoodAdded }: AddFoodDialogProps) => {
   const [search, setSearch] = useState('');
   const [quantity, setQuantity] = useState(100);
-  const { foods, loading } = useFoods({ search });
+  const [group, setGroup] = useState('');
+  const { groups } = useFoodGroups();
+  const { foods, loading } = useFoods({ search, group });
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -41,6 +45,17 @@ const AddFoodDialog = ({ open, mealId, mealName, onClose, onFoodAdded }: AddFood
         <DialogHeader>
           <DialogTitle>Ajouter un aliment à {mealName}</DialogTitle>
         </DialogHeader>
+        <Select value={group} onValueChange={setGroup}>
+          <SelectTrigger className="mb-4">
+            <SelectValue placeholder="Choisir un groupe" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Tous</SelectItem>
+            {groups.map((g) => (
+              <SelectItem key={g} value={g}>{g}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Input
           placeholder="Rechercher un aliment..."
           value={search}
