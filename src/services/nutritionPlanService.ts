@@ -1,10 +1,9 @@
 
 import supabase from '@/lib/supabase';
-import type { Database } from '@/types/supabase';
+import type { Database, PlannedMealFood } from '@/types/supabase';
 
 type NutritionPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 type PlannedMeal = Database['public']['Tables']['planned_meals']['Row'];
-type PlannedMealFood = Database['public']['Tables']['planned_meal_foods']['Row'];
 type ActivityEntry = Database['public']['Tables']['activity_entries']['Row'];
 type SleepEntry = Database['public']['Tables']['sleep_entries']['Row'];
 
@@ -124,7 +123,7 @@ export const plannedMealService = {
 
     const foodsByMeal: Record<string, any[]> = {};
     (mealFoods || []).forEach((food: any) => {
-      const mealId = food.planned_meal_id || (food as any).meal_id;
+      const mealId = food.planned_meal_id;
       if (!foodsByMeal[mealId]) {
         foodsByMeal[mealId] = [];
       }
@@ -155,7 +154,7 @@ export const plannedMealService = {
   },
 
   async addFoodToMeal(plannedMealId: string, foodId: number, quantity: number) {
-    let { error } = await supabase
+    const { error } = await supabase
       .from('planned_meal_foods')
       .insert({
         planned_meal_id: plannedMealId,
@@ -163,20 +162,7 @@ export const plannedMealService = {
         quantity,
       });
 
-    if (error && error.message?.includes('planned_meal_id')) {
-      const { error: fallbackError } = await supabase
-        .from('planned_meal_foods')
-        .insert({
-          meal_id: plannedMealId,
-          food_id: foodId,
-          quantity,
-        });
-
-      if (fallbackError) {
-        console.error('Error adding food to meal:', fallbackError);
-        throw fallbackError;
-      }
-    } else if (error) {
+    if (error) {
       console.error('Error adding food to meal:', error);
       throw error;
     }

@@ -38,3 +38,11 @@ export interface PlannedMeal {
   target_date: string
   grams: number
 }
+
+export interface PlannedMealFood {
+  id: string
+  planned_meal_id: string
+  food_id: number
+  quantity: number
+  created_at: string
+}
