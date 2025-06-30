@@ -42,8 +42,9 @@ export interface PlannedMeal {
 export interface PlannedMealFood {
   id: string
   planned_meal_id: string
+  user_id: string
   food_id: number
   grams: number
-  target_date?: string
+  target_date: string
   created_at: string
 }
