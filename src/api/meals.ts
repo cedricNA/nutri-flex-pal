@@ -12,16 +12,24 @@ export interface PlannedMealFood {
 
 export async function addFoodToMeal(params: {
   plannedMealId: string
-  userId: string
   foodId: number
   grams: number
   targetDate: string
 }): Promise<void> {
-  const { plannedMealId, userId, foodId, grams, targetDate } = params
+  const { plannedMealId, foodId, grams, targetDate } = params
   try {
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      throw new Error('User not authenticated')
+    }
+
     const { error } = await supabase.from('planned_meal_foods').insert({
       planned_meal_id: plannedMealId,
-      user_id: userId,
+      user_id: user.id,
       food_id: foodId,
       grams,
       target_date: targetDate
