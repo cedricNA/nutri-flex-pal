@@ -16,19 +16,15 @@ interface Food {
   unit: string;
 }
 
-interface Meal {
-  id: string;
+interface MealCardProps {
+  mealId: string;
   name: string;
   time: string;
+  kcalTarget: number;
   foods: Food[];
-  targetCalories: number;
-}
-
-interface MealCardProps {
-  meal: Meal;
   isShowingMacros: boolean;
   onToggleMacros: (mealId: string) => void;
-  onAddFood: (meal: Meal) => void;
+  onAddFood: (mealId: string) => void;
 }
 
 const calculateMealTotals = (foods: Food[]) => {
@@ -44,14 +40,18 @@ const calculateMealTotals = (foods: Food[]) => {
 };
 
 const MealCard: React.FC<MealCardProps> = ({
-  meal,
+  mealId,
+  name,
+  time,
+  kcalTarget,
+  foods,
   isShowingMacros,
   onToggleMacros,
   onAddFood,
 }) => {
-  const totals = calculateMealTotals(meal.foods);
-  const progress = (totals.calories / meal.targetCalories) * 100;
-  const mealIcon = useMealIcon(meal.name);
+  const totals = calculateMealTotals(foods);
+  const progress = (totals.calories / kcalTarget) * 100;
+  const mealIcon = useMealIcon(name);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-xl hover:scale-102 group">
@@ -61,10 +61,10 @@ const MealCard: React.FC<MealCardProps> = ({
             {mealIcon}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{meal.name}</h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{name}</h3>
             <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
               <Clock size={14} />
-              <span>{meal.time}</span>
+              <span>{time}</span>
             </div>
           </div>
         </div>
@@ -72,10 +72,10 @@ const MealCard: React.FC<MealCardProps> = ({
       </div>
 
       <div className="space-y-3 mb-6">
-        {meal.foods.map((food) => (
+        {foods.map((food) => (
           <FoodItem key={food.id} food={food} />
         ))}
-        {meal.foods.length === 0 && (
+        {foods.length === 0 && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Calculator size={28} className="opacity-50" />
@@ -87,14 +87,14 @@ const MealCard: React.FC<MealCardProps> = ({
                 <TooltipTrigger asChild>
                   <Button
                     className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-2 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    onClick={() => onAddFood(meal)}
+                    onClick={() => onAddFood(mealId)}
                   >
                     <Plus size={16} className="mr-2" />
                     Ajouter un aliment
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Ajouter un aliment à votre {meal.name}</p>
+                  <p>Ajouter un aliment à votre {name}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -110,11 +110,11 @@ const MealCard: React.FC<MealCardProps> = ({
           <div className="flex items-center gap-3">
             <div className="text-right">
               <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                {totals.calories} / {meal.targetCalories}
+                {totals.calories} / {kcalTarget}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">kcal</div>
             </div>
-            {meal.foods.length > 0 && (
+            {foods.length > 0 && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -122,7 +122,7 @@ const MealCard: React.FC<MealCardProps> = ({
                       variant="ghost"
                       size="sm"
                       className="h-10 w-10 p-0 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => onToggleMacros(meal.id)}
+                      onClick={() => onToggleMacros(mealId)}
                     >
                       <Info size={16} />
                     </Button>
