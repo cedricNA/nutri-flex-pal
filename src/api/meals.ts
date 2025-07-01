@@ -40,3 +40,27 @@ export async function addFoodToMeal(params: {
     throw new Error('Unknown error adding food to meal')
   }
 }
+
+export async function createMeal(
+  name: string,
+  time: string,
+  kcal: number,
+  planId: string
+): Promise<string> {
+  const { data, error } = await supabase
+    .from('planned_meals')
+    .insert({
+      name,
+      meal_time: time,
+      target_calories: kcal,
+      plan_id: planId
+    })
+    .select('id')
+    .single()
+
+  if (error || !data) {
+    throw new Error(`Failed to create meal: ${error?.message}`)
+  }
+
+  return data.id
+}

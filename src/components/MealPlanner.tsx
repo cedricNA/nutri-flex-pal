@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
-import { useNutritionPlan } from '@/hooks/useNutritionPlan';
+import { useAuth } from '@/hooks/useAuth';
+import { ensureActivePlan } from '@/api/plan';
+import { addFoodToMeal } from '@/api/meals';
+import supabase from '@/lib/supabase';
 import MealCard from './MealCard';
 import AddFoodDialog from './AddFoodDialog';
 
@@ -29,27 +32,34 @@ interface Meal {
 
 const MealPlanner = () => {
   const { toast } = useToast();
-  const { activePlan, plannedMeals, loading, refreshPlan } = useNutritionPlan();
+  const { user } = useAuth();
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showMacros, setShowMacros] = useState<string | null>(null);
   const [mealToAddFood, setMealToAddFood] = useState<Meal | null>(null);
 
-  // Transformer les repas planifiés en format attendu par MealCard
-  const transformedMeals: Meal[] = plannedMeals.map(meal => ({
-    id: meal.id,
-    name: meal.name,
-    time: meal.meal_time,
-    targetCalories: meal.target_calories,
-    foods: meal.planned_meal_foods?.map((plannedFood: any) => ({
-      id: plannedFood.id,
-      name: plannedFood.foods?.name || 'Aliment inconnu',
-      calories: Math.round((plannedFood.foods?.calories || 0) * plannedFood.grams / 100),
-      protein: Math.round((plannedFood.foods?.protein || 0) * plannedFood.grams / 100 * 10) / 10,
-      carbs: Math.round((plannedFood.foods?.carbs || 0) * plannedFood.grams / 100 * 10) / 10,
-      fat: Math.round((plannedFood.foods?.fat || 0) * plannedFood.grams / 100 * 10) / 10,
-      quantity: plannedFood.grams,
-      unit: plannedFood.foods?.unit || 'g'
-    })) || []
-  }));
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const id = await ensureActivePlan(user.id);
+        setPlanId(id);
+        await fetchMeals(id);
+      } catch (err) {
+        console.error(err);
+        toast({
+          title: 'Erreur',
+          description: "Impossible de charger vos repas.",
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user]);
 
   // Repas par défaut si aucun plan actif
   const defaultMeals: Meal[] = [
@@ -83,7 +93,7 @@ const MealPlanner = () => {
     }
   ];
 
-  const meals = transformedMeals.length > 0 ? transformedMeals : defaultMeals;
+  const displayMeals = meals.length > 0 ? meals : defaultMeals;
 
   const handleCopyFromYesterday = () => {
     toast({
@@ -99,8 +109,53 @@ const MealPlanner = () => {
     });
   };
 
-  const handleAddFood = (meal: Meal) => {
+  const handleOpenAddFood = (meal: Meal) => {
     setMealToAddFood(meal);
+  };
+
+  const fetchMeals = async (id: string) => {
+    const { data, error } = await supabase
+      .from('planned_meals')
+      .select('id,name,meal_time,target_calories,planned_meal_foods(id,grams,foods(id,name,calories,protein,carbs,fat,unit)))')
+      .eq('plan_id', id)
+      .order('meal_order');
+
+    if (error) throw error;
+
+    const mapped: Meal[] = (data || []).map((meal) => ({
+      id: meal.id,
+      name: meal.name,
+      time: meal.meal_time,
+      targetCalories: meal.target_calories,
+      foods:
+        meal.planned_meal_foods?.map((pf: any) => ({
+          id: pf.id,
+          name: pf.foods?.name ?? 'Aliment inconnu',
+          calories: Math.round(((pf.foods?.calories ?? 0) * pf.grams) / 100),
+          protein: Math.round(((pf.foods?.protein ?? 0) * pf.grams) / 100 * 10) / 10,
+          carbs: Math.round(((pf.foods?.carbs ?? 0) * pf.grams) / 100 * 10) / 10,
+          fat: Math.round(((pf.foods?.fat ?? 0) * pf.grams) / 100 * 10) / 10,
+          quantity: pf.grams,
+          unit: pf.foods?.unit ?? 'g',
+        })) || [],
+    }));
+
+    setMeals(mapped);
+  };
+
+  const handleAddFood = async (mealId: string, foodId: string, grams: number) => {
+    try {
+      await addFoodToMeal({ plannedMealId: mealId, foodId: Number(foodId), grams });
+      if (planId) {
+        await fetchMeals(planId);
+      }
+    } catch (err) {
+      toast({
+        title: 'Erreur',
+        description: "Impossible d'ajouter l'aliment.",
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
@@ -121,11 +176,6 @@ const MealPlanner = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">Plan alimentaire du jour</h2>
-          {activePlan && (
-            <p className="text-sm text-muted-foreground mt-1">
-              Plan actuel : {activePlan.name} ({activePlan.target_calories} kcal/jour)
-            </p>
-          )}
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Button 
@@ -145,7 +195,7 @@ const MealPlanner = () => {
         </div>
       </div>
 
-      {!activePlan && (
+      {!planId && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
           <p className="text-yellow-800 dark:text-yellow-200 text-sm">
             Aucun plan nutritionnel actif. Rendez-vous dans la section "Plans" pour créer ou activer un plan alimentaire personnalisé.
@@ -154,15 +204,19 @@ const MealPlanner = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {meals.map((meal) => (
+        {displayMeals.map((meal) => (
           <MealCard
             key={meal.id}
-            meal={meal}
+            mealId={meal.id}
+            name={meal.name}
+            time={meal.time}
+            kcalTarget={meal.targetCalories}
+            foods={meal.foods}
             isShowingMacros={showMacros === meal.id}
             onToggleMacros={(mealId) =>
               setShowMacros(showMacros === mealId ? null : mealId)
             }
-            onAddFood={handleAddFood}
+            onAddFood={handleOpenAddFood}
           />
         ))}
       </div>
@@ -172,7 +226,7 @@ const MealPlanner = () => {
           mealId={mealToAddFood.id}
           mealName={mealToAddFood.name}
           onClose={() => setMealToAddFood(null)}
-          onFoodAdded={refreshPlan}
+          onAddFood={handleAddFood}
         />
       )}
     </div>

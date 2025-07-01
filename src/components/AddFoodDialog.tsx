@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFoods } from '@/hooks/useFoods';
 import { useFoodGroups } from '@/hooks/useFoodGroups';
-import { plannedMealService } from '@/services/nutritionPlanService';
-import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { FoodClean } from '@/types/supabase';
 
@@ -15,27 +13,28 @@ interface AddFoodDialogProps {
   mealId: string;
   mealName: string;
   onClose: () => void;
-  onFoodAdded: () => void;
+  onAddFood: (mealId: string, foodId: string, grams: number) => Promise<void> | void;
 }
 
-const AddFoodDialog = ({ open, mealId, mealName, onClose, onFoodAdded }: AddFoodDialogProps) => {
+const AddFoodDialog = ({ open, mealId, mealName, onClose, onAddFood }: AddFoodDialogProps) => {
   const [search, setSearch] = useState('');
   const [quantity, setQuantity] = useState(100);
   const [group, setGroup] = useState('all');
   const { groups } = useFoodGroups();
   const { foods, loading } = useFoods({ search, group: group === 'all' ? '' : group });
-  const { user } = useAuth();
   const { toast } = useToast();
 
   const handleAdd = async (food: FoodClean) => {
-    if (!user) return;
     try {
-      await plannedMealService.addFoodToMeal(mealId, food.id, quantity);
+      await onAddFood(mealId, food.id, quantity);
       toast({ title: 'Aliment ajouté', description: `${food.name_fr} ajouté à ${mealName}.` });
-      onFoodAdded();
       onClose();
     } catch (error) {
-      console.error('Error adding food to meal:', error);
+      toast({
+        title: 'Erreur',
+        description: "Impossible d'ajouter l'aliment.",
+        variant: 'destructive'
+      });
     }
   };
 
