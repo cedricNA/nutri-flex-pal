@@ -1,4 +1,5 @@
 import supabase from '@/lib/supabase'
+import dayjs from 'dayjs'
 
 export interface PlannedMealFood {
   id: string
@@ -14,7 +15,7 @@ export async function addFoodToMeal(params: {
   plannedMealId: string
   foodId: number
   grams: number
-  targetDate: string
+  targetDate?: string
 }): Promise<void> {
   const { plannedMealId, foodId, grams, targetDate } = params
   try {
@@ -24,16 +25,19 @@ export async function addFoodToMeal(params: {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      throw new Error('User not authenticated')
+      throw 'Not authenticated'
     }
 
-    const { error } = await supabase.from('planned_meal_foods').insert({
+    const finalDate = targetDate ?? dayjs().format('YYYY-MM-DD')
+    const insertData: Record<string, unknown> = {
       planned_meal_id: plannedMealId,
-      user_id: user.id,
       food_id: foodId,
       grams,
-      target_date: targetDate
-    })
+      target_date: finalDate,
+      ...(user ? { user_id: user.id } : {})
+    }
+
+    const { error } = await supabase.from('planned_meal_foods').insert(insertData)
 
     if (error) {
       throw new Error(`Failed to add food to meal: ${error.message}`)
