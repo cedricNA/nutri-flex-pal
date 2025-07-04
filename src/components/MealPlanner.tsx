@@ -114,11 +114,11 @@ const MealPlanner = () => {
   };
 
   const fetchMeals = async (id: string) => {
-    const { data, error } = await supabase
-      .from('planned_meals')
-      .select(
-        'id,name,meal_time,target_calories,planned_meal_foods(id,grams,foods(id,name,calories,protein,carbs,fat,unit))'
-      )
+      const { data, error } = await supabase
+        .from('planned_meals')
+        .select(
+          'id,name,meal_time,target_calories,planned_meal_foods(id,grams,foods(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g,unit))'
+        )
       .eq('plan_id', id)
       .order('meal_order');
 
