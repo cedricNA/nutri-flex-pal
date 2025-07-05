@@ -1,16 +1,17 @@
 
 import supabase from '@/lib/supabase';
 import { Food, FoodInsert } from '@/types/food';
+import type { FoodClean } from '@/types/supabase';
 
 export class FoodRepository {
   async getAllFoods(): Promise<Food[]> {
     try {
       console.log('Fetching foods from Supabase...');
-      
+
       const { data: foods, error } = await supabase
-        .from('foods')
+        .from('foods_clean')
         .select('*')
-        .order('name');
+        .order('name_fr');
 
       if (error) {
         console.error('Error loading foods:', error);
@@ -23,7 +24,27 @@ export class FoodRepository {
       }
 
       console.log(`Raw foods count: ${foods.length}`);
-      return foods;
+      return (foods as FoodClean[]).map(f => ({
+        id: String(f.id),
+        name: f.name_fr,
+        category: f.group_fr,
+        calories: f.kcal,
+        protein: f.protein_g,
+        carbs: f.carb_g,
+        fat: f.fat_g,
+        fiber: f.fiber_g,
+        salt: f.salt_g,
+        unit: 'g',
+        image: null,
+        created_at: null,
+        calcium: null,
+        iron: null,
+        magnesium: null,
+        potassium: null,
+        sodium: null,
+        vitamin_c: null,
+        vitamin_d: null,
+      }));
     } catch (error) {
       console.error('Error in getAllFoods:', error);
       return [];

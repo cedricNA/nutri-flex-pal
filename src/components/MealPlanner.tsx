@@ -117,7 +117,7 @@ const MealPlanner = () => {
       const { data, error } = await supabase
         .from('planned_meals')
         .select(
-          'id,name,meal_time,target_calories,planned_meal_foods(id,grams,foods(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g,unit))'
+          'id,name,meal_time,target_calories,planned_meal_foods(id,grams,foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g))'
         )
       .eq('plan_id', id)
       .order('meal_order');
@@ -138,7 +138,7 @@ const MealPlanner = () => {
           carbs: Math.round(((pf.foods?.carbs ?? 0) * pf.grams) / 100 * 10) / 10,
           fat: Math.round(((pf.foods?.fat ?? 0) * pf.grams) / 100 * 10) / 10,
           quantity: pf.grams,
-          unit: pf.foods?.unit ?? 'g',
+          unit: 'g',
         })) || [],
     }));
 

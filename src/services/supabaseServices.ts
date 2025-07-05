@@ -7,6 +7,7 @@ type WeightEntry = Database['public']['Tables']['weight_entries']['Row'];
 type CalorieEntry = Database['public']['Tables']['calorie_entries']['Row'];
 type MealEntry = Database['public']['Tables']['meal_entries']['Row'];
 type Food = Database['public']['Tables']['foods']['Row'];
+import type { FoodClean } from '@/types/supabase';
 type HydrationEntry = Database['public']['Tables']['hydration_entries']['Row'];
 type UserSettings = Database['public']['Tables']['user_settings']['Row'];
 
@@ -113,15 +114,35 @@ export const calorieService = {
 export const foodService = {
   async getFoods(): Promise<Food[]> {
     const { data, error } = await supabase
-      .from('foods')
+      .from('foods_clean')
       .select('*')
-      .order('name');
-    
+      .order('name_fr');
+
     if (error) {
       console.error('Error fetching foods:', error);
       return [];
     }
-    return data || [];
+    return (data as FoodClean[]).map(f => ({
+      id: String(f.id),
+      name: f.name_fr,
+      category: f.group_fr,
+      calories: f.kcal,
+      protein: f.protein_g,
+      carbs: f.carb_g,
+      fat: f.fat_g,
+      fiber: f.fiber_g,
+      salt: f.salt_g,
+      unit: 'g',
+      image: null,
+      created_at: null,
+      calcium: null,
+      iron: null,
+      magnesium: null,
+      potassium: null,
+      sodium: null,
+      vitamin_c: null,
+      vitamin_d: null,
+    }));
   },
 
   async getUserFavorites(userId: string): Promise<number[]> {
@@ -172,7 +193,7 @@ export const mealService = {
       .from('meal_entries')
       .select(`
         *,
-        foods (*)
+        foods:foods_clean (*)
       `)
       .eq('user_id', userId);
 
