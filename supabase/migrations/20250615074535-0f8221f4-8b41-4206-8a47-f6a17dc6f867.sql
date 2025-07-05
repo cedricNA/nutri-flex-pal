@@ -65,9 +65,9 @@ CREATE TABLE public.meal_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   food_id UUID REFERENCES public.foods(id) ON DELETE CASCADE NOT NULL,
-  quantity DECIMAL(6,2) NOT NULL,
+  grams DECIMAL(6,2) NOT NULL,
   meal_type TEXT CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')) NOT NULL,
-  date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  eaten_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
