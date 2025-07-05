@@ -173,6 +173,13 @@ const MealCard: React.FC<MealCardProps> = ({
             </div>
           </div>
         )}
+
+        <div className="flex justify-center mt-6">
+          <Button variant="outline" onClick={() => onAddFood(mealId)}>
+            <Plus size={16} className="mr-2" />
+            Ajouter un aliment
+          </Button>
+        </div>
       </div>
     </div>
   );
