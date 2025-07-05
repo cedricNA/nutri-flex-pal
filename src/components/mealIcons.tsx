@@ -18,23 +18,43 @@ const iconMapping: { [key: string]: React.ComponentType<any> } = {
 };
 
 // Fonction de fallback avec les icônes hardcodées
-const getMealIconFallback = (mealName: string, size: number = 18, className?: string): React.ReactElement => {
+const getMealIconFallback = (
+  mealName: string,
+  size: number = 18,
+  className?: string
+): React.ReactElement => {
+  let emoji = '🍽️';
   switch (mealName) {
     case 'breakfast':
     case 'Petit-déjeuner':
-      return React.createElement(Coffee, { size, className: className || "text-white" });
+      emoji = '🥐';
+      break;
     case 'lunch':
     case 'Déjeuner':
-      return React.createElement(Utensils, { size, className: className || "text-white" });
-    case 'snack':
-    case 'Collation':
-      return React.createElement(CakeSlice, { size, className: className || "text-white" });
+      emoji = '🍽️';
+      break;
     case 'dinner':
     case 'Dîner':
-      return React.createElement(Egg, { size, className: className || "text-white" });
+      emoji = '🍲';
+      break;
+    case 'snack':
+    case 'Collation':
+      emoji = '🍎';
+      break;
     default:
-      return React.createElement(Clock, { size, className: className || "text-white" });
+      emoji = '🍽️';
   }
+
+  return (
+    <span
+      className={className || 'text-white'}
+      style={{ fontSize: size, lineHeight: 1 }}
+      role="img"
+      aria-label={mealName}
+    >
+      {emoji}
+    </span>
+  );
 };
 
 // Fonction pour obtenir l'icône depuis la base de données (asynchrone)
