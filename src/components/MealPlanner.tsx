@@ -109,8 +109,14 @@ const MealPlanner = () => {
     });
   };
 
-  const handleOpenAddFood = (meal: Meal) => {
-    setMealToAddFood(meal);
+  // Open the "Add food" dialog for the given meal
+  const handleOpenAddFood = (mealId: string) => {
+    const meal = displayMeals.find((m) => m.id === mealId);
+    if (meal) {
+      setMealToAddFood(meal);
+    } else {
+      console.error('Meal not found for id', mealId);
+    }
   };
 
   const fetchMeals = async (id: string) => {
