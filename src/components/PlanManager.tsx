@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Settings, Trash2, Copy, Calendar, Target } from 'lucide-react';
+import { Plus, Settings, Trash2, Copy, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import { nutritionPlanService } from '@/services/nutritionPlanService';
 import { useToast } from "@/hooks/use-toast";
 import CreatePlanModal from './CreatePlanModal';
 import EditPlanModal from './EditPlanModal';
+import ActivePlanCard from './ActivePlanCard';
 import type { Database } from '@/types/supabase';
 
 type NutritionalPlan = Database['public']['Tables']['nutrition_plans']['Row'];
@@ -223,37 +224,7 @@ const PlanManager = () => {
 
       {/* Plan actif */}
       {plans.find(plan => plan.is_active) && (
-        <Card className="border-green-200 bg-green-50">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-green-800">Plan actuel</CardTitle>
-              <Badge variant="default" className="bg-green-500">Actif</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {(() => {
-              const activePlan = plans.find(plan => plan.is_active)!;
-              const config = planTypeConfig[activePlan.type as keyof typeof planTypeConfig];
-              return (
-                <div className="flex items-center space-x-4">
-                  <div className={`w-16 h-16 bg-gradient-to-r ${config.color} rounded-2xl flex items-center justify-center`}>
-                    <Target className="text-white" size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-green-800">{activePlan.name}</h3>
-                    <p className="text-green-600 text-sm">{activePlan.description}</p>
-                    <div className="flex space-x-4 mt-2 text-sm text-green-700">
-                      <span>{activePlan.target_calories} kcal</span>
-                      <span>P: {activePlan.target_protein}g</span>
-                      <span>G: {activePlan.target_carbs}g</span>
-                      <span>L: {activePlan.target_fat}g</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </CardContent>
-        </Card>
+        <ActivePlanCard plan={plans.find(plan => plan.is_active)!} />
       )}
 
       {/* Liste des plans */}
