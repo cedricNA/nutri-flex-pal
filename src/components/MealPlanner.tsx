@@ -39,6 +39,14 @@ const MealPlanner = () => {
   const [showMacros, setShowMacros] = useState<string | null>(null);
   const [mealToAddFood, setMealToAddFood] = useState<Meal | null>(null);
 
+  const todayString = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  const formattedDate = todayString.charAt(0).toUpperCase() + todayString.slice(1);
+
   useEffect(() => {
     const load = async () => {
       if (!user) return;
@@ -192,7 +200,10 @@ const MealPlanner = () => {
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">Plan alimentaire du jour</h2>
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">Plan alimentaire du jour</h2>
+            <p className="text-gray-600 dark:text-gray-400">{formattedDate}</p>
+          </div>
         </div>
         <div className="text-center py-8">
           <p className="text-muted-foreground">Chargement de votre plan alimentaire...</p>
@@ -206,9 +217,10 @@ const MealPlanner = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">Plan alimentaire du jour</h2>
+          <p className="text-gray-600 dark:text-gray-400">{formattedDate}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-          <Button 
+          <Button
             variant="outline"
             className="text-sm px-4 py-2 rounded-lg font-medium transition"
             onClick={handleCopyFromYesterday}
