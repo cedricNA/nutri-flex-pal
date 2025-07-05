@@ -9,6 +9,7 @@ import { addFoodToMeal, getOrCreatePlannedMeal } from '@/api/meals';
 import supabase from '@/lib/supabase';
 import MealCard from './MealCard';
 import AddFoodDialog from './AddFoodDialog';
+import { planColors } from '@/utils/planColors';
 
 // Types pour les repas dynamiques
 interface Food {
@@ -34,10 +35,12 @@ const MealPlanner = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [planId, setPlanId] = useState<string | null>(null);
+  const [planType, setPlanType] = useState<'maintenance' | 'weight-loss' | 'bulk'>('maintenance');
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMacros, setShowMacros] = useState<string | null>(null);
   const [mealToAddFood, setMealToAddFood] = useState<Meal | null>(null);
+  const [lastAddedMealId, setLastAddedMealId] = useState<string | null>(null);
 
   const todayString = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -54,6 +57,14 @@ const MealPlanner = () => {
       try {
         const id = await ensureActivePlan(user.id);
         setPlanId(id);
+        const { data: planData } = await supabase
+          .from('nutrition_plans')
+          .select('type')
+          .eq('id', id)
+          .single();
+        if (planData && planData.type) {
+          setPlanType(planData.type as 'maintenance' | 'weight-loss' | 'bulk');
+        }
         await fetchMeals(id);
       } catch (err) {
         console.error(err);
@@ -187,6 +198,8 @@ const MealPlanner = () => {
       });
 
       await fetchMeals(planId);
+      setLastAddedMealId(mealId);
+      setTimeout(() => setLastAddedMealId(null), 1000);
     } catch (err) {
       toast({
         title: 'Erreur',
@@ -259,6 +272,8 @@ const MealPlanner = () => {
               setShowMacros(showMacros === mealId ? null : mealId)
             }
             onAddFood={handleOpenAddFood}
+            progressColor={planColors[planType].progress}
+            highlightLastFood={lastAddedMealId === meal.id}
           />
         ))}
       </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Zap, Drumstick, Sandwich, Nut } from 'lucide-react';
 import type { Database } from '@/types/supabase';
+import { planColors, PlanType } from '@/utils/planColors';
 
 type NutritionPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 
@@ -10,11 +11,12 @@ interface ActivePlanCardProps {
 }
 
 const ActivePlanCard = ({ plan }: ActivePlanCardProps) => {
+  const colors = planColors[plan.type as PlanType] || planColors.maintenance;
   return (
-    <div className="bg-blue-900 text-white rounded-xl shadow-md p-6 space-y-4">
+    <div className={`${colors.card} text-white rounded-xl shadow-md p-6 space-y-4`}>
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold">{plan.name}</h3>
-        <Badge className="bg-green-500 text-white py-0.5 px-2 text-xs">Actif</Badge>
+        <Badge className={`${colors.badge} text-white py-0.5 px-2 text-xs`}>Actif</Badge>
       </div>
       {plan.description && <p className="text-sm">{plan.description}</p>}
       <div className="flex flex-wrap gap-4 text-sm">

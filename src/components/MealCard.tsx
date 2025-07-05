@@ -27,6 +27,8 @@ interface MealCardProps {
   isShowingMacros: boolean;
   onToggleMacros: (mealId: string) => void;
   onAddFood: (mealId: string) => void;
+  progressColor?: string;
+  highlightLastFood?: boolean;
 }
 
 const calculateMealTotals = (foods: Food[]) => {
@@ -50,11 +52,26 @@ const MealCard: React.FC<MealCardProps> = ({
   isShowingMacros,
   onToggleMacros,
   onAddFood,
+  progressColor = 'bg-green-500',
+  highlightLastFood = false,
 }) => {
   const totals = calculateMealTotals(foods);
   const progress = (totals.calories / kcalTarget) * 100;
   const mealIcon = useMealIcon(name);
   const { toast } = useToast();
+  const lastItemRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    if (highlightLastFood && lastItemRef.current) {
+      lastItemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlightLastFood, foods.length]);
+
+  const badgeColorMap: Record<string, string> = {
+    'bg-blue-500': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    'bg-pink-500': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+    'bg-green-500': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-xl hover:scale-102 group">
@@ -92,8 +109,13 @@ const MealCard: React.FC<MealCardProps> = ({
       </div>
 
       <div className="space-y-3 mb-6">
-        {foods.map((food) => (
-          <FoodItem key={food.id} food={food} />
+        {foods.map((food, idx) => (
+          <FoodItem
+            key={food.id}
+            food={food}
+            ref={idx === foods.length - 1 ? lastItemRef : null}
+            isNew={highlightLastFood && idx === foods.length - 1}
+          />
         ))}
         {foods.length === 0 && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -158,7 +180,7 @@ const MealCard: React.FC<MealCardProps> = ({
         
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-700 ease-out relative overflow-hidden"
+            className={`${progressColor} h-3 rounded-full transition-all duration-700 ease-out relative overflow-hidden`}
             style={{ width: `${Math.min(progress, 100)}%` }}
           >
             <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -167,11 +189,9 @@ const MealCard: React.FC<MealCardProps> = ({
         
         {progress > 0 && (
           <div className="flex justify-center mt-2">
-            <span className={`text-sm font-medium px-3 py-1 rounded-full ${
-              progress >= 100 
-                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-            }`}>
+            <span
+              className={`text-sm font-medium px-3 py-1 rounded-full ${badgeColorMap[progressColor]}`}
+            >
               {Math.round(progress)}% complété
             </span>
           </div>
