@@ -223,29 +223,29 @@ export type Database = {
       meal_entries: {
         Row: {
           created_at: string | null
-          date: string
+          eaten_at: string
           food_id: string
+          grams: number
           id: string
           meal_type: string
-          quantity: number
           user_id: string
         }
         Insert: {
           created_at?: string | null
-          date?: string
+          eaten_at?: string
           food_id: string
+          grams: number
           id?: string
           meal_type: string
-          quantity: number
           user_id: string
         }
         Update: {
           created_at?: string | null
-          date?: string
+          eaten_at?: string
           food_id?: string
+          grams?: number
           id?: string
           meal_type?: string
-          quantity?: number
           user_id?: string
         }
         Relationships: [
