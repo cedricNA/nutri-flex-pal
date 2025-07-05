@@ -196,7 +196,13 @@ export const mealService = {
     return data || [];
   },
 
-  async addMealEntry(userId: string, foodId: number, grams: number, eatenAt?: Date) {
+  async addMealEntry(
+    userId: string,
+    foodId: number,
+    grams: number,
+    mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack',
+    eatenAt?: Date
+  ) {
     const { error } = await supabase
       .from('meal_entries')
       .insert({
