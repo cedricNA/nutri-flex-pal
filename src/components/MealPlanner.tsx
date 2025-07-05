@@ -168,7 +168,7 @@ const MealPlanner = () => {
 
       await addFoodToMeal({
         plannedMealId: dbMealId,
-        foodId: Number(foodId),
+        foodId,
         grams,
       });
 
