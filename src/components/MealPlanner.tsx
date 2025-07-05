@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/useAuth';
 import { ensureActivePlan } from '@/api/plan';
-import { addFoodToMeal } from '@/api/meals';
+import { addFoodToMeal, getOrCreatePlannedMeal } from '@/api/meals';
 import supabase from '@/lib/supabase';
 import MealCard from './MealCard';
 import AddFoodDialog from './AddFoodDialog';
@@ -147,10 +147,32 @@ const MealPlanner = () => {
 
   const handleAddFood = async (mealId: string, foodId: string, grams: number) => {
     try {
-      await addFoodToMeal({ plannedMealId: mealId, foodId: Number(foodId), grams });
-      if (planId) {
-        await fetchMeals(planId);
+      if (!planId) {
+        throw new Error('Aucun plan actif');
       }
+
+      // Find meal info by id from current state
+      const mealInfo = displayMeals.find((m) => m.id === mealId);
+
+      if (!mealInfo) {
+        throw new Error('Repas introuvable');
+      }
+
+      // Ensure the meal exists in database and get its id
+      const dbMealId = await getOrCreatePlannedMeal({
+        planId,
+        name: mealInfo.name,
+        mealTime: mealInfo.time,
+        targetCalories: mealInfo.targetCalories,
+      });
+
+      await addFoodToMeal({
+        plannedMealId: dbMealId,
+        foodId: Number(foodId),
+        grams,
+      });
+
+      await fetchMeals(planId);
     } catch (err) {
       toast({
         title: 'Erreur',
