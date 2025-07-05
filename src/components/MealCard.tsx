@@ -1,7 +1,9 @@
 import React from 'react';
-import { Plus, Calculator, Info, Clock } from 'lucide-react';
+import { Plus, Calculator, Info, Clock, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 import FoodItem from './FoodItem';
 import { useMealIcon } from './mealIcons';
 
@@ -52,6 +54,7 @@ const MealCard: React.FC<MealCardProps> = ({
   const totals = calculateMealTotals(foods);
   const progress = (totals.calories / kcalTarget) * 100;
   const mealIcon = useMealIcon(name);
+  const { toast } = useToast();
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-xl hover:scale-102 group">
@@ -62,13 +65,30 @@ const MealCard: React.FC<MealCardProps> = ({
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{name}</h3>
-            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Clock size={14} />
               <span>{time}</span>
             </div>
           </div>
         </div>
-        {/* Removed top-right "Ajouter" button to avoid redundancy */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreVertical size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => toast({ title: 'Fonctionnalité à venir', description: 'La modification de repas sera bientôt disponible.' })}>
+              Modifier le repas
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast({ title: 'Fonctionnalité à venir', description: 'La suppression de repas sera bientôt disponible.' })}>
+              Supprimer
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast({ title: 'Fonctionnalité à venir', description: 'La duplication de repas sera bientôt disponible.' })}>
+              Dupliquer
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="space-y-3 mb-6">
@@ -186,3 +206,4 @@ const MealCard: React.FC<MealCardProps> = ({
 };
 
 export default MealCard;
+
