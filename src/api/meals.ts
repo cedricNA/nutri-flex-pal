@@ -4,7 +4,7 @@ export interface PlannedMealFood {
   id: string
   planned_meal_id: string
   user_id: string
-  food_id: number
+  food_id: string
   grams: number
   target_date: string
   created_at: string
@@ -12,12 +12,16 @@ export interface PlannedMealFood {
 
 export async function addFoodToMeal(params: {
   plannedMealId: string
-  foodId: number
+  foodId: string
   grams: number
   targetDate?: string
 }): Promise<void> {
   const { plannedMealId, foodId, grams, targetDate } = params
   try {
+    console.log('Planned meal ID:', plannedMealId)
+    if (!plannedMealId) {
+      throw new Error('Invalid planned meal ID')
+    }
     const insertData: Record<string, unknown> = {
       planned_meal_id: plannedMealId,
       food_id: foodId,

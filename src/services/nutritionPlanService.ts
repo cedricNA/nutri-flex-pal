@@ -155,7 +155,7 @@ export const plannedMealService = {
 
   async addFoodToMeal(
     plannedMealId: string,
-    foodId: number,
+    foodId: string,
     quantity: number,
     targetDate?: string
   ) {

@@ -27,7 +27,12 @@ const AddFoodDialog = ({ open, mealId, mealName, onClose, onAddFood }: AddFoodDi
   const handleAdd = async (food: FoodClean) => {
     try {
       await onAddFood(mealId, food.id, quantity);
-      toast({ title: 'Aliment ajouté', description: `${food.name_fr} ajouté à ${mealName}.` });
+      if (mealName) {
+        toast({ title: 'Aliment ajouté', description: `${food.name_fr} ajouté à ${mealName}.` });
+      } else {
+        console.error('mealName is undefined when adding food');
+        toast({ title: 'Aliment ajouté', description: `${food.name_fr} ajouté.` });
+      }
       onClose();
     } catch (error) {
       toast({
