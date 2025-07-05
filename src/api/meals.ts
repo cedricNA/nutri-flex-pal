@@ -64,3 +64,47 @@ export async function createMeal(
 
   return data.id
 }
+
+export async function getOrCreatePlannedMeal(params: {
+  planId: string
+  name: string
+  mealTime: string
+  targetCalories?: number
+}): Promise<string> {
+  const { planId, name, mealTime, targetCalories = 0 } = params
+
+  // Try to find existing meal for this plan, name and time
+  const { data: existing, error } = await supabase
+    .from('planned_meals')
+    .select('id')
+    .eq('plan_id', planId)
+    .eq('name', name)
+    .eq('meal_time', mealTime)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(`Failed to fetch planned meal: ${error.message}`)
+  }
+
+  if (existing) {
+    return existing.id
+  }
+
+  // Create the meal if not found
+  const { data, error: insertError } = await supabase
+    .from('planned_meals')
+    .insert({
+      name,
+      meal_time: mealTime,
+      target_calories: targetCalories,
+      plan_id: planId
+    })
+    .select('id')
+    .single()
+
+  if (insertError || !data) {
+    throw new Error(`Failed to create planned meal: ${insertError?.message}`)
+  }
+
+  return data.id
+}
