@@ -37,7 +37,7 @@ const AddFoodDialog = ({ open, mealId, mealName, onClose, onAddFood }: AddFoodDi
       }
 
       await onAddFood(mealId, food.id, quantity);
-      toast({ title: 'Aliment ajouté', description: `${food.name_fr} ajouté à ${mealName}.` });
+      toast({ title: `✅ ${food.name_fr} ajouté à ${mealName.toLowerCase()}` });
       onClose();
     } catch (error) {
       toast({
