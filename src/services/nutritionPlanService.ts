@@ -114,7 +114,7 @@ export const plannedMealService = {
 
     const { data: mealFoods, error: foodsError } = await supabase
       .from('planned_meal_foods')
-      .select('*, foods(*)')
+      .select('*, foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g)')
       .in('planned_meal_id', meals.map((m) => m.id));
 
     if (foodsError) {
