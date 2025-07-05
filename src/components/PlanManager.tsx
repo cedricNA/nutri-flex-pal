@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Settings, Trash2, Copy, Calendar } from 'lucide-react';
+import { Plus, Wrench, Trash2, CheckCircle, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -227,9 +227,9 @@ const PlanManager = () => {
         <ActivePlanCard plan={plans.find(plan => plan.is_active)!} />
       )}
 
-      {/* Liste des plans */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans.map((plan) => {
+      {/* Liste des autres plans */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {plans.filter(plan => !plan.is_active).map((plan) => {
           const config = planTypeConfig[plan.type as keyof typeof planTypeConfig];
           return (
             <Card key={plan.id} className="hover:shadow-md transition-shadow">
@@ -242,18 +242,18 @@ const PlanManager = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setEditingPlan(plan)}
-                      className="h-8 w-8"
+                      onClick={() => activatePlan(plan.id)}
+                      className="h-8 w-8 text-green-500 hover:text-green-700"
                     >
-                      <Settings size={14} />
+                      <CheckCircle size={14} />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => duplicatePlan(plan)}
+                      onClick={() => setEditingPlan(plan)}
                       className="h-8 w-8"
                     >
-                      <Copy size={14} />
+                      <Wrench size={14} />
                     </Button>
                     <Button
                       variant="ghost"
@@ -267,7 +267,7 @@ const PlanManager = () => {
                 </div>
                 <div>
                   <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <Badge variant="secondary" className={`${config.bgColor} ${config.textColor} mt-2`}>
+                  <Badge variant="secondary" className="bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300 mt-2">
                     {config.label}
                   </Badge>
                 </div>
@@ -302,15 +302,6 @@ const PlanManager = () => {
                   <span>Créé le {new Date(plan.created_at!).toLocaleDateString('fr-FR')}</span>
                 </div>
 
-                {!plan.is_active && (
-                  <Button
-                    onClick={() => activatePlan(plan.id)}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    Activer ce plan
-                  </Button>
-                )}
               </CardContent>
             </Card>
           );
