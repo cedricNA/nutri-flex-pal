@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 export default {
 	darkMode: ["class"],
@@ -18,8 +19,11 @@ export default {
 				'2xl': '1400px'
 			}
 		},
-		extend: {
-			colors: {
+                extend: {
+                        fontFamily: {
+                                sans: ["Poppins", ...defaultTheme.fontFamily.sans],
+                        },
+                        colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
