@@ -22,6 +22,7 @@ interface MealCardProps {
   mealId: string;
   name: string;
   time: string;
+  mealTypeId: string | null;
   kcalTarget: number;
   foods: Food[];
   isShowingMacros: boolean;
@@ -47,6 +48,7 @@ const MealCard: React.FC<MealCardProps> = ({
   mealId,
   name,
   time,
+  mealTypeId,
   kcalTarget,
   foods,
   isShowingMacros,
@@ -57,7 +59,7 @@ const MealCard: React.FC<MealCardProps> = ({
 }) => {
   const totals = calculateMealTotals(foods);
   const progress = (totals.calories / kcalTarget) * 100;
-  const mealIcon = useMealIcon(name);
+  const mealIcon = useMealIcon(mealTypeId || name);
   const { toast } = useToast();
   const lastItemRef = React.useRef<HTMLDivElement | null>(null);
 

@@ -58,7 +58,7 @@ const getMealIconFallback = (
 };
 
 // Fonction pour obtenir l'icône depuis la base de données (asynchrone)
-export const getMealIcon = async (mealTypeKey: string, size: number = 18, className?: string): Promise<React.ReactElement> => {
+export const getMealIcon = async (mealIdentifier: string, size: number = 18, className?: string): Promise<React.ReactElement> => {
   // Vérifier le cache
   const now = Date.now();
   if (!mealTypesCache || (now - cacheTimestamp) > CACHE_DURATION) {
@@ -68,14 +68,16 @@ export const getMealIcon = async (mealTypeKey: string, size: number = 18, classN
     } catch (error) {
       console.error('Error loading meal types:', error);
       // Fallback vers les icônes par défaut
-      return getMealIconFallback(mealTypeKey, size, className);
+      return getMealIconFallback(mealIdentifier, size, className);
     }
   }
 
   // Trouver le type de repas correspondant
-  const mealType = mealTypesCache.find(mt => mt.type_key === mealTypeKey);
+  const mealType = mealTypesCache.find(
+    mt => mt.id === mealIdentifier || mt.type_key === mealIdentifier || mt.display_name === mealIdentifier
+  );
   if (!mealType) {
-    return getMealIconFallback(mealTypeKey, size, className);
+    return getMealIconFallback(mealIdentifier, size, className);
   }
 
   // Obtenir l'icône correspondante
@@ -84,17 +86,17 @@ export const getMealIcon = async (mealTypeKey: string, size: number = 18, classN
 };
 
 // Hook pour utiliser les icônes de repas dans les composants React
-export const useMealIcon = (mealTypeKey: string) => {
-  const [icon, setIcon] = useState<React.ReactElement>(() => getMealIconFallback(mealTypeKey));
+export const useMealIcon = (mealIdentifier: string) => {
+  const [icon, setIcon] = useState<React.ReactElement>(() => getMealIconFallback(mealIdentifier));
 
   useEffect(() => {
     const loadIcon = async () => {
-      const iconElement = await getMealIcon(mealTypeKey);
+      const iconElement = await getMealIcon(mealIdentifier);
       setIcon(iconElement);
     };
-    
+
     loadIcon();
-  }, [mealTypeKey]);
+  }, [mealIdentifier]);
 
   return icon;
 };

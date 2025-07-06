@@ -431,6 +431,7 @@ export type Database = {
           meal_time: string
           name: string
           plan_id: string | null
+          meal_type_id: string | null
           target_calories: number
         }
         Insert: {
@@ -440,6 +441,7 @@ export type Database = {
           meal_time: string
           name: string
           plan_id?: string | null
+          meal_type_id?: string | null
           target_calories: number
         }
         Update: {
@@ -449,6 +451,7 @@ export type Database = {
           meal_time?: string
           name?: string
           plan_id?: string | null
+          meal_type_id?: string | null
           target_calories?: number
         }
         Relationships: [
@@ -457,6 +460,13 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "nutrition_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planned_meals_meal_type_id_fkey"
+            columns: ["meal_type_id"]
+            isOneToOne: false
+            referencedRelation: "meal_types"
             referencedColumns: ["id"]
           },
         ]

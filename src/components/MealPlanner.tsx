@@ -39,6 +39,7 @@ interface Meal {
   name: string;
   time: string;
   mealType: string;
+  mealTypeId: string | null;
   foods: Food[];
   targetCalories: number;
 }
@@ -99,6 +100,7 @@ const MealPlanner = () => {
       name: 'Petit-déjeuner',
       time: '08:00',
       mealType: 'breakfast',
+      mealTypeId: null,
       foods: [],
       targetCalories: 400
     },
@@ -107,6 +109,7 @@ const MealPlanner = () => {
       name: 'Déjeuner',
       time: '12:30',
       mealType: 'lunch',
+      mealTypeId: null,
       foods: [],
       targetCalories: 550
     },
@@ -115,6 +118,7 @@ const MealPlanner = () => {
       name: 'Collation',
       time: '16:00',
       mealType: 'snack',
+      mealTypeId: null,
       foods: [],
       targetCalories: 200
     },
@@ -123,6 +127,7 @@ const MealPlanner = () => {
       name: 'Dîner',
       time: '19:30',
       mealType: 'dinner',
+      mealTypeId: null,
       foods: [],
       targetCalories: 500
     }
@@ -158,7 +163,7 @@ const MealPlanner = () => {
       const { data, error } = await supabase
         .from('planned_meals')
         .select(
-          'id,name,meal_time,target_calories,planned_meal_foods(id,grams,foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g))'
+          'id,name,meal_time,target_calories,meal_type_id,planned_meal_foods(id,grams,foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g))'
         )
       .eq('plan_id', id)
       .order('meal_order');
@@ -170,6 +175,7 @@ const MealPlanner = () => {
       name: meal.name,
       time: meal.meal_time,
       mealType: nameToType[meal.name] || meal.name.toLowerCase(),
+      mealTypeId: meal.meal_type_id ?? null,
       targetCalories: meal.target_calories,
       foods:
         meal.planned_meal_foods?.map((pf: any) => ({
@@ -283,6 +289,7 @@ const MealPlanner = () => {
             mealId={meal.id}
             name={meal.name}
             time={meal.time}
+            mealTypeId={meal.mealTypeId}
             kcalTarget={meal.targetCalories}
             foods={meal.foods}
             isShowingMacros={showMacros === meal.id}
