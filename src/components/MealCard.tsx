@@ -153,10 +153,12 @@ const MealCard: React.FC<MealCardProps> = ({
           </span>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                {totals.calories} / {kcalTarget}
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Objectif : {kcalTarget} kcal
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">kcal</div>
+              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                {totals.calories} kcal
+              </div>
             </div>
             {foods.length > 0 && (
               <TooltipProvider>

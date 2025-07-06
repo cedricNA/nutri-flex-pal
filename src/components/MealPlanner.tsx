@@ -40,6 +40,7 @@ interface Meal {
   time: string;
   mealType: string;
   mealTypeId: string | null;
+  mealOrder?: number;
   foods: Food[];
   targetCalories: number;
 }
@@ -133,7 +134,9 @@ const MealPlanner = () => {
     }
   ];
 
-  const displayMeals = meals.length > 0 ? meals : defaultMeals;
+  const displayMeals = meals.length > 0
+    ? [...meals].sort((a, b) => (a.mealOrder ?? 0) - (b.mealOrder ?? 0))
+    : defaultMeals;
 
   const handleCopyFromYesterday = () => {
     toast({
@@ -163,10 +166,10 @@ const MealPlanner = () => {
       const { data, error } = await supabase
         .from('planned_meals')
         .select(
-          'id,name,meal_time,target_calories,meal_type_id,planned_meal_foods(id,grams,foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g))'
+          'id,name,meal_time,meal_order,target_calories,meal_type_id,planned_meal_foods(id,grams,foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g))'
         )
       .eq('plan_id', id)
-      .order('meal_order');
+      .order('meal_order', { ascending: true });
 
     if (error) throw error;
 
@@ -176,6 +179,7 @@ const MealPlanner = () => {
       time: meal.meal_time,
       mealType: nameToType[meal.name] || meal.name.toLowerCase(),
       mealTypeId: meal.meal_type_id ?? null,
+      mealOrder: meal.meal_order ?? undefined,
       targetCalories: meal.target_calories,
       foods:
         meal.planned_meal_foods?.map((pf: any) => ({
