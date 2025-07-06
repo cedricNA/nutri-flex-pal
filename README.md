@@ -111,3 +111,13 @@ This project now includes several usability improvements:
 - Charts offer comparison mode with zoom and pan controls.
 - Mobile navigation supports swipe gestures and pull-to-refresh.
 
+## Meal calorie ratios
+
+Planned meals automatically set their calorie targets using the active nutrition plan.
+Ratios applied per meal type:
+
+- Petit-déjeuner / breakfast: 25%
+- Déjeuner / lunch: 35%
+- Dîner / dinner: 30%
+- Collation / snack: 10%
+

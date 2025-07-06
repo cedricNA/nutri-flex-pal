@@ -11,6 +11,17 @@ import MealCard from './MealCard';
 import AddFoodDialog from './AddFoodDialog';
 import { planColors } from '@/utils/planColors';
 
+const nameToType: Record<string, string> = {
+  'Petit-déjeuner': 'breakfast',
+  Breakfast: 'breakfast',
+  'Déjeuner': 'lunch',
+  Lunch: 'lunch',
+  'Dîner': 'dinner',
+  Dinner: 'dinner',
+  Collation: 'snack',
+  Snack: 'snack'
+};
+
 // Types pour les repas dynamiques
 interface Food {
   id: string;
@@ -27,6 +38,7 @@ interface Meal {
   id: string;
   name: string;
   time: string;
+  mealType: string;
   foods: Food[];
   targetCalories: number;
 }
@@ -86,6 +98,7 @@ const MealPlanner = () => {
       id: 'default-1',
       name: 'Petit-déjeuner',
       time: '08:00',
+      mealType: 'breakfast',
       foods: [],
       targetCalories: 400
     },
@@ -93,6 +106,7 @@ const MealPlanner = () => {
       id: 'default-2',
       name: 'Déjeuner',
       time: '12:30',
+      mealType: 'lunch',
       foods: [],
       targetCalories: 550
     },
@@ -100,6 +114,7 @@ const MealPlanner = () => {
       id: 'default-3',
       name: 'Collation',
       time: '16:00',
+      mealType: 'snack',
       foods: [],
       targetCalories: 200
     },
@@ -107,6 +122,7 @@ const MealPlanner = () => {
       id: 'default-4',
       name: 'Dîner',
       time: '19:30',
+      mealType: 'dinner',
       foods: [],
       targetCalories: 500
     }
@@ -153,6 +169,7 @@ const MealPlanner = () => {
       id: meal.id,
       name: meal.name,
       time: meal.meal_time,
+      mealType: nameToType[meal.name] || meal.name.toLowerCase(),
       targetCalories: meal.target_calories,
       foods:
         meal.planned_meal_foods?.map((pf: any) => ({
@@ -188,6 +205,7 @@ const MealPlanner = () => {
         planId,
         name: mealInfo.name,
         mealTime: mealInfo.time,
+        mealType: mealInfo.mealType,
         targetCalories: mealInfo.targetCalories,
       });
 
