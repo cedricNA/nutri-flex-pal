@@ -1,4 +1,5 @@
 import supabase from '@/lib/supabase'
+import { mealRatios } from '@/utils/mealRatios'
 
 export interface PlannedMealFood {
   id: string
@@ -48,15 +49,29 @@ export async function addFoodToMeal(params: {
 export async function createMeal(
   name: string,
   time: string,
-  kcal: number,
-  planId: string
+  kcal: number | undefined,
+  planId: string,
+  mealType?: string
 ): Promise<string> {
+  let target = kcal ?? 0
+  if (kcal === undefined && mealType) {
+    const { data: plan } = await supabase
+      .from('nutrition_plans')
+      .select('target_calories')
+      .eq('id', planId)
+      .single()
+
+    if (plan && mealRatios[mealType as keyof typeof mealRatios]) {
+      target = Math.round(plan.target_calories * mealRatios[mealType as keyof typeof mealRatios])
+    }
+  }
+
   const { data, error } = await supabase
     .from('planned_meals')
     .insert({
       name,
       meal_time: time,
-      target_calories: kcal,
+      target_calories: target,
       plan_id: planId
     })
     .select('id')
@@ -73,9 +88,10 @@ export async function getOrCreatePlannedMeal(params: {
   planId: string
   name: string
   mealTime: string
+  mealType: string
   targetCalories?: number
 }): Promise<string> {
-  const { planId, name, mealTime, targetCalories = 0 } = params
+  const { planId, name, mealTime, mealType, targetCalories } = params
 
   // Try to find existing meal for this plan, name and time
   const { data: existing, error } = await supabase
@@ -94,13 +110,31 @@ export async function getOrCreatePlannedMeal(params: {
     return existing.id
   }
 
+  // Compute target calories if not provided
+  let target = targetCalories
+  if (target === undefined && mealType) {
+    const { data: plan } = await supabase
+      .from('nutrition_plans')
+      .select('target_calories')
+      .eq('id', planId)
+      .single()
+
+    if (plan && mealRatios[mealType as keyof typeof mealRatios]) {
+      target = Math.round(plan.target_calories * mealRatios[mealType as keyof typeof mealRatios])
+    } else {
+      target = 0
+    }
+  } else if (target === undefined) {
+    target = 0
+  }
+
   // Create the meal if not found
   const { data, error: insertError } = await supabase
     .from('planned_meals')
     .insert({
       name,
       meal_time: mealTime,
-      target_calories: targetCalories,
+      target_calories: target,
       plan_id: planId
     })
     .select('id')
