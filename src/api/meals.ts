@@ -53,6 +53,15 @@ export async function createMeal(
   planId: string,
   mealType?: string
 ): Promise<string> {
+  // Retrieve meal_type_id from meal_types based on display name
+  const { data: typeData } = await supabase
+    .from('meal_types')
+    .select('id')
+    .eq('display_name', name)
+    .maybeSingle()
+
+  const mealTypeId = typeData?.id || null
+
   let target = kcal ?? 0
   if (kcal === undefined && mealType) {
     const { data: plan } = await supabase
@@ -71,6 +80,7 @@ export async function createMeal(
     .insert({
       name,
       meal_time: time,
+      meal_type_id: mealTypeId,
       target_calories: target,
       plan_id: planId
     })
@@ -92,6 +102,15 @@ export async function getOrCreatePlannedMeal(params: {
   targetCalories?: number
 }): Promise<string> {
   const { planId, name, mealTime, mealType, targetCalories } = params
+
+  // Retrieve meal_type_id from meal_types based on display name
+  const { data: typeData } = await supabase
+    .from('meal_types')
+    .select('id')
+    .eq('display_name', name)
+    .maybeSingle()
+
+  const mealTypeId = typeData?.id || null
 
   // Try to find existing meal for this plan, name and time
   const { data: existing, error } = await supabase
@@ -134,6 +153,7 @@ export async function getOrCreatePlannedMeal(params: {
     .insert({
       name,
       meal_time: mealTime,
+      meal_type_id: mealTypeId,
       target_calories: target,
       plan_id: planId
     })
