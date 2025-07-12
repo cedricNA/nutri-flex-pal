@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { calorieService } from '@/services/supabaseServices';
 import type { CalorieEntry } from '@/schemas';
+import AddCalorieEntryDialog from './AddCalorieEntryDialog';
 
 interface CaloriesChartProps {
   period: "7d" | "30d" | "custom";
@@ -30,11 +31,55 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
   const handleAddEntry = () => {
-    toast({
-      title: 'Fonctionnalité à venir',
-      description: "L'ajout d'entrées de calories sera bientôt disponible.",
-    });
+    setShowAddDialog(true);
+  };
+
+  const handleDialogSuccess = () => {
+    setShowAddDialog(false);
+    // Reload data
+    if (user) {
+      const loadCaloriesData = async () => {
+        setLoading(true);
+        try {
+          const entries = await calorieService.getCalorieEntries(user.id);
+          
+          const now = new Date();
+          let cutoffDate = new Date();
+          
+          switch (period) {
+            case '7d':
+              cutoffDate.setDate(now.getDate() - 7);
+              break;
+            case '30d':
+              cutoffDate.setDate(now.getDate() - 30);
+              break;
+            default:
+              cutoffDate = new Date(0);
+          }
+
+          const filteredEntries = entries
+            .filter(entry => new Date(entry.date) >= cutoffDate)
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+            .map(entry => ({
+              day: new Date(entry.date).toLocaleDateString('fr-FR', {
+                weekday: 'short'
+              }),
+              consumed: Number(entry.consumed),
+              target: Number(entry.target)
+            }));
+
+          setCaloriesData(filteredEntries);
+        } catch (error) {
+          console.error('Error reloading calories data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadCaloriesData();
+    }
   };
 
   useEffect(() => {
@@ -179,18 +224,17 @@ const CaloriesChart: React.FC<CaloriesChartProps> = ({ period }) => {
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar dataKey="target" fill="var(--color-target)" radius={[4, 4, 0, 0]} opacity={0.6} />
                 <Bar dataKey="consumed" fill="var(--color-consumed)" radius={[4, 4, 0, 0]} />
-                {compare && prevData.length > 0 && (
-                  <>
-                    <Bar dataKey="target" data={prevData} fill="var(--color-prevT)" radius={[4,4,0,0]} opacity={0.3} />
-                    <Bar dataKey="consumed" data={prevData} fill="var(--color-prevC)" radius={[4,4,0,0]} opacity={0.3} />
-                  </>
-                )}
                 <Brush dataKey="day" height={20} stroke="var(--color-target)" />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
         </div>
       </CardContent>
+      <AddCalorieEntryDialog
+        open={showAddDialog}
+        onClose={() => setShowAddDialog(false)}
+        onSuccess={handleDialogSuccess}
+      />
     </Card>
   );
 };

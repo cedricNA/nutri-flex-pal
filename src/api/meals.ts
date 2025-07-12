@@ -23,14 +23,11 @@ export async function addFoodToMeal(params: {
     if (!plannedMealId) {
       throw new Error('Invalid planned meal ID')
     }
-    const insertData: Record<string, unknown> = {
+    const insertData = {
       planned_meal_id: plannedMealId,
-      food_id: foodId,
-      grams
-    }
-
-    if (targetDate) {
-      insertData.target_date = targetDate
+      food_id: parseInt(foodId),
+      grams,
+      ...(targetDate && { target_date: targetDate })
     }
 
     const { error } = await supabase.from('planned_meal_foods').insert(insertData)

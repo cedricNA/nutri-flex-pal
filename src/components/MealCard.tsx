@@ -6,6 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from '@/hooks/use-toast';
 import FoodItem from './FoodItem';
 import { useMealIcon } from './mealIcons';
+import EditMealDialog from './EditMealDialog';
+import { deletePlannedMeal, duplicatePlannedMeal } from '@/api/mealOperations';
 
 interface Food {
   id: string;
@@ -30,6 +32,8 @@ interface MealCardProps {
   onAddFood: (mealId: string) => void;
   progressColor?: string;
   highlightLastFood?: boolean;
+  planId?: string;
+  onMealUpdated?: () => void;
 }
 
 const calculateMealTotals = (foods: Food[]) => {
@@ -56,12 +60,15 @@ const MealCard: React.FC<MealCardProps> = ({
   onAddFood,
   progressColor = 'bg-green-500',
   highlightLastFood = false,
+  planId,
+  onMealUpdated,
 }) => {
   const totals = calculateMealTotals(foods);
   const progress = (totals.calories / kcalTarget) * 100;
   const mealIcon = useMealIcon(mealTypeId || name);
   const { toast } = useToast();
   const lastItemRef = React.useRef<HTMLDivElement | null>(null);
+  const [showEditDialog, setShowEditDialog] = React.useState(false);
 
   React.useEffect(() => {
     if (highlightLastFood && lastItemRef.current) {
@@ -97,13 +104,56 @@ const MealCard: React.FC<MealCardProps> = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => toast({ title: 'Fonctionnalité à venir', description: 'La modification de repas sera bientôt disponible.' })}>
+            <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
               Modifier le repas
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => toast({ title: 'Fonctionnalité à venir', description: 'La suppression de repas sera bientôt disponible.' })}>
+            <DropdownMenuItem 
+              onClick={async () => {
+                try {
+                  await deletePlannedMeal(mealId);
+                  toast({
+                    title: 'Repas supprimé',
+                    description: 'Le repas a été supprimé avec succès.'
+                  });
+                  onMealUpdated?.();
+                } catch (error) {
+                  toast({
+                    title: 'Erreur',
+                    description: 'Impossible de supprimer le repas.',
+                    variant: 'destructive'
+                  });
+                }
+              }}
+              className="text-red-600"
+            >
               Supprimer
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => toast({ title: 'Fonctionnalité à venir', description: 'La duplication de repas sera bientôt disponible.' })}>
+            <DropdownMenuItem 
+              onClick={async () => {
+                if (!planId) {
+                  toast({
+                    title: 'Erreur',
+                    description: 'Impossible de dupliquer le repas.',
+                    variant: 'destructive'
+                  });
+                  return;
+                }
+                try {
+                  await duplicatePlannedMeal(mealId, planId);
+                  toast({
+                    title: 'Repas dupliqué',
+                    description: 'Le repas a été dupliqué avec succès.'
+                  });
+                  onMealUpdated?.();
+                } catch (error) {
+                  toast({
+                    title: 'Erreur',
+                    description: 'Impossible de dupliquer le repas.',
+                    variant: 'destructive'
+                  });
+                }
+              }}
+            >
               Dupliquer
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -225,6 +275,22 @@ const MealCard: React.FC<MealCardProps> = ({
           </Button>
         </div>
       </div>
+      {showEditDialog && (
+        <EditMealDialog
+          open={showEditDialog}
+          onClose={() => setShowEditDialog(false)}
+          onSuccess={() => {
+            setShowEditDialog(false);
+            onMealUpdated?.();
+          }}
+          mealId={mealId}
+          initialData={{
+            name,
+            time,
+            targetCalories: kcalTarget
+          }}
+        />
+      )}
     </div>
   );
 };

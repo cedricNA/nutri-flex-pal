@@ -6,9 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/useAuth';
 import { ensureActivePlan } from '@/api/plan';
 import { addFoodToMeal, getOrCreatePlannedMeal } from '@/api/meals';
+import { copyMealsFromYesterday } from '@/api/mealOperations';
 import supabase from '@/lib/supabase';
 import MealCard from './MealCard';
 import AddFoodDialog from './AddFoodDialog';
+import CreateMealDialog from './CreateMealDialog';
 import { planColors } from '@/utils/planColors';
 
 const nameToType: Record<string, string> = {
@@ -55,6 +57,7 @@ const MealPlanner = () => {
   const [showMacros, setShowMacros] = useState<string | null>(null);
   const [mealToAddFood, setMealToAddFood] = useState<Meal | null>(null);
   const [lastAddedMealId, setLastAddedMealId] = useState<string | null>(null);
+  const [showCreateMeal, setShowCreateMeal] = useState(false);
 
   const todayString = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -138,18 +141,34 @@ const MealPlanner = () => {
     ? [...meals].sort((a, b) => (a.mealOrder ?? 0) - (b.mealOrder ?? 0))
     : defaultMeals;
 
-  const handleCopyFromYesterday = () => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: "La copie des repas d'hier sera bientôt disponible.",
-    });
+  const handleCopyFromYesterday = async () => {
+    if (!planId) {
+      toast({
+        title: "Erreur",
+        description: "Aucun plan actif trouvé.",
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      await copyMealsFromYesterday(planId);
+      toast({
+        title: "Repas copiés",
+        description: "Les repas d'hier ont été copiés avec succès.",
+      });
+      await fetchMeals(planId);
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de copier les repas d'hier.",
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleNewMeal = () => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: "La création de nouveaux repas sera bientôt disponible.",
-    });
+    setShowCreateMeal(true);
   };
 
   // Open the "Add food" dialog for the given meal
@@ -303,6 +322,8 @@ const MealPlanner = () => {
             onAddFood={handleOpenAddFood}
             progressColor={planColors[planType].progress}
             highlightLastFood={lastAddedMealId === meal.id}
+            planId={planId}
+            onMealUpdated={() => planId && fetchMeals(planId)}
           />
         ))}
       </div>
@@ -313,6 +334,17 @@ const MealPlanner = () => {
           mealName={mealToAddFood.name}
           onClose={() => setMealToAddFood(null)}
           onAddFood={handleAddFood}
+        />
+      )}
+      {showCreateMeal && planId && (
+        <CreateMealDialog
+          open={showCreateMeal}
+          onClose={() => setShowCreateMeal(false)}
+          onSuccess={() => {
+            setShowCreateMeal(false);
+            fetchMeals(planId);
+          }}
+          planId={planId}
         />
       )}
     </div>
