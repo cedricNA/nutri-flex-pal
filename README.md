@@ -65,6 +65,17 @@ This project is built with:
 - `VITE_SUPABASE_URL`: URL of your Supabase instance.
 - `VITE_SUPABASE_ANON_KEY`: public anon key for your Supabase project.
 
+## OpenRouter API Key
+
+Some AI‑powered features like the chat assistant and personalized nutrition advice
+require an API key from [OpenRouter](https://openrouter.ai/).
+
+- Create an account on OpenRouter and generate a new API key.
+- The application stores this key in your browser `localStorage` under the name
+  `openrouter-api-key` when you enter it in the configuration screen.
+- If you prefer, you can also expose it as an environment variable (for example,
+  `OPENROUTER_API_KEY`) and adapt the code to load it automatically at startup.
+
 ## Supabase Setup
 
 1. Copy `.env.example` to `.env` and provide values for
