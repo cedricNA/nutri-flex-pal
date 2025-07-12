@@ -1,32 +1,9 @@
 import supabase from '@/lib/supabase';
-import { ActivityLevel } from '@/utils/calorieUtils';
-
-interface UserProfile {
-  id: string;
-  gender: 'male' | 'female';
-  age: number;
-  weight: number;
-  height: number;
-  activity_level: ActivityLevel;
-}
+import { ActivityLevel, calculateTDEE } from '@/utils/calorieUtils';
 
 interface UserGoal {
   target_value: number | null;
   description: string | null;
-}
-
-const activityFactor: Record<ActivityLevel, number> = {
-  sedentary: 1.2,
-  light: 1.375,
-  moderate: 1.55,
-  active: 1.725,
-  very_active: 1.9,
-};
-
-function calculateTDEE({ gender, weight, height, age, activity_level }: UserProfile): number {
-  const base = 10 * weight + 6.25 * height - 5 * age;
-  const bmr = gender === 'male' ? base + 5 : base - 161;
-  return Math.round(bmr * activityFactor[activity_level]);
 }
 
 export async function generateNutritionAdvice(userId: string): Promise<string> {
@@ -50,7 +27,13 @@ export async function generateNutritionAdvice(userId: string): Promise<string> {
     .limit(1)
     .maybeSingle();
 
-  const tdee = calculateTDEE(profile as UserProfile);
+  const tdee = calculateTDEE({
+    gender: profile.gender,
+    weight: profile.weight,
+    height: profile.height,
+    age: profile.age,
+    activityLevel: profile.activity_level,
+  });
 
   // Étape 3 : construire le prompt
   const prompt = `Voici le profil de l'utilisateur :\n- Sexe : ${profile.gender}\n- Âge : ${profile.age} ans\n- Poids : ${profile.weight} kg\n- Taille : ${profile.height} cm\n- Niveau d'activité : ${profile.activity_level}\n- Objectif : ${goal?.target_value ? `${goal.target_value} kg` : 'non précisé'}\n- Description de l'objectif : ${goal?.description || 'non précisée'}\n\nSon TDEE estimé est de ${tdee} kcal par jour. Donne-lui des conseils nutritionnels personnalisés et motivants pour atteindre son objectif.`;
