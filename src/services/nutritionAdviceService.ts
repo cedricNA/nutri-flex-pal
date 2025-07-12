@@ -10,11 +10,6 @@ interface UserProfile {
   activity_level: ActivityLevel;
 }
 
-interface UserGoal {
-  target_value: number | null;
-  description: string | null;
-}
-
 const activityFactor: Record<ActivityLevel, number> = {
   sedentary: 1.2,
   light: 1.375,
