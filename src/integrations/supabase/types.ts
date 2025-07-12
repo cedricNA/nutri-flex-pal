@@ -461,6 +461,7 @@ export type Database = {
           created_at: string | null
           daily_calories: number | null
           email: string
+          gender: string | null
           fat_goal: number | null
           height: number | null
           id: string
@@ -477,6 +478,7 @@ export type Database = {
           created_at?: string | null
           daily_calories?: number | null
           email: string
+          gender?: string | null
           fat_goal?: number | null
           height?: number | null
           id: string
@@ -493,6 +495,7 @@ export type Database = {
           created_at?: string | null
           daily_calories?: number | null
           email?: string
+          gender?: string | null
           fat_goal?: number | null
           height?: number | null
           id?: string
