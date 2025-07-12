@@ -7,6 +7,10 @@ export interface CalorieCalcInput {
   activityLevel: ActivityLevel;
 }
 
+export interface CalorieCalcGenderInput extends CalorieCalcInput {
+  gender: 'male' | 'female';
+}
+
 const activityFactor: Record<ActivityLevel, number> = {
   sedentary: 1.2,
   light: 1.375,
@@ -14,6 +18,12 @@ const activityFactor: Record<ActivityLevel, number> = {
   active: 1.725,
   very_active: 1.9,
 };
+
+export function calculateTDEE({ gender, weight, height, age, activityLevel }: CalorieCalcGenderInput): number {
+  const base = 10 * weight + 6.25 * height - 5 * age;
+  const bmr = gender === 'male' ? base + 5 : base - 161;
+  return Math.round(bmr * activityFactor[activityLevel]);
+}
 
 export function calculateMaintenanceCalories({ weight, height, age, activityLevel }: CalorieCalcInput): number {
   const bmr = 10 * weight + 6.25 * height - 5 * age;
