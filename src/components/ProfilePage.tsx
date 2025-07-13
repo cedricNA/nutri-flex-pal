@@ -34,6 +34,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     lastName: '',
     email: '',
     phone: '',
+    gender: 'male',
     age: '',
     weight: '',
     height: '',
@@ -76,6 +77,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         lastName: rest.join(' '),
         email: storedProfile.email || '',
         phone: '',
+        gender: storedProfile.gender || 'male',
         age: storedProfile.age?.toString() || '',
         weight: storedProfile.weight?.toString() || '',
         height: storedProfile.height?.toString() || '',
@@ -114,6 +116,8 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
       updates.height = Number(value) || null;
     } else if (field === 'activityLevel') {
       updates.activity_level = reverseActivityMap[value] || 'sedentary';
+    } else if (field === 'gender') {
+      updates.gender = value;
     }
 
     if (Object.keys(updates).length) {
@@ -182,6 +186,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
       weight: Number(p.weight) || null,
       height: Number(p.height) || null,
       activity_level: reverseActivityMap[p.activityLevel] || 'sedentary',
+      gender: p.gender,
     });
     toast({ title: 'Modifications annulées' });
   };
@@ -327,7 +332,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
             <CardTitle>Informations physiques</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="age">Âge</Label>
               <InlineEditableInput
@@ -338,6 +343,18 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 className="w-full"
                 error={errors.age}
               />
+              </div>
+              <div>
+                <Label htmlFor="gender">Sexe</Label>
+                <select
+                  id="gender"
+                  value={profile.gender}
+                  onChange={(e) => handleInputChange('gender', e.target.value)}
+                  className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
+                >
+                  <option value="male">Masculin</option>
+                  <option value="female">Féminin</option>
+                </select>
               </div>
               <div>
                 <Label htmlFor="weight">Poids (kg)</Label>
