@@ -11,6 +11,7 @@ import ProfilePage from '@/components/ProfilePage';
 import SettingsPage from '@/components/SettingsPage';
 import AdminPanel from '@/components/AdminPanel';
 import AdminRoute from '@/components/AdminRoute';
+import FoodJournal from '@/components/FoodJournal';
 import NutritionStats from '@/components/NutritionStats';
 import DashboardGoals from '@/components/DashboardGoals';
 import CaloriesChart from '@/components/CaloriesChart';
@@ -92,6 +93,8 @@ const Index = () => {
         return <ChatBot />;
       case 'progress':
         return <ProgressPage />;
+      case 'journal':
+        return <FoodJournal />;
       case 'profile':
         return <ProfilePage onManageGoals={() => setActiveSection('progress')} />;
       case 'settings':

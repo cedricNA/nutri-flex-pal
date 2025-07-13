@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Book, Target, TrendingUp, User, MessageCircle } from 'lucide-react';
+import { Home, Book, Target, TrendingUp, User, MessageCircle, BookOpen } from 'lucide-react';
 
 interface MobileNavigationProps {
   activeSection: string;
@@ -14,12 +14,13 @@ const MobileNavigation = ({ activeSection, onSectionChange }: MobileNavigationPr
     { id: 'plans', label: 'Plans', icon: Target },
     { id: 'chat', label: 'Assistant', icon: MessageCircle },
     { id: 'progress', label: 'Progrès', icon: TrendingUp },
+    { id: 'journal', label: 'Journal', icon: BookOpen },
     { id: 'profile', label: 'Profil', icon: User },
   ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 z-50 md:hidden shadow-2xl">
-      <div className="grid grid-cols-6 h-20">
+      <div className="grid grid-cols-7 h-20">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
