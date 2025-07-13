@@ -4,6 +4,8 @@ import { User, Session, AuthError } from '@supabase/supabase-js';
 import supabase from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
+/* eslint-disable react-refresh/only-export-components */
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;

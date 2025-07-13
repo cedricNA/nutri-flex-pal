@@ -2,6 +2,8 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
+/* eslint-disable react-refresh/only-export-components */
+
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(

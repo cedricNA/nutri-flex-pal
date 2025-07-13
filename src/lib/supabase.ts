@@ -11,7 +11,6 @@ const url = import.meta.env.VITE_SUPABASE_URL || DEFAULT_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_KEY
 
 if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  // eslint-disable-next-line no-console
   console.warn('Supabase environment variables missing, falling back to default credentials.')
 }
 
