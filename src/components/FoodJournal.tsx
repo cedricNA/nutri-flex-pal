@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { foodJournalService } from '@/services/foodJournalService';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -44,6 +45,7 @@ const FoodJournal = () => {
             </li>
           ))}
         </ul>
+
       )}
     </div>
   );
