@@ -1,8 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Key, Trash2, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Key, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { chatService, ChatMessage } from '../services/chatService';
+import { generateNutritionAdvice } from '@/services/nutritionAdviceService';
+import { useAuth } from '@/hooks/useAuth';
 import ReactMarkdown from 'react-markdown';
 
 const ChatBot = () => {
@@ -12,6 +14,7 @@ const ChatBot = () => {
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     // Charger l'historique et vérifier la clé API
@@ -88,6 +91,49 @@ const ChatBot = () => {
     chatService.clearConversation();
   };
 
+  const handleGenerateAdvice = async () => {
+    if (isLoading) return;
+
+    if (!user) {
+      const errorMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: "Veuillez vous connecter pour obtenir des conseils personnalisés.",
+        timestamp: new Date()
+      };
+      const finalMessages = [...messages, errorMessage];
+      setMessages(finalMessages);
+      chatService.saveConversation(finalMessages);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const advice = await generateNutritionAdvice(user.id);
+      const assistantMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: advice,
+        timestamp: new Date()
+      };
+      const finalMessages = [...messages, assistantMessage];
+      setMessages(finalMessages);
+      chatService.saveConversation(finalMessages);
+    } catch (error) {
+      const errorMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `Erreur: ${error instanceof Error ? error.message : 'inconnue'}`,
+        timestamp: new Date()
+      };
+      const finalMessages = [...messages, errorMessage];
+      setMessages(finalMessages);
+      chatService.saveConversation(finalMessages);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const suggestedQuestions = [
     "Quels aliments sont riches en protéines ?",
     "Comment calculer mes besoins caloriques ?",
@@ -140,6 +186,9 @@ const ChatBot = () => {
         <div className="flex space-x-2">
           <Button variant="outline" size="sm" onClick={() => setShowApiKeyInput(true)}>
             <Key size={16} />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleGenerateAdvice}>
+            <Sparkles size={16} />
           </Button>
           <Button variant="outline" size="sm" onClick={handleClearChat}>
             <Trash2 size={16} />
