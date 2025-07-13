@@ -46,7 +46,9 @@ export async function generateNutritionAdvice(userId: string): Promise<string> {
       'X-Title': 'NutriFlex',
     },
     body: JSON.stringify({
-      model: 'openai/gpt-4o',
+      // Utiliser le même modèle que pour le chat afin de rester cohérent
+      // avec le reste de l'application
+      model: 'deepseek/deepseek-r1-0528:free',
       messages: [
         { role: 'system', content: 'Tu es un expert nutritionniste et coach motivationnel.' },
         { role: 'user', content: prompt },
