@@ -96,7 +96,7 @@ const AddCalorieEntryDialog: React.FC<AddCalorieEntryDialogProps> = ({
             <Input
               id="target"
               type="number"
-              placeholder="Ex: 2000"
+              placeholder="Ex: 2200"
               value={formData.target}
               onChange={(e) => setFormData(prev => ({ ...prev, target: e.target.value }))}
               required

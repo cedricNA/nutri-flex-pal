@@ -3,14 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
-import { hydrationService, settingsService } from '@/services/supabaseServices';
-import { activityService, sleepService } from '@/services/nutritionPlanService';
-import { useProgressStats } from '@/hooks/useProgressStats';
+import type { useProgressStats } from '@/hooks/useProgressStats';
 
-const ProgressStats = () => {
-  const { user } = useAuth();
-  const progressStats = useProgressStats();
+type ProgressStatsData = ReturnType<typeof useProgressStats>;
+
+interface ProgressStatsProps {
+  progressStats: ProgressStatsData;
+}
+
+const ProgressStats = ({ progressStats }: ProgressStatsProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

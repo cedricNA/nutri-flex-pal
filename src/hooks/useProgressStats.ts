@@ -16,12 +16,11 @@ export const useProgressStats = () => {
   const [todayHydration, setTodayHydration] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user) return;
-      
-      setLoading(true);
-      try {
+  const loadData = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
         // Calculer les dates selon la période
         const now = new Date();
         let startDate = new Date();
@@ -57,7 +56,9 @@ export const useProgressStats = () => {
       }
     };
 
+  useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, currentPeriod]);
 
   const stats = useMemo(() => {
@@ -174,5 +175,5 @@ export const useProgressStats = () => {
     };
   }, [weightEntries, calorieEntries, activityEntries, sleepEntries, todayHydration, currentPeriod, loading, user]);
 
-  return stats;
+  return { ...stats, refetch: loadData };
 };

@@ -21,7 +21,7 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
     name: '',
     description: '',
     type: 'maintenance' as 'weight-loss' | 'maintenance' | 'bulk',
-    target_calories: 2000,
+    target_calories: 2200,
     target_protein: 100,
     target_carbs: 250,
     target_fat: 70,

@@ -19,6 +19,7 @@ import { TrendingUp, TrendingDown, Target, Calendar } from 'lucide-react';
 import PeriodSelector from "./PeriodSelector";
 import { useAppStore } from '../stores/useAppStore';
 import { useProgressStats } from '../hooks/useProgressStats';
+import { useNutritionStats } from '../hooks/useNutritionStats';
 import { useSwipeTabs } from '../hooks/useSwipeTabs';
 import { usePullToRefresh } from '../hooks/usePullToRefresh';
 import { useRecommendations } from '../hooks/useRecommendations';
@@ -26,6 +27,7 @@ import { useRecommendations } from '../hooks/useRecommendations';
 const ProgressPage = () => {
   const { currentPeriod, setPeriod } = useAppStore();
   const progressData = useProgressStats();
+  const { stats: nutritionStats } = useNutritionStats();
   const tabRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tab, setTab] = useState('overview');
@@ -155,7 +157,7 @@ const ProgressPage = () => {
               <CaloriesChart period={currentPeriod} />
             </Suspense>
           </div>
-          <ProgressStats />
+          <ProgressStats progressStats={progressData} />
           <GoalsProgress />
 
           <Recommendations messages={recs} />
@@ -203,8 +205,12 @@ const ProgressPage = () => {
                 <CardTitle className="text-lg">Protéines</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">-</div>
-                <p className="text-sm text-muted-foreground">Données non disponibles</p>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {nutritionStats.proteins.current}g
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  / {nutritionStats.proteins.target}g
+                </p>
               </CardContent>
             </Card>
             <Card>
@@ -212,8 +218,12 @@ const ProgressPage = () => {
                 <CardTitle className="text-lg">Glucides</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">-</div>
-                <p className="text-sm text-muted-foreground">Données non disponibles</p>
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {nutritionStats.carbs.current}g
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  / {nutritionStats.carbs.target}g
+                </p>
               </CardContent>
             </Card>
             <Card>
@@ -221,8 +231,12 @@ const ProgressPage = () => {
                 <CardTitle className="text-lg">Lipides</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">-</div>
-                <p className="text-sm text-muted-foreground">Données non disponibles</p>
+                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  {nutritionStats.fats.current}g
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  / {nutritionStats.fats.target}g
+                </p>
               </CardContent>
             </Card>
           </div>
