@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Target, Book, User, Settings, TrendingUp, MessageCircle, Sparkles, Shield } from 'lucide-react';
+import { Home, Target, Book, User, Settings, TrendingUp, MessageCircle, Sparkles, Shield, BookOpen } from 'lucide-react';
 import { useRole } from '@/hooks/useRole';
 
 interface SidebarProps {
@@ -17,6 +17,7 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
     { id: 'foods', label: 'Bibliothèque', icon: Book },
     { id: 'chat', label: 'Assistant IA', icon: MessageCircle },
     { id: 'progress', label: 'Progression', icon: TrendingUp },
+    { id: 'journal', label: 'Journal', icon: BookOpen },
     { id: 'profile', label: 'Profil', icon: User },
     { id: 'settings', label: 'Paramètres', icon: Settings },
   ];
