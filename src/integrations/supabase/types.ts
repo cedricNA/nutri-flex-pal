@@ -770,6 +770,55 @@ export type Database = {
           },
         ]
       }
+      consumed_meal_foods: {
+        Row: {
+          id: string
+          user_id: string
+          food_id: string
+          grams: number
+          consumed_at: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          food_id: string
+          grams: number
+          consumed_at?: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          food_id?: string
+          grams?: number
+          consumed_at?: string
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consumed_meal_foods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consumed_meal_foods_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consumed_meal_foods_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods_clean"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       foods_clean: {
@@ -811,6 +860,36 @@ export type Database = {
           salt_g?: never
           sat_fat_g?: never
           sugars_g?: never
+        }
+        Relationships: []
+      }
+      daily_nutrition_summary: {
+        Row: {
+          user_id: string
+          summary_date: string
+          calories: number | null
+          protein: number | null
+          carbs: number | null
+          fat: number | null
+          fiber: number | null
+        }
+        Insert: {
+          user_id?: string
+          summary_date?: string
+          calories?: number | null
+          protein?: number | null
+          carbs?: number | null
+          fat?: number | null
+          fiber?: number | null
+        }
+        Update: {
+          user_id?: string
+          summary_date?: string
+          calories?: number | null
+          protein?: number | null
+          carbs?: number | null
+          fat?: number | null
+          fiber?: number | null
         }
         Relationships: []
       }
