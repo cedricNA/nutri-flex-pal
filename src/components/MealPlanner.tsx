@@ -12,6 +12,7 @@ import MealCard from './MealCard';
 import AddFoodDialog from './AddFoodDialog';
 import CreateMealDialog from './CreateMealDialog';
 import { planColors } from '@/utils/planColors';
+import { mealRatios } from '@/utils/mealRatios';
 
 const nameToType: Record<string, string> = {
   'Petit-déjeuner': 'breakfast',
@@ -98,6 +99,7 @@ const MealPlanner = () => {
   }, [user, toast]);
 
   // Repas par défaut si aucun plan actif
+  const baseCalories = 2200;
   const defaultMeals: Meal[] = [
     {
       id: 'default-1',
@@ -106,7 +108,7 @@ const MealPlanner = () => {
       mealType: 'breakfast',
       mealTypeId: null,
       foods: [],
-      targetCalories: 400
+      targetCalories: Math.round(baseCalories * mealRatios.breakfast)
     },
     {
       id: 'default-2',
@@ -115,7 +117,7 @@ const MealPlanner = () => {
       mealType: 'lunch',
       mealTypeId: null,
       foods: [],
-      targetCalories: 550
+      targetCalories: Math.round(baseCalories * mealRatios.lunch)
     },
     {
       id: 'default-3',
@@ -124,7 +126,7 @@ const MealPlanner = () => {
       mealType: 'snack',
       mealTypeId: null,
       foods: [],
-      targetCalories: 200
+      targetCalories: Math.round(baseCalories * mealRatios.snack)
     },
     {
       id: 'default-4',
@@ -133,7 +135,7 @@ const MealPlanner = () => {
       mealType: 'dinner',
       mealTypeId: null,
       foods: [],
-      targetCalories: 500
+      targetCalories: Math.round(baseCalories * mealRatios.dinner)
     }
   ];
 
