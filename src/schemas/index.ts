@@ -13,6 +13,7 @@ export const UserProfileSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.string().email(),
+  gender: z.enum(['male', 'female']),
   age: z.number().int().min(0),
   weight: z.number(),
   height: z.number(),
