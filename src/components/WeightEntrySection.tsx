@@ -15,15 +15,15 @@ const WeightEntrySection = () => {
   const [entries, setEntries] = useState<WeightEntry[]>([]);
   const [suggestion, setSuggestion] = useState<string>('');
 
-  const loadEntries = async () => {
+  const loadEntries = React.useCallback(async () => {
     if (!user) return;
     const data = await weightService.getWeightEntries(user.id);
     setEntries(data);
-  };
+  }, [user]);
 
   useEffect(() => {
     loadEntries();
-  }, [user]);
+  }, [loadEntries]);
 
   useEffect(() => {
     if (entries.length > 0) {

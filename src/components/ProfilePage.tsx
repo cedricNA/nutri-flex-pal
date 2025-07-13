@@ -15,6 +15,18 @@ import { useToast } from '@/hooks/use-toast';
 import ProfileSkeleton from './skeletons/ProfileSkeleton';
 import { useProfileValidation } from '@/hooks/useProfileValidation';
 
+const activityMap: Record<string, string> = {
+  sedentary: 'sédentaire',
+  light: 'légère',
+  moderate: 'modérée',
+  active: 'intense',
+  very_active: 'très intense',
+};
+
+const reverseActivityMap = Object.fromEntries(
+  Object.entries(activityMap).map(([k, v]) => [v, k])
+) as Record<string, string>;
+
 interface ProfilePageProps {
   onManageGoals?: () => void;
 }
@@ -43,18 +55,6 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     bio: '',
   });
   const initialProfileRef = useRef<typeof profile | null>(null);
-
-  const activityMap: Record<string, string> = {
-    sedentary: 'sédentaire',
-    light: 'légère',
-    moderate: 'modérée',
-    active: 'intense',
-    very_active: 'très intense',
-  };
-
-  const reverseActivityMap = Object.fromEntries(
-    Object.entries(activityMap).map(([k, v]) => [v, k])
-  ) as Record<string, string>;
 
   const loadGoals = useCallback(async () => {
     if (!user) return;
@@ -172,7 +172,8 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     const height = Number(profile.height);
     const age = Number(profile.age);
     if (!weight || !height || !age) return 0;
-    return 10 * weight + 6.25 * height - 5 * age;
+    const base = 10 * weight + 6.25 * height - 5 * age;
+    return base + (profile.gender === 'male' ? 5 : -161);
   };
 
   const handleResetProfile = async () => {
@@ -366,6 +367,19 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
                 error={errors.height}
               />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="gender">Sexe</Label>
+              <select
+                id="gender"
+                value={profile.gender}
+                onChange={(e) => handleInputChange('gender', e.target.value)}
+                className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
+              >
+                <option value="male">Homme</option>
+                <option value="female">Femme</option>
+              </select>
             </div>
 
             <div>

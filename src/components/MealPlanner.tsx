@@ -95,7 +95,7 @@ const MealPlanner = () => {
       }
     };
     load();
-  }, [user]);
+  }, [user, toast]);
 
   // Repas par défaut si aucun plan actif
   const defaultMeals: Meal[] = [

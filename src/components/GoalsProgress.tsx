@@ -49,7 +49,7 @@ const GoalsProgress = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user, toast, recalculateCalorieTarget]);
 
   useEffect(() => {
     loadGoals();
