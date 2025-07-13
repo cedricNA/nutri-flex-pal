@@ -37,6 +37,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     age: '',
     weight: '',
     height: '',
+    gender: 'male',
     activityLevel: 'sédentaire',
     goal: 'maintien',
     bio: '',
@@ -79,6 +80,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
         age: storedProfile.age?.toString() || '',
         weight: storedProfile.weight?.toString() || '',
         height: storedProfile.height?.toString() || '',
+        gender: storedProfile.gender || 'male',
         activityLevel: activityMap[storedProfile.activity_level || 'sedentary'],
         goal: 'maintien',
         bio: '',
@@ -112,6 +114,8 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
       updates.weight = Number(value) || null;
     } else if (field === 'height') {
       updates.height = Number(value) || null;
+    } else if (field === 'gender') {
+      updates.gender = value;
     } else if (field === 'activityLevel') {
       updates.activity_level = reverseActivityMap[value] || 'sedentary';
     }
@@ -178,6 +182,7 @@ const ProfilePage = ({ onManageGoals }: ProfilePageProps) => {
     await updateProfile({
       name: `${p.firstName} ${p.lastName}`.trim(),
       email: p.email,
+      gender: p.gender,
       age: Number(p.age) || null,
       weight: Number(p.weight) || null,
       height: Number(p.height) || null,
