@@ -1,21 +1,5 @@
 import supabase from '@/lib/supabase';
-import { ActivityLevel, calculateTDEE } from '@/utils/calorieUtils';
-
-
-const activityFactor: Record<ActivityLevel, number> = {
-  sedentary: 1.2,
-  light: 1.375,
-  moderate: 1.55,
-  active: 1.725,
-  very_active: 1.9,
-};
-
-function calculateTDEE({ gender, weight, height, age, activity_level }: UserProfile): number {
-  const base = 10 * weight + 6.25 * height - 5 * age;
-  const bmr = gender === 'male' ? base + 5 : base - 161;
-  return Math.round(bmr * activityFactor[activity_level]);
-
-}
+import { calculateTDEE } from '@/utils/calorieUtils';
 
 export async function generateNutritionAdvice(userId: string): Promise<string> {
   // Étape 1 : récupérer le profil utilisateur et son objectif principal
