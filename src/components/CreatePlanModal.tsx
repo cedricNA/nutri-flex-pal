@@ -34,46 +34,8 @@ const CreatePlanModal = ({ open, onClose, onCreatePlan }: CreatePlanModalProps) 
     duration: 8
   });
 
-  const planTemplates = {
-    'weight-loss': {
-      name: 'Plan perte de poids',
-      description: 'Déficit calorique contrôlé pour perdre du poids sainement',
-      targetCalories: 1800,
-      targetProtein: 120,
-      targetCarbs: 180,
-      targetFat: 60
-    },
-    'maintenance': {
-      name: 'Plan maintien',
-      description: 'Équilibre nutritionnel pour maintenir le poids actuel',
-      targetCalories: 2200,
-      targetProtein: 110,
-      targetCarbs: 275,
-      targetFat: 75
-    },
-    'bulk': {
-      name: 'Plan prise de masse',
-      description: 'Surplus calorique pour favoriser la croissance musculaire',
-      targetCalories: 2800,
-      targetProtein: 150,
-      targetCarbs: 350,
-      targetFat: 90
-    }
-  };
-
-  const handleTypeChange = (type: 'weight-loss' | 'maintenance' | 'bulk') => {
-    const template = planTemplates[type];
-    setFormData({
-      ...formData,
-      type,
-      name: template.name,
-      description: template.description,
-      targetCalories: template.targetCalories,
-      targetProtein: template.targetProtein,
-      targetCarbs: template.targetCarbs,
-      targetFat: template.targetFat
-    });
-  };
+  // L'utilisateur définit manuellement ses objectifs nutritionnels, sans plan
+  // prédéfini. Le type reste fixé à "maintenance" par défaut.
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,33 +71,7 @@ const CreatePlanModal = ({ open, onClose, onCreatePlan }: CreatePlanModalProps) 
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Type de plan */}
-            <div className="space-y-3">
-              <Label>Type de plan</Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {(Object.keys(planTemplates) as Array<keyof typeof planTemplates>).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => handleTypeChange(type)}
-                    className={`p-4 rounded-lg border text-left transition ${
-                      formData.type === type
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="font-medium">
-                      {type === 'weight-loss' && 'Perte de poids'}
-                      {type === 'maintenance' && 'Maintien'}
-                      {type === 'bulk' && 'Prise de masse'}
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      {planTemplates[type].description}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+
 
             {/* Informations générales */}
             <div className="space-y-4">
