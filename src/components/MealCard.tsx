@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Calculator, Info, Clock, MoreVertical } from 'lucide-react';
+import { Plus, Calculator, Clock, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -27,8 +27,6 @@ interface MealCardProps {
   mealTypeId: string | null;
   kcalTarget: number;
   foods: Food[];
-  isShowingMacros: boolean;
-  onToggleMacros: (mealId: string) => void;
   onAddFood: (mealId: string) => void;
   progressColor?: string;
   highlightLastFood?: boolean;
@@ -55,8 +53,6 @@ const MealCard: React.FC<MealCardProps> = ({
   mealTypeId,
   kcalTarget,
   foods,
-  isShowingMacros,
-  onToggleMacros,
   onAddFood,
   progressColor = 'bg-green-500',
   highlightLastFood = false,
@@ -83,18 +79,15 @@ const MealCard: React.FC<MealCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 transition-all duration-300 hover:shadow-xl hover:scale-102 group">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+    <div className="bg-[#1e1e2e] text-white rounded-2xl shadow-md p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-blue-500 rounded-lg flex items-center justify-center text-white">
             {mealIcon}
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{name}</h3>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Clock size={14} />
-              <span>{time}</span>
-            </div>
+          <div className="text-lg font-semibold">
+            {name}
+            <span className="ml-2 text-sm font-normal opacity-70">{time} – {kcalTarget} kcal</span>
           </div>
         </div>
         <DropdownMenu>
@@ -160,119 +153,76 @@ const MealCard: React.FC<MealCardProps> = ({
         </DropdownMenu>
       </div>
 
-      <div className="space-y-3 mb-6">
-        {foods.map((food, idx) => (
-          <FoodItem
-            key={food.id}
-            food={food}
-            ref={idx === foods.length - 1 ? lastItemRef : null}
-            isNew={highlightLastFood && idx === foods.length - 1}
-          />
-        ))}
+      <div className="mb-4">
+        {foods.length > 0 && (
+          <div className="text-xs grid grid-cols-6 pb-2 mb-2 border-b border-white/10 font-semibold">
+            <span className="col-span-2">Aliment</span>
+            <span className="text-center">g</span>
+            <span className="text-center">kcal</span>
+            <span className="text-center">P</span>
+            <span className="text-center">G</span>
+            <span className="text-center">L</span>
+          </div>
+        )}
+        <div className="space-y-1">
+          {foods.map((food, idx) => (
+            <FoodItem
+              key={food.id}
+              food={food}
+              ref={idx === foods.length - 1 ? lastItemRef : null}
+              isNew={highlightLastFood && idx === foods.length - 1}
+            />
+          ))}
+        </div>
         {foods.length === 0 && (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Calculator size={28} className="opacity-50" />
-            </div>
-            <p className="text-lg font-medium mb-2">Aucun aliment ajouté</p>
-            <p className="text-sm mb-4">Commencez par ajouter des aliments à votre repas</p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="bg-gradient-to-br from-[#3b0764] via-[#312e81] to-[#0f172a] text-white px-6 py-2 rounded-xl hover:brightness-110 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    onClick={() => onAddFood(mealId)}
-                  >
-                    <Plus size={16} className="mr-2" />
-                    Ajouter un aliment
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ajouter un aliment à votre {name}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="text-center py-4 text-gray-400">
+            <p className="text-sm mb-2">Aucun aliment ajouté</p>
+            <Button variant="ghost" size="sm" onClick={() => onAddFood(mealId)}>
+              <Plus size={16} className="mr-1" /> Ajouter
+            </Button>
           </div>
         )}
       </div>
 
-      <div className="border-t dark:border-gray-700 pt-6">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Progression
-          </span>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                Objectif : {kcalTarget} kcal
-              </div>
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                {totals.calories} kcal
-              </div>
-            </div>
-            {foods.length > 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-10 w-10 p-0 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => onToggleMacros(mealId)}
-                    >
-                      <Info size={16} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Voir les macronutriments</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
+      <div className="border-t border-white/10 pt-2 space-y-2">
+        <div className="flex justify-between text-sm">
+          <span>{totals.calories} / {kcalTarget} kcal</span>
+          <span>{totals.protein}P {totals.carbs}G {totals.fat}L</span>
         </div>
-        
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
           <div
-            className={`${progressColor} h-3 rounded-full transition-all duration-700 ease-out relative overflow-hidden`}
+            className={`${progressColor} h-2 rounded-full transition-all`}
             style={{ width: `${Math.min(progress, 100)}%` }}
-          >
-            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-          </div>
+          />
         </div>
-        
-        {progress > 0 && (
-          <div className="flex justify-center mt-2">
-            <span
-              className={`text-sm font-medium px-3 py-1 rounded-full ${badgeColorMap[progressColor]}`}
-            >
-              {Math.round(progress)}% complété
-            </span>
-          </div>
-        )}
-        
-        {isShowingMacros && (
-          <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t dark:border-gray-700 animate-fade-in">
-            <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
-              <div className="text-lg font-bold text-green-600 dark:text-green-400">{totals.protein}g</div>
-              <div className="text-xs text-green-600 dark:text-green-400">Protéines</div>
-            </div>
-            <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{totals.carbs}g</div>
-              <div className="text-xs text-blue-600 dark:text-blue-400">Glucides</div>
-            </div>
-            <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">{totals.fat}g</div>
-              <div className="text-xs text-purple-600 dark:text-purple-400">Lipides</div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-center mt-6">
-          <Button variant="outline" onClick={() => onAddFood(mealId)}>
-            <Plus size={16} className="mr-2" />
-            Ajouter un aliment
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" size="icon" onClick={() => onAddFood(mealId)}>
+            <Plus size={16} />
           </Button>
+          <Button variant="ghost" size="icon" onClick={() => setShowEditDialog(true)}>
+            <Pencil size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-500"
+            onClick={async () => {
+              try {
+                await deletePlannedMeal(mealId);
+                toast({ title: 'Repas supprimé' });
+                onMealUpdated?.();
+              } catch (error) {
+                toast({ title: 'Erreur', description: 'Suppression impossible', variant: 'destructive' });
+              }
+            }}
+          >
+            <Trash2 size={16} />
+          </Button>
+        </div>
+        <div className="flex justify-around text-xs pt-2">
+          <span className="text-green-400">Prot: {totals.protein}g</span>
+          <span className="text-blue-400">Gluc: {totals.carbs}g</span>
+          <span className="text-purple-400">Lip: {totals.fat}g</span>
         </div>
       </div>
       {showEditDialog && (
