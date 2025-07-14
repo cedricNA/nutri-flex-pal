@@ -128,8 +128,13 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                   type="number"
                   min="1"
                   max="52"
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+                  value={formData.duration || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      duration: parseInt(e.target.value, 10) || 0,
+                    })
+                  }
                   required
                 />
               </div>
@@ -147,8 +152,13 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="1000"
                     max="5000"
-                    value={formData.target_calories}
-                    onChange={(e) => setFormData({ ...formData, target_calories: parseInt(e.target.value) })}
+                    value={formData.target_calories || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        target_calories: parseInt(e.target.value, 10) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
@@ -160,8 +170,13 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="50"
                     max="300"
-                    value={formData.target_protein}
-                    onChange={(e) => setFormData({ ...formData, target_protein: parseInt(e.target.value) })}
+                    value={formData.target_protein || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        target_protein: parseInt(e.target.value, 10) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
@@ -173,8 +188,13 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="50"
                     max="500"
-                    value={formData.target_carbs}
-                    onChange={(e) => setFormData({ ...formData, target_carbs: parseInt(e.target.value) })}
+                    value={formData.target_carbs || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        target_carbs: parseInt(e.target.value, 10) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
@@ -186,8 +206,13 @@ const EditPlanModal = ({ open, onClose, plan, onUpdatePlan }: EditPlanModalProps
                     type="number"
                     min="20"
                     max="200"
-                    value={formData.target_fat}
-                    onChange={(e) => setFormData({ ...formData, target_fat: parseInt(e.target.value) })}
+                    value={formData.target_fat || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        target_fat: parseInt(e.target.value, 10) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
