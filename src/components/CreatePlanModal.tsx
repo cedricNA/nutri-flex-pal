@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { generateNutritionTargets } from '@/utils/nutritionUtils';
 
 interface CreatePlanModalProps {
   open: boolean;
@@ -23,14 +24,15 @@ interface CreatePlanModalProps {
 }
 
 const CreatePlanModal = ({ open, onClose, onCreatePlan }: CreatePlanModalProps) => {
+  const defaultTargets = generateNutritionTargets(2200, 'maintenance');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     type: 'maintenance' as 'weight-loss' | 'maintenance' | 'bulk',
-    targetCalories: 2200,
-    targetProtein: 100,
-    targetCarbs: 250,
-    targetFat: 70,
+    targetCalories: defaultTargets.calories,
+    targetProtein: defaultTargets.protein,
+    targetCarbs: defaultTargets.carbs,
+    targetFat: defaultTargets.fat,
     duration: 8
   });
 
@@ -44,14 +46,15 @@ const CreatePlanModal = ({ open, onClose, onCreatePlan }: CreatePlanModalProps) 
       isActive: false
     });
     onClose();
+    const reset = generateNutritionTargets(2200, 'maintenance');
     setFormData({
       name: '',
       description: '',
       type: 'maintenance',
-      targetCalories: 2200,
-      targetProtein: 100,
-      targetCarbs: 250,
-      targetFat: 70,
+      targetCalories: reset.calories,
+      targetProtein: reset.protein,
+      targetCarbs: reset.carbs,
+      targetFat: reset.fat,
       duration: 8
     });
   };

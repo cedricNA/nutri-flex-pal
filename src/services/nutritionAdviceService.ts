@@ -1,5 +1,6 @@
 import supabase from '@/lib/supabase';
-import { calculateTDEE } from '@/utils/calorieUtils';
+import { calculateTDEE } from '@/utils/nutritionUtils';
+import type { UserProfile } from '@/schemas';
 
 export async function generateNutritionAdvice(userId: string): Promise<string> {
   // Étape 1 : récupérer le profil utilisateur et son objectif principal
@@ -22,13 +23,25 @@ export async function generateNutritionAdvice(userId: string): Promise<string> {
     .limit(1)
     .maybeSingle();
 
-  const tdee = calculateTDEE({
+  const userProfile: UserProfile = {
+    id: userId,
+    name: '',
+    email: '',
     gender: profile.gender,
+    age: profile.age,
     weight: profile.weight,
     height: profile.height,
-    age: profile.age,
     activityLevel: profile.activity_level,
-  });
+    goals: {
+      weightTarget: 0,
+      dailyCalories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+    },
+  };
+
+  const tdee = calculateTDEE(userProfile);
 
   // Étape 3 : construire le prompt
   const prompt = `Voici le profil de l'utilisateur :\n- Sexe : ${profile.gender}\n- Âge : ${profile.age} ans\n- Poids : ${profile.weight} kg\n- Taille : ${profile.height} cm\n- Niveau d'activité : ${profile.activity_level}\n- Objectif : ${goal?.target_value ? `${goal.target_value} kg` : 'non précisé'}\n- Description de l'objectif : ${goal?.description || 'non précisée'}\n\nSon TDEE estimé est de ${tdee} kcal par jour. Donne-lui des conseils nutritionnels personnalisés et motivants pour atteindre son objectif.`;
