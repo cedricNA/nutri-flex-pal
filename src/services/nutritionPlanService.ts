@@ -14,12 +14,14 @@ export const nutritionPlanService = {
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
-    
+
     if (error) {
       console.error('Error fetching nutrition plans:', error);
       return [];
     }
-    return data || [];
+    if (!data) return [];
+    const hasCustom = data.some(p => p.name !== 'Plan par défaut');
+    return hasCustom ? data.filter(p => p.name !== 'Plan par défaut') : data;
   },
 
   async getActivePlan(userId: string): Promise<NutritionPlan | null> {
