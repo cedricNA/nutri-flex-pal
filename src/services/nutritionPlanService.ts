@@ -38,13 +38,20 @@ export const nutritionPlanService = {
   },
 
   async createPlan(userId: string, plan: Omit<NutritionPlan, 'id' | 'user_id' | 'created_at' | 'updated_at'>) {
+    // Supprimer le plan par défaut créé automatiquement
+    await supabase
+      .from('nutrition_plans')
+      .delete()
+      .eq('user_id', userId)
+      .eq('name', 'Plan par défaut');
+
     const { error } = await supabase
       .from('nutrition_plans')
       .insert({
         user_id: userId,
         ...plan
       });
-    
+
     if (error) {
       console.error('Error creating nutrition plan:', error);
       throw error;

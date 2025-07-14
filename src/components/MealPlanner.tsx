@@ -54,7 +54,6 @@ const MealPlanner = () => {
   const [planType, setPlanType] = useState<'maintenance' | 'weight-loss' | 'bulk'>('maintenance');
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showMacros, setShowMacros] = useState<string | null>(null);
   const [mealToAddFood, setMealToAddFood] = useState<Meal | null>(null);
   const [lastAddedMealId, setLastAddedMealId] = useState<string | null>(null);
   const [showCreateMeal, setShowCreateMeal] = useState(false);
@@ -289,10 +288,6 @@ const MealPlanner = () => {
             mealTypeId={meal.mealTypeId}
             kcalTarget={meal.targetCalories}
             foods={meal.foods}
-            isShowingMacros={showMacros === meal.id}
-            onToggleMacros={(mealId) =>
-              setShowMacros(showMacros === mealId ? null : mealId)
-            }
             onAddFood={handleOpenAddFood}
             progressColor={planColors[planType].progress}
             highlightLastFood={lastAddedMealId === meal.id}

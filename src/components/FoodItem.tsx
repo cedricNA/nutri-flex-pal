@@ -20,22 +20,20 @@ interface FoodItemProps {
 const FoodItem = React.forwardRef<HTMLDivElement, FoodItemProps>(({ food, isNew }, ref) => (
   <div
     ref={ref}
-    className={`flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
+    className={`grid grid-cols-6 items-center text-sm p-2 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
       isNew ? 'animate-fade-in animate-scale-in' : ''
     }`}
   >
-    <div className="flex-1">
-      <h4 className="font-medium text-gray-900 dark:text-gray-100">{food.name}</h4>
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        {food.quantity} {food.unit}
-      </p>
-    </div>
-    <div className="text-right">
-      <p className="font-semibold text-gray-900 dark:text-gray-100">{food.calories} kcal</p>
-    </div>
+    <span className="col-span-2 font-medium text-gray-900 dark:text-gray-100">{food.name}</span>
+    <span className="text-center text-gray-600 dark:text-gray-400">{food.quantity}g</span>
+    <span className="text-center font-semibold">{food.calories}</span>
+    <span className="text-center text-green-600">{food.protein}</span>
+    <span className="text-center text-blue-600">{food.carbs}</span>
+    <span className="text-center text-purple-600">{food.fat}</span>
   </div>
 ));
 
 FoodItem.displayName = 'FoodItem';
 
 export default FoodItem;
+

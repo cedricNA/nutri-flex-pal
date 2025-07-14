@@ -4,7 +4,7 @@ import type { Database } from '@/types/supabase'
 import type { UserProfile } from '@/schemas'
 
 export async function ensureActivePlan(userId: string): Promise<string> {
-  // Try to get existing active plan
+  // Vérifie s'il existe déjà un plan actif
   const { data: plan, error } = await supabase
     .from('nutrition_plans')
     .select('id')
@@ -18,6 +18,26 @@ export async function ensureActivePlan(userId: string): Promise<string> {
 
   if (plan) {
     return plan.id
+  }
+
+  // Vérifie s'il existe d'autres plans de l'utilisateur
+  const { data: existingPlans, error: plansError } = await supabase
+    .from('nutrition_plans')
+    .select('id')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (plansError) {
+    throw new Error(`Failed to fetch plans: ${plansError.message}`)
+  }
+
+  if (existingPlans && existingPlans.length > 0) {
+    const firstPlan = existingPlans[0]
+    await supabase
+      .from('nutrition_plans')
+      .update({ is_active: true })
+      .eq('id', firstPlan.id)
+    return firstPlan.id
   }
 
   // Récupérer le profil utilisateur pour calculer un plan personnalisé
