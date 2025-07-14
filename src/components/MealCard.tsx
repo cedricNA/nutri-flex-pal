@@ -1,13 +1,12 @@
 import React from 'react';
-import { Plus, Calculator, Clock, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Calculator, Clock, Pencil, Trash2, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import FoodItem from './FoodItem';
 import { useMealIcon } from './mealIcons';
 import EditMealDialog from './EditMealDialog';
-import { deletePlannedMeal, duplicatePlannedMeal } from '@/api/mealOperations';
+import { deletePlannedMeal } from '@/api/mealOperations';
 
 interface Food {
   id: string;
@@ -72,85 +71,28 @@ const MealCard: React.FC<MealCardProps> = ({
     }
   }, [highlightLastFood, foods.length]);
 
-  const badgeColorMap: Record<string, string> = {
-    'bg-blue-500': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    'bg-pink-500': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-    'bg-green-500': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  };
 
   return (
-    <div className="bg-[#1e1e2e] text-white rounded-2xl shadow-md p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className="bg-[#1e1e2e] text-white rounded-2xl shadow-md p-4 space-y-4 relative">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-lg font-semibold">
           <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-blue-500 rounded-lg flex items-center justify-center text-white">
             {mealIcon}
           </div>
-          <div className="text-lg font-semibold">
-            {name}
-            <span className="ml-2 text-sm font-normal opacity-70">{time} – {kcalTarget} kcal</span>
-          </div>
+          <span>{name}</span>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-              Modifier le repas
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={async () => {
-                try {
-                  await deletePlannedMeal(mealId);
-                  toast({
-                    title: 'Repas supprimé',
-                    description: 'Le repas a été supprimé avec succès.'
-                  });
-                  onMealUpdated?.();
-                } catch (error) {
-                  toast({
-                    title: 'Erreur',
-                    description: 'Impossible de supprimer le repas.',
-                    variant: 'destructive'
-                  });
-                }
-              }}
-              className="text-red-600"
-            >
-              Supprimer
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={async () => {
-                if (!planId) {
-                  toast({
-                    title: 'Erreur',
-                    description: 'Impossible de dupliquer le repas.',
-                    variant: 'destructive'
-                  });
-                  return;
-                }
-                try {
-                  await duplicatePlannedMeal(mealId, planId);
-                  toast({
-                    title: 'Repas dupliqué',
-                    description: 'Le repas a été dupliqué avec succès.'
-                  });
-                  onMealUpdated?.();
-                } catch (error) {
-                  toast({
-                    title: 'Erreur',
-                    description: 'Impossible de dupliquer le repas.',
-                    variant: 'destructive'
-                  });
-                }
-              }}
-            >
-              Dupliquer
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="text-xs text-gray-400 flex items-center gap-1">
+          <Clock size={12} />
+          <span>{time}</span>
+        </div>
+        <div className="text-xs text-gray-400 flex items-center gap-1">
+          <Flame size={12} />
+          <span>Objectif : {kcalTarget} kcal</span>
+        </div>
+        <div className="text-xs flex items-center gap-1">
+          <Calculator size={12} />
+          <span>{totals.calories} / {kcalTarget} kcal ({Math.round(progress)}%)</span>
+        </div>
       </div>
 
       <div className="mb-4">
@@ -185,17 +127,39 @@ const MealCard: React.FC<MealCardProps> = ({
       </div>
 
       <div className="border-t border-white/10 pt-2 space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>{totals.calories} / {kcalTarget} kcal</span>
-          <span>{totals.protein}P {totals.carbs}G {totals.fat}L</span>
+        <div className="flex justify-between text-sm font-medium">
+          <span>{totals.calories} kcal</span>
+          <span>{totals.protein}g P | {totals.carbs}g G | {totals.fat}g L</span>
         </div>
-        <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+        <div className="w-full bg-gray-700 rounded-full h-1 overflow-hidden">
           <div
-            className={`${progressColor} h-2 rounded-full transition-all`}
+            className={`${progressColor} h-1 rounded-full transition-all`}
             style={{ width: `${Math.min(progress, 100)}%` }}
           />
         </div>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-around text-xs pt-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-green-400 cursor-help">Prot: {totals.protein}g</span>
+              </TooltipTrigger>
+              <TooltipContent>Protéines</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-blue-400 cursor-help">Gluc: {totals.carbs}g</span>
+              </TooltipTrigger>
+              <TooltipContent>Glucides</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-purple-400 cursor-help">Lip: {totals.fat}g</span>
+              </TooltipTrigger>
+              <TooltipContent>Lipides</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        <div className="absolute bottom-3 right-3 flex gap-2">
           <Button variant="ghost" size="icon" onClick={() => onAddFood(mealId)}>
             <Plus size={16} />
           </Button>
@@ -218,11 +182,6 @@ const MealCard: React.FC<MealCardProps> = ({
           >
             <Trash2 size={16} />
           </Button>
-        </div>
-        <div className="flex justify-around text-xs pt-2">
-          <span className="text-green-400">Prot: {totals.protein}g</span>
-          <span className="text-blue-400">Gluc: {totals.carbs}g</span>
-          <span className="text-purple-400">Lip: {totals.fat}g</span>
         </div>
       </div>
       {showEditDialog && (
