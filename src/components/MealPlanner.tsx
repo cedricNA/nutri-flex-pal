@@ -12,7 +12,6 @@ import MealCard from './MealCard';
 import AddFoodDialog from './AddFoodDialog';
 import CreateMealDialog from './CreateMealDialog';
 import { planColors } from '@/utils/planColors';
-import { mealRatios } from '@/utils/mealRatios';
 
 const nameToType: Record<string, string> = {
   'Petit-déjeuner': 'breakfast',
@@ -98,50 +97,7 @@ const MealPlanner = () => {
     load();
   }, [user, toast]);
 
-  // Repas par défaut si aucun plan actif
-  const baseCalories = 2200;
-  const defaultMeals: Meal[] = [
-    {
-      id: 'default-1',
-      name: 'Petit-déjeuner',
-      time: '08:00',
-      mealType: 'breakfast',
-      mealTypeId: null,
-      foods: [],
-      targetCalories: Math.round(baseCalories * mealRatios.breakfast)
-    },
-    {
-      id: 'default-2',
-      name: 'Déjeuner',
-      time: '12:30',
-      mealType: 'lunch',
-      mealTypeId: null,
-      foods: [],
-      targetCalories: Math.round(baseCalories * mealRatios.lunch)
-    },
-    {
-      id: 'default-3',
-      name: 'Collation',
-      time: '16:00',
-      mealType: 'snack',
-      mealTypeId: null,
-      foods: [],
-      targetCalories: Math.round(baseCalories * mealRatios.snack)
-    },
-    {
-      id: 'default-4',
-      name: 'Dîner',
-      time: '19:30',
-      mealType: 'dinner',
-      mealTypeId: null,
-      foods: [],
-      targetCalories: Math.round(baseCalories * mealRatios.dinner)
-    }
-  ];
-
-  const displayMeals = meals.length > 0
-    ? [...meals].sort((a, b) => (a.mealOrder ?? 0) - (b.mealOrder ?? 0))
-    : defaultMeals;
+  const displayMeals = [...meals].sort((a, b) => (a.mealOrder ?? 0) - (b.mealOrder ?? 0));
 
   const handleCopyFromYesterday = async () => {
     if (!planId) {
@@ -328,6 +284,13 @@ const MealPlanner = () => {
             onMealUpdated={() => planId && fetchMeals(planId)}
           />
         ))}
+        {displayMeals.length === 0 && (
+          <div className="col-span-1 lg:col-span-2 text-center py-8">
+            <p className="text-muted-foreground">
+              Aucun repas planifié pour aujourd'hui.
+            </p>
+          </div>
+        )}
       </div>
       {mealToAddFood && (
         <AddFoodDialog
