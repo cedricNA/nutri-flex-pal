@@ -1,15 +1,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Wrench, Trash2, CheckCircle, Calendar } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { nutritionPlanService } from '@/services/nutritionPlanService';
 import { useToast } from "@/hooks/use-toast";
 import CreatePlanModal from './CreatePlanModal';
 import EditPlanModal from './EditPlanModal';
-import ActivePlanCard from './ActivePlanCard';
+import NutritionPlanCard from './NutritionPlanCard';
 import type { Database } from '@/types/supabase';
 
 type NutritionalPlan = Database['public']['Tables']['nutrition_plans']['Row'];
@@ -34,26 +33,6 @@ const PlanManager = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingPlan, setEditingPlan] = useState<NutritionalPlan | null>(null);
 
-  const planTypeConfig = {
-    'weight-loss': {
-      label: 'Perte de poids',
-      color: 'from-red-400 to-pink-500',
-      bgColor: 'bg-red-100',
-      textColor: 'text-red-700'
-    },
-    'maintenance': {
-      label: 'Maintien',
-      color: 'from-green-400 to-blue-500',
-      bgColor: 'bg-green-100',
-      textColor: 'text-green-700'
-    },
-    'bulk': {
-      label: 'Prise de masse',
-      color: 'from-blue-400 to-purple-500',
-      bgColor: 'bg-blue-100',
-      textColor: 'text-blue-700'
-    }
-  };
 
   const loadPlans = useCallback(async () => {
     if (!user) return;
@@ -222,93 +201,16 @@ const PlanManager = () => {
         </Button>
       </div>
 
-      {/* Plan actif */}
-      {plans.find(plan => plan.is_active) && (
-        <ActivePlanCard
-          plan={plans.find(plan => plan.is_active)!}
-          onDelete={(id) => deletePlan(id)}
-        />
-      )}
-
-      {/* Liste des autres plans */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {plans.filter(plan => !plan.is_active).map((plan) => {
-          const config = planTypeConfig[plan.type as keyof typeof planTypeConfig];
-          return (
-            <Card key={plan.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${config.color} rounded-xl flex items-center justify-center`}>
-                    <span className="text-white text-lg font-bold">{plan.name[0]}</span>
-                  </div>
-                  <div className="flex space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => activatePlan(plan.id)}
-                      className="h-8 w-8 text-green-500 hover:text-green-700"
-                    >
-                      <CheckCircle size={14} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditingPlan(plan)}
-                      className="h-8 w-8"
-                    >
-                      <Wrench size={14} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deletePlan(plan.id)}
-                      className="h-8 w-8 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <Badge variant="secondary" className="bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300 mt-2">
-                    {config.label}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span>Calories:</span>
-                    <span className="font-medium">{plan.target_calories} kcal</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Protéines:</span>
-                    <span className="font-medium">{plan.target_protein}g</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Glucides:</span>
-                    <span className="font-medium">{plan.target_carbs}g</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Lipides:</span>
-                    <span className="font-medium">{plan.target_fat}g</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
-                  <div className="flex items-center">
-                    <Calendar size={12} className="mr-1" />
-                    {plan.duration} semaines
-                  </div>
-                  <span>Créé le {new Date(plan.created_at!).toLocaleDateString('fr-FR')}</span>
-                </div>
-
-              </CardContent>
-            </Card>
-          );
-        })}
+        {plans.map((plan) => (
+          <NutritionPlanCard
+            key={plan.id}
+            plan={plan}
+            onActivate={activatePlan}
+            onEdit={() => setEditingPlan(plan)}
+            onDelete={deletePlan}
+          />
+        ))}
       </div>
 
       {plans.length === 0 && (
