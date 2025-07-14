@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { generateNutritionTargets } from '@/utils/nutritionUtils';
+import { useAuth } from '@/hooks/useAuth';
+import { generatePlanSuggestion } from '@/services/planSuggestionService';
 
 interface CreatePlanModalProps {
   open: boolean;
@@ -35,6 +37,25 @@ const CreatePlanModal = ({ open, onClose, onCreatePlan }: CreatePlanModalProps) 
     targetFat: defaultTargets.fat,
     duration: 8
   });
+  const { user } = useAuth();
+  const [suggestion, setSuggestion] = useState<string>('');
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
+
+  useEffect(() => {
+    const fetchSuggestion = async () => {
+      if (!user || !open) return;
+      setLoadingSuggestion(true);
+      try {
+        const text = await generatePlanSuggestion(user.id);
+        setSuggestion(text);
+      } catch (e) {
+        console.error('Erreur lors de la génération de la suggestion:', e);
+      } finally {
+        setLoadingSuggestion(false);
+      }
+    };
+    fetchSuggestion();
+  }, [open, user]);
 
   // L'utilisateur définit manuellement ses objectifs nutritionnels, sans plan
   // prédéfini. Le type reste fixé à "maintenance" par défaut.
@@ -117,6 +138,12 @@ const CreatePlanModal = ({ open, onClose, onCreatePlan }: CreatePlanModalProps) 
             {/* Objectifs nutritionnels */}
             <div className="space-y-4">
               <h3 className="font-semibold">Objectifs nutritionnels</h3>
+              {loadingSuggestion && (
+                <p className="text-sm text-muted-foreground">Calcul de la suggestion...</p>
+              )}
+              {!loadingSuggestion && suggestion && (
+                <p className="text-sm text-muted-foreground">{suggestion}</p>
+              )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
