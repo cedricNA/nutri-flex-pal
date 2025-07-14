@@ -10,7 +10,7 @@ type DailySummary = Database['public']['Views']['daily_nutrition_summary']['Row'
 export interface ConsumedMealEnriched {
   id: string;
   user_id: string;
-  consumed_at: string;
+  eaten_at: string;
   meal_type: string;
   sort_order: number;
   name_fr: string;
@@ -78,11 +78,11 @@ export const foodJournalService = {
 
     const { data, error } = await supabase
       .from('consumed_meals_enriched')
-      .select('*')
+      .select('*, sort_order')
       .eq('user_id', userId)
-      .gte('consumed_at', startOfDay.toISOString())
-      .lte('consumed_at', endOfDay.toISOString())
-      .order('sort_order');
+      .gte('eaten_at', startOfDay.toISOString())
+      .lte('eaten_at', endOfDay.toISOString())
+      .order('sort_order', { ascending: true });
 
     if (error) {
       console.error('Error fetching enriched meals:', error);
