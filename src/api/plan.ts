@@ -1,6 +1,7 @@
 import supabase from '@/lib/supabase'
-import { calculateTDEE, type ActivityLevel } from '@/utils/calorieUtils'
+import { calculateTDEE, generateNutritionTargets } from '@/utils/nutritionUtils'
 import type { Database } from '@/types/supabase'
+import type { UserProfile } from '@/schemas'
 
 export async function ensureActivePlan(userId: string): Promise<string> {
   // Try to get existing active plan
@@ -31,14 +32,27 @@ export async function ensureActivePlan(userId: string): Promise<string> {
     throw new Error(`Failed to fetch user profile: ${profileError?.message}`)
   }
 
-  // Calcul du TDEE à partir des données du profil
-  const tdee = calculateTDEE({
+  // Création d'un profil minimal pour le calcul
+  const userProfile: UserProfile = {
+    id: userId,
+    name: '',
+    email: '',
     gender: (profile.gender || 'male') as 'male' | 'female',
+    age: profile.age || 30,
     weight: profile.weight || 70,
     height: profile.height || 170,
-    age: profile.age || 30,
-    activityLevel: (profile.activity_level || 'moderate') as ActivityLevel
-  })
+    activityLevel: (profile.activity_level || 'moderate') as any,
+    goals: {
+      weightTarget: profile.weight_target || (profile.weight || 70),
+      dailyCalories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+    },
+  }
+
+  // Calcul du TDEE à partir des données du profil
+  const tdee = calculateTDEE(userProfile)
 
   let planType: 'maintenance' | 'weight-loss' | 'bulk' = 'maintenance'
   if (profile.weight_target && profile.weight) {
@@ -46,18 +60,11 @@ export async function ensureActivePlan(userId: string): Promise<string> {
     if (profile.weight_target > profile.weight) planType = 'bulk'
   }
 
-  let targetCalories = tdee
-  if (planType === 'weight-loss') {
-    targetCalories = Math.max(1200, tdee - 500)
-  } else if (planType === 'bulk') {
-    targetCalories = tdee + 500
-  }
-
-  const weight = profile.weight || 70
-  const targetProtein = Math.round(weight * 1.8)
-  const targetFat = Math.round(weight)
-  const remaining = targetCalories - targetProtein * 4 - targetFat * 9
-  const targetCarbs = Math.max(0, Math.round(remaining / 4))
+  const targets = generateNutritionTargets(
+    tdee,
+    planType === 'bulk' ? 'muscle-gain' : planType
+  )
+  const { calories: targetCalories, protein: targetProtein, carbs: targetCarbs, fat: targetFat } = targets
 
   // Create a default plan if none exists
   const { data, error: insertError } = await supabase

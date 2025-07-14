@@ -2,6 +2,7 @@
 import { useMemo } from 'react';
 import { useFoodStore } from '../stores/useFoodStore';
 import { useAppStore } from '../stores/useAppStore';
+import { generateNutritionTargets } from '../utils/nutritionUtils';
 
 export const useNutritionStats = () => {
   const { getTodayNutrition } = useFoodStore();
@@ -11,11 +12,12 @@ export const useNutritionStats = () => {
     const todayNutrition = getTodayNutrition();
     
     // Objectifs par défaut si pas d'utilisateur
+    const defaults = generateNutritionTargets(2200, 'maintenance');
     const defaultGoals = {
-      dailyCalories: 2200,
-      protein: 120,
-      carbs: 275,
-      fat: 75
+      dailyCalories: defaults.calories,
+      protein: defaults.protein,
+      carbs: defaults.carbs,
+      fat: defaults.fat
     };
 
     const goals = user?.goals || defaultGoals;
