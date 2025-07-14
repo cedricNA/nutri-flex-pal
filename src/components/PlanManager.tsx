@@ -224,7 +224,10 @@ const PlanManager = () => {
 
       {/* Plan actif */}
       {plans.find(plan => plan.is_active) && (
-        <ActivePlanCard plan={plans.find(plan => plan.is_active)!} />
+        <ActivePlanCard
+          plan={plans.find(plan => plan.is_active)!}
+          onDelete={(id) => deletePlan(id)}
+        />
       )}
 
       {/* Liste des autres plans */}

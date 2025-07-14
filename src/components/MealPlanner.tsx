@@ -140,17 +140,42 @@ const MealPlanner = () => {
   };
 
   const fetchMeals = async (id: string) => {
-      const { data, error } = await supabase
-        .from('planned_meals')
-        .select(
-          'id,name,meal_time,meal_order,target_calories,meal_type_id,planned_meal_foods(id,grams,foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g))'
-        )
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data: meals, error } = await supabase
+      .from('planned_meals')
+      .select('id,name,meal_time,meal_order,target_calories,meal_type_id')
       .eq('plan_id', id)
       .order('meal_order', { ascending: true });
 
-    if (error) throw error;
+    if (error || !meals) throw error;
 
-    const mapped: Meal[] = (data || []).map((meal) => ({
+    const { data: foods, error: foodsError } = await supabase
+      .from('planned_meal_foods')
+      .select('id,grams,planned_meal_id,foods:foods_clean(id,name:name_fr,calories:kcal,protein:protein_g,carbs:carb_g,fat:fat_g)')
+      .in('planned_meal_id', meals.map((m) => m.id))
+      .eq('target_date', today);
+
+    if (foodsError) throw foodsError;
+
+    const foodsByMeal: Record<string, any[]> = {};
+    (foods || []).forEach((f: any) => {
+      if (!foodsByMeal[f.planned_meal_id]) {
+        foodsByMeal[f.planned_meal_id] = [];
+      }
+      foodsByMeal[f.planned_meal_id].push({
+        id: f.id,
+        name: f.foods?.name ?? 'Aliment inconnu',
+        calories: Math.round(((f.foods?.calories ?? 0) * f.grams) / 100),
+        protein: Math.round(((f.foods?.protein ?? 0) * f.grams) / 100 * 10) / 10,
+        carbs: Math.round(((f.foods?.carbs ?? 0) * f.grams) / 100 * 10) / 10,
+        fat: Math.round(((f.foods?.fat ?? 0) * f.grams) / 100 * 10) / 10,
+        quantity: f.grams,
+        unit: 'g',
+      });
+    });
+
+    const mapped: Meal[] = meals.map((meal) => ({
       id: meal.id,
       name: meal.name,
       time: meal.meal_time,
@@ -158,17 +183,7 @@ const MealPlanner = () => {
       mealTypeId: meal.meal_type_id ?? null,
       mealOrder: meal.meal_order ?? undefined,
       targetCalories: meal.target_calories,
-      foods:
-        meal.planned_meal_foods?.map((pf: any) => ({
-          id: pf.id,
-          name: pf.foods?.name ?? 'Aliment inconnu',
-          calories: Math.round(((pf.foods?.calories ?? 0) * pf.grams) / 100),
-          protein: Math.round(((pf.foods?.protein ?? 0) * pf.grams) / 100 * 10) / 10,
-          carbs: Math.round(((pf.foods?.carbs ?? 0) * pf.grams) / 100 * 10) / 10,
-          fat: Math.round(((pf.foods?.fat ?? 0) * pf.grams) / 100 * 10) / 10,
-          quantity: pf.grams,
-          unit: 'g',
-        })) || [],
+      foods: foodsByMeal[meal.id] || [],
     }));
 
     setMeals(mapped);
@@ -200,6 +215,7 @@ const MealPlanner = () => {
         plannedMealId: dbMealId,
         foodId,
         grams,
+        targetDate: new Date().toISOString().split('T')[0],
       });
 
       await fetchMeals(planId);
