@@ -7,6 +7,20 @@ type FoodClean = Database['public']['Views']['foods_clean']['Row'];
 type MealType = Database['public']['Tables']['meal_types']['Row'];
 type DailySummary = Database['public']['Views']['daily_nutrition_summary']['Row'];
 
+export interface ConsumedMealEnriched {
+  id: string;
+  user_id: string;
+  consumed_at: string;
+  meal_type: string;
+  sort_order: number;
+  name_fr: string;
+  quantity_grams: number;
+  kcal: number;
+  protein_g: number;
+  carb_g: number;
+  fat_g: number;
+}
+
 export const foodJournalService = {
   async getTodayMeals(userId: string) {
     const startOfDay = new Date();
@@ -54,5 +68,27 @@ export const foodJournalService = {
     }
 
     return data as DailySummary | null;
+  },
+
+  async getTodayEnrichedMeals(userId: string): Promise<ConsumedMealEnriched[]> {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const { data, error } = await supabase
+      .from('consumed_meals_enriched')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('consumed_at', startOfDay.toISOString())
+      .lte('consumed_at', endOfDay.toISOString())
+      .order('sort_order');
+
+    if (error) {
+      console.error('Error fetching enriched meals:', error);
+      return [];
+    }
+
+    return (data || []) as ConsumedMealEnriched[];
   }
 };
