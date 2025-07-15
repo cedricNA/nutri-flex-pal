@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Zap, Drumstick, Sandwich, Nut, Pencil, CheckCircle, Trash2 } from 'lucide-react';
 import type { Database } from '@/types/supabase';
 import { planColors, PlanType } from '@/utils/planColors';
-import { differenceInWeeks } from 'date-fns';
+import { format } from 'date-fns';
 
 type NutritionPlan = Database['public']['Tables']['nutrition_plans']['Row'];
 
@@ -17,7 +17,7 @@ interface NutritionPlanCardProps {
 
 const NutritionPlanCard = ({ plan, onEdit, onActivate, onDelete }: NutritionPlanCardProps) => {
   const colors = planColors[plan.type as PlanType] || planColors.maintenance;
-  const weeksAgo = plan.created_at ? differenceInWeeks(new Date(), new Date(plan.created_at)) : 0;
+  const createdDate = plan.created_at ? format(new Date(plan.created_at), 'dd/MM/yyyy') : '';
 
   return (
     <div className="bg-[#1e1e2e] text-white rounded-2xl shadow-lg overflow-hidden flex flex-col">
@@ -48,7 +48,7 @@ const NutritionPlanCard = ({ plan, onEdit, onActivate, onDelete }: NutritionPlan
       <div className="p-4 space-y-2 flex-1">
         {plan.description && <p className="text-sm text-white/80">{plan.description}</p>}
         {plan.created_at && (
-          <p className="text-xs text-white/60">Créé il y a {weeksAgo} semaine{weeksAgo > 1 ? 's' : ''}</p>
+          <p className="text-xs text-white/60">Créé le {createdDate}</p>
         )}
         <div className="flex flex-wrap gap-2 pt-2">
           <Badge className="bg-white/10 text-white flex items-center gap-1">
