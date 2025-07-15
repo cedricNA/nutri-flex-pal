@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -147,7 +148,9 @@ const CreatePlanModal = ({ open, onClose, onCreatePlan }: CreatePlanModalProps) 
                 <p className="text-sm text-muted-foreground">Calcul de la suggestion...</p>
               )}
               {!loadingSuggestion && suggestion && (
-                <p className="text-sm text-muted-foreground">{suggestion}</p>
+                <ReactMarkdown className="prose prose-sm text-muted-foreground whitespace-pre-wrap">
+                  {suggestion}
+                </ReactMarkdown>
               )}
               
               <div className="grid grid-cols-2 gap-4">

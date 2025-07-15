@@ -195,10 +195,6 @@ const PlanManager = () => {
           <h2 className="text-2xl font-bold text-foreground">Plans alimentaires</h2>
           <p className="text-muted-foreground">Gérez vos plans personnalisés selon vos objectifs</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} className="bg-green-500 hover:bg-green-600">
-          <Plus className="mr-2" size={16} />
-          Nouveau plan
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
